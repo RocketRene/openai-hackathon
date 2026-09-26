@@ -64,3 +64,6 @@ node_modules/
 .wrangler/
 web/generated/
 web/worker-configuration.d.ts
+
+# Claude agent worktrees
+.claude/worktrees/
