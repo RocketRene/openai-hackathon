@@ -3,7 +3,7 @@
  * Einstellungen: Systemstatus (/api/health), Nutzer-Kontext (Export/Import/Demo/Löschen),
  * Datenquellen-Erklärung und Team.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import type { UserContext } from "@/lib/types";
 import { DEFAULT_USER_CONTEXT, useUserContext } from "@/lib/user-context";
 import { Badge, Button, Card } from "@/components/ui";
@@ -57,7 +57,7 @@ function validateUserContext(value: unknown): string | null {
   return null;
 }
 
-function StatusRow({ label, value }: { label: string; value: React.ReactNode }) {
+function StatusRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-3 py-1.5 text-sm">
       <span className="text-[var(--muted)]">{label}</span>
@@ -110,7 +110,7 @@ export default function SettingsPanel() {
     setMessage({ tone: "success", text: "Kontext als JSON exportiert." });
   }
 
-  async function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
