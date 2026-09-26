@@ -1,1 +1,638 @@
-[]
+[
+  {
+    "id": "max-brandt",
+    "name": "Max Brandt",
+    "headline": "Ex-McKinsey Consultant · WHU-Alumnus · sucht technischen Co-Founder für B2B-SaaS/KI",
+    "location": "München, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=max-brandt",
+    "email": "max.brandt@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/max-brandt",
+    "about": "Max hat drei Jahre bei McKinsey Digitalisierungsprojekte für DAX-Konzerne geleitet und davor Management an der WHU studiert. Seit einigen Monaten arbeitet er an einer eigenen Idee für eine B2B-SaaS-Plattform, die Vertriebsteams mit KI beim Forecasting unterstützt, und hat bereits über 40 Kundeninterviews geführt. Ihm fehlt der technische Co-Founder, der die Vision in ein Produkt verwandelt. Max denkt in großen Linien, verkauft Ideen überzeugend und hat durch WHU und McKinsey ein starkes Netzwerk zu Investor:innen und Corporates. Er sucht jemanden, der genauso hungrig ist, ein kategorien-definierendes Produkt zu bauen.",
+    "experience": [
+      {
+        "title": "Gründer in Vorbereitung",
+        "company": "Eigenes Projekt (Stealth)",
+        "start": "2026",
+        "end": null,
+        "description": "Entwickelt eine B2B-SaaS-Idee für KI-gestütztes Vertriebs-Forecasting, über 40 Kundeninterviews mit Sales-Leitern geführt."
+      },
+      {
+        "title": "Senior Consultant",
+        "company": "McKinsey & Company",
+        "start": "2023",
+        "end": "2026",
+        "description": "Leitung von Digitalisierungsprojekten für DAX-Konzerne, Schwerpunkt Vertriebsorganisation und GTM-Strategie."
+      },
+      {
+        "title": "Consultant",
+        "company": "McKinsey & Company",
+        "start": "2021",
+        "end": "2023",
+        "description": "Strategieprojekte für Industrie- und Tech-Kunden, Teilprojektleitung ab dem zweiten Jahr."
+      },
+      {
+        "title": "Werkstudent Strategy & Operations",
+        "company": "Rocket Internet",
+        "start": "2020",
+        "end": "2021",
+        "description": "Unterstützung beim Aufbau neuer Ventures im Bereich Marktanalyse und Wettbewerbsbeobachtung."
+      }
+    ],
+    "education": [
+      {
+        "school": "WHU – Otto Beisheim School of Management",
+        "degree": "M.Sc. Management",
+        "field": "Entrepreneurship",
+        "start": "2021",
+        "end": "2023"
+      },
+      {
+        "school": "WHU – Otto Beisheim School of Management",
+        "degree": "B.Sc. Management",
+        "start": "2018",
+        "end": "2021"
+      }
+    ],
+    "skills": [
+      "Strategieberatung",
+      "Business Development",
+      "Go-to-Market",
+      "Fundraising",
+      "Pitch Decks",
+      "Stakeholder Management",
+      "Marktanalyse",
+      "Verhandlungsführung"
+    ],
+    "languages": ["Deutsch", "Englisch", "Französisch"],
+    "networkRole": "cofounder",
+    "founderRole": "commercial",
+    "lookingFor": ["technical cofounder"],
+    "verticals": ["b2b saas", "ai"],
+    "stage": "idea",
+    "dims": { "vision": 9, "design": 4, "tech": 3, "detail": 6, "execution": 8 },
+    "personality": {
+      "type": "visionary",
+      "summary": "Max denkt in großen Visionen und Kategorien, nicht in einzelnen Features – er will das nächste große B2B-SaaS-Unternehmen aus Deutschland bauen.",
+      "traits": ["visionär", "überzeugend", "ungeduldig bei Details", "netzwerkstark"],
+      "communicationStyle": "Direkt, energiegeladen und in großen Linien – Details und Fahrpläne bespricht er lieber in einem zweiten Gespräch.",
+      "outreachTips": [
+        "Mit der großen Vision einsteigen, nicht mit Feature-Details",
+        "Auf gemeinsame WHU- oder Consulting-Bezüge eingehen, falls vorhanden",
+        "Konkreten nächsten Schritt vorschlagen (z. B. Kaffee bei Bits & Pretzels)"
+      ],
+      "avoid": ["Zu kleinteilig ins technische Detail gehen", "Lange E-Mails ohne klare Kernaussage"]
+    },
+    "events": ["idealab-2026", "bits-and-pretzels-2026"],
+    "tags": ["ex-mckinsey", "whu", "b2b-saas"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "sophia-lindner",
+    "name": "Sophia Lindner",
+    "headline": "Head of Sales (FinTech-Scaleup) · sucht technischen Co-Founder",
+    "location": "Berlin, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=sophia-lindner",
+    "email": "sophia.lindner@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/sophia-lindner",
+    "about": "Sophia hat als Head of Sales bei einem Berliner FinTech-Scaleup den ARR in zwei Jahren verzehnfacht und davor bei Personio und Celonis Enterprise-Deals abgeschlossen. Sie kennt die Probleme von KMU-Finanzabteilungen aus hunderten Sales-Gesprächen und will nun selbst ein Produkt bauen, das diese Probleme löst. Ihr fehlt ein technischer Co-Founder, der ihre Idee für ein automatisiertes Debitorenmanagement-Tool umsetzt. Sophia ist pragmatisch, verhandlungsstark und liebt es, direkt mit Kund:innen zu sprechen.",
+    "experience": [
+      {
+        "title": "Head of Sales DACH",
+        "company": "Pliant",
+        "start": "2023",
+        "end": null,
+        "description": "Aufbau und Führung des B2B-Sales-Teams, ARR in zwei Jahren verzehnfacht."
+      },
+      {
+        "title": "Senior Account Executive",
+        "company": "Personio",
+        "start": "2021",
+        "end": "2023",
+        "description": "Verantwortung für Enterprise-Deals mit HR-Entscheider:innen, Quote regelmäßig übertroffen."
+      },
+      {
+        "title": "Sales Development Representative",
+        "company": "Celonis",
+        "start": "2019",
+        "end": "2021",
+        "description": "Aufbau der Outbound-Pipeline für den DACH-Markt."
+      }
+    ],
+    "education": [
+      {
+        "school": "Universität Mannheim",
+        "degree": "B.Sc. Business Administration",
+        "start": "2016",
+        "end": "2019"
+      }
+    ],
+    "skills": [
+      "B2B Sales",
+      "Enterprise Sales",
+      "Verhandlungsführung",
+      "CRM (Salesforce)",
+      "Pipeline-Aufbau",
+      "Go-to-Market",
+      "Kaltakquise",
+      "Team-Leadership"
+    ],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "commercial",
+    "lookingFor": ["technical cofounder"],
+    "verticals": ["fintech", "b2b saas"],
+    "stage": "idea",
+    "dims": { "vision": 7, "design": 3, "tech": 2, "detail": 5, "execution": 9 },
+    "personality": {
+      "type": "operator",
+      "summary": "Sophia will liefern, nicht nur reden – sie denkt in Quartalszielen und erwartet das Gleiche von einem Co-Founder.",
+      "traits": ["pragmatisch", "verhandlungsstark", "ungeduldig", "kundenorientiert"],
+      "communicationStyle": "Kurz, konkret und ergebnisorientiert – sie schätzt klare Agenden und messbare nächste Schritte.",
+      "outreachTips": [
+        "Konkreten Termin vorschlagen statt vager Kennenlern-Anfrage",
+        "Mit einer klaren Kennzahl oder einem Kundenproblem einsteigen",
+        "Vorherige Sales-Erfolge respektvoll erwähnen"
+      ],
+      "avoid": ["Zu abstrakt oder philosophisch werden", "Termine ohne Agenda anfragen"]
+    },
+    "events": ["idealab-2026"],
+    "tags": ["sales", "fintech", "enterprise-sales"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "jonas-reiter",
+    "name": "Jonas Reiter",
+    "headline": "Ex-VC-Analyst (Cherry Ventures) · sucht technischen Co-Founder für Climate-Tech",
+    "location": "Berlin, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=jonas-reiter",
+    "email": "jonas.reiter@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/jonas-reiter",
+    "about": "Jonas hat als Investment-Analyst bei Cherry Ventures über 300 Startups analysiert und kennt die Kriterien, nach denen VCs investieren, aus erster Hand. Nach Stationen im Investment Banking will er nun selbst gründen – im Bereich CO2-Bilanzierung für den Mittelstand, ein Thema, das er seit seiner Zeit bei Cherry als unterschätzt einschätzt. Er sucht einen technischen Co-Founder, der eine Datenplattform aufbaut, während er Fundraising, Business-Case und Marktanalyse übernimmt. Jonas denkt strukturiert, hinterfragt Annahmen gründlich und bringt ein exzellentes Investoren-Netzwerk mit.",
+    "experience": [
+      {
+        "title": "Investment Analyst",
+        "company": "Cherry Ventures",
+        "start": "2023",
+        "end": "2026",
+        "description": "Analyse und Due Diligence für Seed-Investments, Bewertung von über 300 Startups."
+      },
+      {
+        "title": "Investment Banking Analyst",
+        "company": "Rothschild & Co",
+        "start": "2021",
+        "end": "2023",
+        "description": "M&A-Transaktionen im Mid-Cap-Segment begleitet."
+      },
+      {
+        "title": "Werkstudent M&A",
+        "company": "Deutsche Bank",
+        "start": "2020",
+        "end": "2021",
+        "description": "Unterstützung bei Bewertungsmodellen und Marktanalysen."
+      }
+    ],
+    "education": [
+      {
+        "school": "Universität St. Gallen (HSG)",
+        "degree": "M.A. Strategy and International Management",
+        "start": "2021",
+        "end": "2023"
+      },
+      {
+        "school": "Universität St. Gallen (HSG)",
+        "degree": "B.A. Business Administration",
+        "start": "2018",
+        "end": "2021"
+      }
+    ],
+    "skills": [
+      "Due Diligence",
+      "Finanzmodellierung",
+      "Marktanalyse",
+      "Fundraising-Strategie",
+      "Cap Table Management",
+      "Investor Relations",
+      "Pitch-Deck-Review",
+      "Datenanalyse"
+    ],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "commercial",
+    "lookingFor": ["technical cofounder", "pre-seed investment"],
+    "verticals": ["climate", "energy"],
+    "stage": "idea",
+    "dims": { "vision": 8, "design": 3, "tech": 4, "detail": 8, "execution": 6 },
+    "personality": {
+      "type": "analyst",
+      "summary": "Jonas prüft jede Annahme mit Daten, bevor er eine Entscheidung trifft – seine VC-Vergangenheit hat ihn skeptisch gegenüber Buzzwords gemacht.",
+      "traits": ["analytisch", "strukturiert", "skeptisch gegenüber Hype", "gut vernetzt"],
+      "communicationStyle": "Sachlich und strukturiert – schriftliche Zusammenfassungen mit Zahlen kommen besser an als reine Pitches.",
+      "outreachTips": [
+        "Mit einer klaren Marktzahl oder einem Datenpunkt einsteigen",
+        "Auf sein VC-Netzwerk und seine Fundraising-Erfahrung eingehen",
+        "Konkrete nächste Schritte mit Zeitrahmen vorschlagen"
+      ],
+      "avoid": ["Unbelegte Superlative wie 'das nächste Unicorn'", "Unstrukturierte Sprachnachrichten statt kurzer, klarer Texte"]
+    },
+    "events": ["idealab-2026", "slush-2026"],
+    "tags": ["ex-vc", "climate-tech", "fundraising"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "lea-hofmann",
+    "name": "Lea Hofmann",
+    "headline": "Head of Growth Marketing · sucht technischen Co-Founder für Consumer-App",
+    "location": "Hamburg, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=lea-hofmann",
+    "email": "lea.hofmann@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/lea-hofmann",
+    "about": "Lea hat als Head of Growth Marketing bei Flaschenpost und zuvor bei Mymuesli Millionen-Budgets für Performance-Marketing verantwortet. Mit einem kleinen Team hat sie bereits einen Prototyp für eine Consumer-App getestet, die nachhaltigen Konsum spielerisch belohnt, und über 500 Nutzer:innen in der Beta gesammelt. Jetzt sucht sie einen technischen Co-Founder, der das Produkt robust weiterbaut, während sie Community, Markenaufbau und Partnerschaften treibt. Lea ist eine geborene Netzwerkerin, die Menschen für Ideen begeistert und schnell Communities aufbaut.",
+    "experience": [
+      {
+        "title": "Head of Growth Marketing",
+        "company": "Flaschenpost",
+        "start": "2023",
+        "end": null,
+        "description": "Verantwortung für Performance-Marketing-Budget und Markenkampagnen, App-Installs deutlich gesteigert."
+      },
+      {
+        "title": "Marketing Managerin",
+        "company": "Mymuesli",
+        "start": "2021",
+        "end": "2023",
+        "description": "Aufbau von Social-Media- und Content-Strategie."
+      },
+      {
+        "title": "Werkstudentin Social Media",
+        "company": "Zalando",
+        "start": "2019",
+        "end": "2021",
+        "description": "Betreuung von Social-Media-Kanälen und Community-Management."
+      }
+    ],
+    "education": [
+      {
+        "school": "Universität Hamburg",
+        "degree": "B.A. Medien- und Kommunikationswissenschaft",
+        "start": "2017",
+        "end": "2020"
+      },
+      {
+        "school": "Hyper Island",
+        "degree": "Certificate",
+        "field": "Digital Marketing",
+        "start": "2021",
+        "end": "2021"
+      }
+    ],
+    "skills": [
+      "Performance Marketing",
+      "Content-Strategie",
+      "Branding",
+      "Social Media",
+      "Community Building",
+      "Influencer-Marketing",
+      "A/B-Testing",
+      "Storytelling"
+    ],
+    "languages": ["Deutsch", "Englisch", "Spanisch"],
+    "networkRole": "cofounder",
+    "founderRole": "commercial",
+    "lookingFor": ["technical cofounder"],
+    "verticals": ["consumer", "ecommerce"],
+    "stage": "pre-seed",
+    "dims": { "vision": 8, "design": 7, "tech": 2, "detail": 5, "execution": 7 },
+    "personality": {
+      "type": "connector",
+      "summary": "Lea verbindet Menschen und Ideen, bevor andere das Potenzial überhaupt sehen – ihr Netzwerk ist ihr wertvollstes Werkzeug.",
+      "traits": ["kontaktfreudig", "begeisterungsfähig", "kreativ", "ungeduldig bei Bürokratie"],
+      "communicationStyle": "Warm, persönlich und storytelling-orientiert – sie reagiert gut auf Nachrichten mit Persönlichkeit statt Standardfloskeln.",
+      "outreachTips": [
+        "Persönlichen Bezug oder gemeinsame Kontakte erwähnen",
+        "Die Story hinter der eigenen Idee erzählen, nicht nur Fakten auflisten",
+        "Community- oder Event-Bezug herstellen (z. B. IdeaLab)"
+      ],
+      "avoid": ["Rein zahlengetriebene, unpersönliche Ansprache", "Zu förmliche, distanzierte Sprache"]
+    },
+    "events": ["idealab-2026", "bits-and-pretzels-2026"],
+    "tags": ["growth-marketing", "consumer", "branding"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "david-kessler",
+    "name": "David Kessler",
+    "headline": "Ex-Investment Banking (Goldman Sachs) · sucht technischen Co-Founder für FinTech",
+    "location": "Frankfurt am Main, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=david-kessler",
+    "email": "david.kessler@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/david-kessler",
+    "about": "David war vier Jahre im Investment Banking bei Goldman Sachs und hat dort Finanzierungsrunden und M&A-Deals im dreistelligen Millionenbereich begleitet. Er will die Finanzinfrastruktur für kleine und mittlere Unternehmen modernisieren und hat bereits ein detailliertes Finanzmodell sowie erste Gespräche mit Business Angels vorbereitet. Ihm fehlt ein technischer Co-Founder, der die Plattform baut, während er Fundraising, Finanzplanung und Investorengespräche übernimmt. David ist analytisch, gründlich und risikobewusst – er trifft Entscheidungen lieber auf Basis von Zahlen als aus dem Bauch heraus.",
+    "experience": [
+      {
+        "title": "Associate",
+        "company": "Goldman Sachs",
+        "start": "2022",
+        "end": "2026",
+        "description": "Begleitung von Kapitalmarkttransaktionen und M&A-Deals im dreistelligen Millionenbereich."
+      },
+      {
+        "title": "Analyst",
+        "company": "Goldman Sachs",
+        "start": "2020",
+        "end": "2022",
+        "description": "Finanzmodellierung und Bewertung für Corporate-Finance-Mandate."
+      },
+      {
+        "title": "Werkstudent Corporate Finance",
+        "company": "Deutsche Börse",
+        "start": "2019",
+        "end": "2020",
+        "description": "Unterstützung im Bereich Kapitalmarktanalyse."
+      }
+    ],
+    "education": [
+      {
+        "school": "Frankfurt School of Finance & Management",
+        "degree": "M.Sc. Finance",
+        "start": "2020",
+        "end": "2022"
+      },
+      {
+        "school": "Frankfurt School of Finance & Management",
+        "degree": "B.Sc. Business Administration",
+        "start": "2017",
+        "end": "2020"
+      }
+    ],
+    "skills": [
+      "Finanzmodellierung",
+      "M&A",
+      "Kapitalmarktanalyse",
+      "Fundraising",
+      "Financial Planning",
+      "Excel/VBA",
+      "Investor Relations",
+      "Risikomanagement"
+    ],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "commercial",
+    "lookingFor": ["technical cofounder"],
+    "verticals": ["fintech", "b2b saas"],
+    "stage": "idea",
+    "dims": { "vision": 6, "design": 2, "tech": 3, "detail": 9, "execution": 7 },
+    "personality": {
+      "type": "analyst",
+      "summary": "David rechnet jedes Szenario durch, bevor er sich festlegt – Bauchentscheidungen sind seine Sache nicht.",
+      "traits": ["gründlich", "risikobewusst", "zahlenaffin", "geduldig"],
+      "communicationStyle": "Sachlich, präzise und mit Beleg – er antwortet ausführlicher, wenn eine Frage gut vorbereitet gestellt wird.",
+      "outreachTips": [
+        "Finanzielle Kennzahlen oder Marktgröße direkt mitliefern",
+        "Realistische, unaufgeregte Tonalität wählen",
+        "Zeit für Rückfragen und Prüfung einplanen"
+      ],
+      "avoid": ["Überzogene Wachstumsversprechen ohne Substanz", "Druck für schnelle Entscheidungen aufbauen"]
+    },
+    "events": ["idealab-2026"],
+    "tags": ["finance", "ex-investment-banking", "fintech"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "anna-lena-vogt",
+    "name": "Anna-Lena Vogt",
+    "headline": "Ex-BCG Consultant · sucht Product Co-Founder für HealthTech",
+    "location": "München, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=anna-lena-vogt",
+    "email": "anna-lena.vogt@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/anna-lena-vogt",
+    "about": "Anna-Lena hat bei BCG drei Jahre lang Kliniken und Krankenkassen bei Digitalisierungsprojekten beraten und dabei gesehen, wie viel Zeit Pflegepersonal mit Dokumentation verliert. Sie führt bereits Gespräche mit zwei Klinikketten über eine Pilotierung ihrer Idee für ein Dokumentations-Tool und sucht einen Product Co-Founder, der gemeinsam mit ihr das Produkt gestaltet. Anna-Lena ist pragmatisch, baut schnell Vertrauen zu Entscheider:innen im Gesundheitswesen auf und behält bei komplexen Projekten den Überblick.",
+    "experience": [
+      {
+        "title": "Projektleiterin",
+        "company": "Boston Consulting Group (BCG)",
+        "start": "2022",
+        "end": "2026",
+        "description": "Leitung von Digitalisierungsprojekten für Kliniken und Krankenkassen."
+      },
+      {
+        "title": "Consultant",
+        "company": "Boston Consulting Group (BCG)",
+        "start": "2020",
+        "end": "2022",
+        "description": "Strategieprojekte im Gesundheitswesen, Schwerpunkt Prozessoptimierung."
+      },
+      {
+        "title": "Praktikum Health Economics",
+        "company": "Bertelsmann Stiftung",
+        "start": "2019",
+        "end": "2020",
+        "description": "Recherche zu Digitalisierung im Gesundheitswesen."
+      }
+    ],
+    "education": [
+      {
+        "school": "Universität zu Köln",
+        "degree": "M.Sc. Health Economics",
+        "start": "2020",
+        "end": "2022"
+      },
+      {
+        "school": "Universität zu Köln",
+        "degree": "B.Sc. Volkswirtschaftslehre",
+        "start": "2017",
+        "end": "2020"
+      }
+    ],
+    "skills": [
+      "Strategieberatung",
+      "Partnerschaften",
+      "Stakeholder Management",
+      "Business-Case-Entwicklung",
+      "Vertrieb an Kliniken",
+      "Projektmanagement",
+      "Marktanalyse",
+      "Healthcare Policy"
+    ],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "commercial",
+    "lookingFor": ["product cofounder"],
+    "verticals": ["healthtech"],
+    "stage": "pre-seed",
+    "dims": { "vision": 7, "design": 5, "tech": 2, "detail": 7, "execution": 8 },
+    "personality": {
+      "type": "operator",
+      "summary": "Anna-Lena bringt komplexe Projekte mit vielen Stakeholdern zuverlässig ins Ziel – bei ihr wird aus einer Idee ein Pilotprojekt.",
+      "traits": ["pragmatisch", "vertrauensbildend", "organisiert", "ergebnisorientiert"],
+      "communicationStyle": "Klar, verbindlich und lösungsorientiert – sie mag konkrete Vorschläge statt offener Fragen.",
+      "outreachTips": [
+        "Konkreten Vorschlag für ein erstes Gespräch machen",
+        "Bezug zu Healthcare- bzw. Klinik-Kontext herstellen",
+        "Verbindlichkeit und Termintreue zeigen"
+      ],
+      "avoid": ["Unverbindliche 'Lass uns mal vernetzen'-Nachrichten", "Zu technische Detailfragen ohne Kontext"]
+    },
+    "events": ["idealab-2026", "tum-cofounder-matching-oct-2026"],
+    "tags": ["ex-consulting", "healthtech", "partnerships"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "tobias-wagner",
+    "name": "Tobias Wagner",
+    "headline": "VP Sales (ex-SAP) · sucht technischen Co-Founder für HR-Tech",
+    "location": "Mannheim, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=tobias-wagner",
+    "email": "tobias.wagner@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/tobias-wagner",
+    "about": "Tobias hat zwanzig Jahre im Enterprise-Vertrieb verbracht, davon zuletzt als VP Sales bei Personio und zuvor viele Jahre bei SAP. Er kennt die Personalabteilungen im deutschen Mittelstand wie kaum ein anderer und hat eine klare Idee für ein HR-Tech-Produkt, das Skills-Management automatisiert. Für die Umsetzung sucht er einen technischen Co-Founder, der Produkt und Technik verantwortet, während er Vertrieb, Kundenbeziehungen und Wachstum übernimmt. Tobias ist zielorientiert, direkt und bekannt dafür, Teams zuverlässig zum Abschluss zu bringen.",
+    "experience": [
+      {
+        "title": "VP Sales DACH",
+        "company": "Personio",
+        "start": "2023",
+        "end": null,
+        "description": "Verantwortung für das gesamte DACH-Vertriebsteam und die Umsatzplanung."
+      },
+      {
+        "title": "Senior Sales Manager",
+        "company": "SAP",
+        "start": "2018",
+        "end": "2023",
+        "description": "Führung eines regionalen Vertriebsteams für Mittelstandskunden."
+      },
+      {
+        "title": "Account Executive",
+        "company": "SAP",
+        "start": "2015",
+        "end": "2018",
+        "description": "Betreuung von Enterprise-Accounts im Bereich HR-Software."
+      },
+      {
+        "title": "Account Manager",
+        "company": "T-Systems",
+        "start": "2010",
+        "end": "2015",
+        "description": "Betreuung von Bestandskunden im IT-Outsourcing-Geschäft."
+      }
+    ],
+    "education": [
+      {
+        "school": "Universität Mannheim",
+        "degree": "Diplom-Kaufmann",
+        "start": "2005",
+        "end": "2010"
+      }
+    ],
+    "skills": [
+      "Enterprise Sales",
+      "Team-Leadership",
+      "Vertriebsstrategie",
+      "Verhandlungsführung",
+      "Forecasting",
+      "Channel-Partnerschaften",
+      "CRM",
+      "Coaching"
+    ],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "commercial",
+    "lookingFor": ["technical cofounder"],
+    "verticals": ["hr tech", "b2b saas"],
+    "stage": "idea",
+    "dims": { "vision": 6, "design": 2, "tech": 2, "detail": 6, "execution": 9 },
+    "personality": {
+      "type": "operator",
+      "summary": "Tobias führt Teams seit Jahren zu Abschlüssen – er will die gleiche Disziplin jetzt in ein eigenes Unternehmen stecken.",
+      "traits": ["zielorientiert", "direkt", "durchsetzungsstark", "erfahren"],
+      "communicationStyle": "Direkt und zielgerichtet – er schätzt klare Aussagen und wenig Small Talk.",
+      "outreachTips": [
+        "Klar sagen, worum es geht und was der nächste Schritt ist",
+        "Erfahrung im Enterprise-Vertrieb wertschätzend ansprechen",
+        "Kurze, prägnante Nachrichten statt langer Texte"
+      ],
+      "avoid": ["Vage bleiben, was man von ihm möchte", "Zu viel Zeit mit Small Talk verbringen"]
+    },
+    "events": ["idealab-2026"],
+    "tags": ["enterprise-sales", "hr-tech", "ex-sap"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "nils-petersen",
+    "name": "Nils Petersen",
+    "headline": "Business Development (Celonis) · sucht technischen Co-Founder für AI-Dev-Tools",
+    "location": "München, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=nils-petersen",
+    "email": "nils.petersen@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/nils-petersen",
+    "about": "Nils baut bei Celonis Partnerschaften mit Technologieanbietern auf und hat zuvor bei Contentful das Partner-Ökosystem mit aufgebaut. Durch sein Wirtschaftsinformatik-Studium an der TUM versteht er technische Architekturen gut genug, um mit Entwickler:innen auf Augenhöhe zu sprechen. Er möchte ein KI-gestütztes Developer-Tool gründen und sucht einen technischen Co-Founder, der das Produkt baut, während er Partnerschaften, Business Development und sein Netzwerk in der DACH-Tech-Szene einbringt. Nils ist bestens vernetzt, organisiert selbst Meetups und verbindet gerne Menschen und Ideen.",
+    "experience": [
+      {
+        "title": "Business Development Manager",
+        "company": "Celonis",
+        "start": "2022",
+        "end": null,
+        "description": "Aufbau von Technologie- und Vertriebspartnerschaften im DACH-Raum."
+      },
+      {
+        "title": "Partner Manager",
+        "company": "Contentful",
+        "start": "2020",
+        "end": "2022",
+        "description": "Mitaufbau des Partner-Ökosystems für die API-Plattform."
+      },
+      {
+        "title": "Werkstudent Business Development",
+        "company": "Trade Republic",
+        "start": "2019",
+        "end": "2020",
+        "description": "Unterstützung bei Marktanalysen und Partnerschaftsanbahnung."
+      }
+    ],
+    "education": [
+      {
+        "school": "Technische Universität München (TUM)",
+        "degree": "M.Sc. Management & Technology",
+        "start": "2020",
+        "end": "2022"
+      },
+      {
+        "school": "Technische Universität München (TUM)",
+        "degree": "B.Sc. Wirtschaftsinformatik",
+        "start": "2017",
+        "end": "2020"
+      }
+    ],
+    "skills": [
+      "Partnerships",
+      "Business Development",
+      "API-Ökosysteme",
+      "Verhandlungsführung",
+      "Netzwerkaufbau",
+      "Enterprise Sales",
+      "Community Building",
+      "Marktanalyse"
+    ],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "commercial",
+    "lookingFor": ["technical cofounder"],
+    "verticals": ["ai", "b2b saas"],
+    "stage": "idea",
+    "dims": { "vision": 7, "design": 4, "tech": 5, "detail": 5, "execution": 7 },
+    "personality": {
+      "type": "connector",
+      "summary": "Nils kennt in der DACH-Tech-Szene fast jeden und verbindet gerne Menschen, Ideen und Partnerschaften miteinander.",
+      "traits": ["vernetzt", "kommunikativ", "technikaffin", "initiativ"],
+      "communicationStyle": "Locker, persönlich und schnell – er antwortet gerne auch kurzfristig auf LinkedIn oder direkt beim Event.",
+      "outreachTips": [
+        "Direkt beim Event ansprechen, er ist gut auffindbar",
+        "Gemeinsame Kontakte oder Partnerschaften erwähnen",
+        "Kurze, konkrete Frage statt langer Vorstellung"
+      ],
+      "avoid": ["Lange, unpersönliche Nachrichten", "Zu förmliche Anrede"]
+    },
+    "events": ["idealab-2026", "bits-and-pretzels-2026"],
+    "tags": ["business-development", "ai", "partnerships"],
+    "source": { "type": "mock" }
+  }
+]
