@@ -104,11 +104,26 @@ export function ShortlistCompare() {
   }
 
   if (profiles.length === 0) {
+    // IDs vorhanden, aber kein Profil mehr dazu (Datenstand geändert) → aufräumen anbieten.
+    const stale = ids.length > 0;
     return (
       <EmptyState
-        title="Noch nichts gemerkt"
-        body="Markiere Kandidat:innen mit „Merken“, um sie hier nebeneinander zu vergleichen."
-        action={<LinkButton href="/candidates">Kandidat:innen entdecken</LinkButton>}
+        title={stale ? "Gemerkte Profile nicht mehr vorhanden" : "Noch nichts gemerkt"}
+        body={
+          stale
+            ? "Die gespeicherten Einträge passen zu keinem Profil mehr."
+            : "Markiere Kandidat:innen mit „Merken“, um sie hier nebeneinander zu vergleichen."
+        }
+        action={
+          <div className="flex flex-wrap justify-center gap-2">
+            <LinkButton href="/candidates">Kandidat:innen entdecken</LinkButton>
+            {stale && (
+              <Button type="button" variant="secondary" onClick={clear}>
+                Shortlist leeren
+              </Button>
+            )}
+          </div>
+        }
       />
     );
   }
