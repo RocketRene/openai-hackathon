@@ -111,14 +111,13 @@ der OpenAI-Sprachagent benötigt diesen Token nicht.
 
 ## Profil im Gespräch
 
-Beim Abruf mit `get_candidate` zeigt Voya neben dem Gespräch ein Profil mit Bild,
-LinkedIn-Link und den ersten drei beruflichen Stationen. „Ganzes Profil“ öffnet
-alle Stationen, Ausbildung und Skills. Bis zu acht besprochene Personen können
-über die Profilauswahl erneut angezeigt werden. Fehlende Bilder nutzen Initialen;
-fehlende Links und Berufsstationen werden ausdrücklich als fehlend angezeigt.
+Beim Abruf mit `get_candidate` zeigt Voya eine kleine eingebettete Karte direkt
+im Gespräch: Profilbild, LinkedIn-Link und zwei berufliche Stationen. Chat,
+Mikrofon und Gesprächssteuerung bleiben sichtbar. Auch ein Klick in der
+Kandidatenliste wählt nur diese kompakte Karte aus, ohne ein Profilfenster zu öffnen.
+Es gibt keinen automatischen Seitensprung zum Profil. Ein vom Agenten erstellter
+Interviewleitfaden kann über die Karte heruntergeladen werden.
 
 Im Sprachgespräch erscheinen Profile bereits beim vollständigen Tool-Aufruf.
 Doppelte Tool-Ereignisse werden anhand ihrer Call-ID zusammengeführt. Das aktuell
-angezeigte Profil wird als Kontext an Text- und Sprachagent übergeben, damit
-Folgefragen zur sichtbaren Person passen. Auf Mobilgeräten scrollt die Ansicht
-zum neu angezeigten Profil.
+angezeigte Profil wird als Kontext an Text- und Sprachagent übergeben.
