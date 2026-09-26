@@ -1,4 +1,4 @@
-# FounderRadar – Architektur
+# Voya – Architektur
 
 Technischer Überblick für alle, die nach dem Hackathon weiterbauen (Design-Pivot, Backend-Ausbau,
 Datenbank). Ergänzt [DESIGN.md](DESIGN.md) (Oberfläche) und [PARALLEL-WORK.md](PARALLEL-WORK.md)

@@ -8,11 +8,11 @@ Berufserfahrung. Das Voice-Modell ist GPT-Realtime-2.1 mit Reasoning-Stufe `medi
 
 - App und Deployment: `/Users/rene/github.com/RocketRene/openai-hackathon/web/README.md`
 - API-Client und Export-Werkzeuge: `/Users/rene/github.com/RocketRene/openai-hackathon/docs/idealab-client.md`
-- Die parallel entwickelte FounderRadar-App liegt weiterhin im Repository-Hauptverzeichnis.
+- Die parallel entwickelte Voya-App liegt weiterhin im Repository-Hauptverzeichnis.
 
 ---
 
-# FounderRadar – OpenAI Hackathon 2026
+# Voya – OpenAI Hackathon 2026
 
 Findet aus Konferenz-/LinkedIn-Daten die richtigen Kontakte für Gründer:innen (Co-Founder,
 Investoren, Mentoren, Talente), erzeugt persönlichkeitsangepassten Outreach und bereitet per

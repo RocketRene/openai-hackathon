@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { slug } = await params;
   const event = getEvent(slug);
   return {
-    title: event ? `${event.name} – FounderRadar` : "Event nicht gefunden – FounderRadar",
+    title: event ? `${event.name} – Voya` : "Event nicht gefunden – Voya",
     description: event?.description,
   };
 }

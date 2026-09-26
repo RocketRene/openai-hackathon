@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui";
 import OutreachWorkspace from "@/components/outreach/OutreachWorkspace";
 
 export const metadata: Metadata = {
-  title: "Outreach – FounderRadar",
+  title: "Outreach – Voya",
   description: "Personalisierte Nachrichten – passend zum Persönlichkeitstyp",
 };
 

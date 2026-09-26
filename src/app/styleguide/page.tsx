@@ -22,8 +22,8 @@ import {
 } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "Styleguide – FounderRadar",
-  description: "Design-Tokens, UI-Primitives und Typografie von FounderRadar in allen Varianten.",
+  title: "Styleguide – Voya",
+  description: "Design-Tokens, UI-Primitives und Typografie von Voya in allen Varianten.",
 };
 
 /* ------------------------------------------------------------------ */

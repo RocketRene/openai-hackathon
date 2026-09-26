@@ -3,7 +3,7 @@ import TeamBuilder from "@/components/team/TeamBuilder";
 import { PageHeader } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "Team-Radar – FounderRadar",
+  title: "Team-Radar – Voya",
   description: "Vision, Design, Technik, Detail und Umsetzung im Gründerteam – was ist stark, was fehlt noch?",
 };
 

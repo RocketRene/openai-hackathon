@@ -8,7 +8,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# FounderRadar – Agent-Leitfaden
+# Voya – Agent-Leitfaden
 
 Gilt für alle KI-Agenten (Claude, Codex, Cursor …) und Menschen in diesem Repo.
 

@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui";
 import NetworkOverview from "@/components/network/NetworkOverview";
 
 export const metadata: Metadata = {
-  title: "Netzwerk-Analyse – FounderRadar",
+  title: "Netzwerk-Analyse – Voya",
   description: "Das Ökosystem hinter den Daten: Rollen, Verticals, Standorte, Hochschulen und Events aller Teilnehmer:innen.",
 };
 

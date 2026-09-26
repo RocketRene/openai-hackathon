@@ -1,4 +1,4 @@
-# FounderRadar – Demo-Drehbuch (Hackathon-Pitch)
+# Voya – Demo-Drehbuch (Hackathon-Pitch)
 
 Ziel: kompletter End-to-End-Flow in **unter 3 Minuten**. Eine Person spricht und klickt, eine
 zweite hält den Fallback-Plan bereit (Abschnitt C).
@@ -53,7 +53,7 @@ Sprecher-Text kursiv, Klicks in **fett**, rechts was das Publikum sieht.
 ### 0:00 – Hook (15 s) · Route `/`
 
 *„Auf der IdeaLab in Vallendar waren 569 Leute. Welche drei davon hätte ich ansprechen
-sollen? Und was sage ich denen? FounderRadar beantwortet genau das."*
+sollen? Und was sage ich denen? Voya beantwortet genau das."*
 
 **Dashboard zeigen.** Publikum sieht: Marvins Kontext-Karte (Tech-Founder, sucht Commercial
 Co-Founder + Investor), Top-Matches als Vorschau, Team-Radar klein, nächste Events.
@@ -119,7 +119,7 @@ frühes Design-Hire), dazu Fundraising-Hinweis mit Markus Fellner als Angel.
 ### 2:45 – Schluss (10 s)
 
 *„Drei Kontakte statt 569. Eine Nachricht, die zum Menschen passt. Und ein Gespräch, das ich
-schon einmal geführt habe, bevor es stattfindet. Das ist FounderRadar."*
+schon einmal geführt habe, bevor es stattfindet. Das ist Voya."*
 
 ---
 
@@ -144,7 +144,7 @@ neu starten, `node scripts/smoke.mjs` muss trotzdem grün sein). Dann gibt es ke
 
 ## D. Drei Kernbotschaften für den Pitch
 
-1. **Zeit sparen.** Statt 569 Profile durchzuklicken, zeigt FounderRadar die drei, die
+1. **Zeit sparen.** Statt 569 Profile durchzuklicken, zeigt Voya die drei, die
    *mich* suchen – mit erklärbarem Score aus sichtbaren Quelldaten (Rolle, Vertical, komplementäre
    Stärken). Weniger, aber bessere Anschreiben.
 2. **Risiko beim Co-Founder-Match senken.** Persönlichkeitstyp, Team-Radar und Red Flags machen

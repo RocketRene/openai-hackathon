@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/ui";
 import SettingsPanel from "@/components/settings/SettingsPanel";
 
 export const metadata = {
-  title: "Einstellungen – FounderRadar",
+  title: "Einstellungen – Voya",
 };
 
 export default function SettingsPage() {

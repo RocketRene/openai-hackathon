@@ -3,7 +3,7 @@ import TipsPanel from "@/components/tips/TipsPanel";
 import { PageHeader } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "Tipps – FounderRadar",
+  title: "Tipps – Voya",
   description: "Was deinem Start-up noch fehlt: Team, Skills, Produkt, Fundraising, Netzwerk.",
 };
 

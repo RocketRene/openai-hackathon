@@ -9,7 +9,7 @@ import { EmptyState, PageHeader } from "@/components/ui";
 import { getEvents, getProfilesForEvent } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Events – FounderRadar",
+  title: "Events – Voya",
   description: "Konferenzen und Meetups als Quelle deiner Kontakte.",
 };
 

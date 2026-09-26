@@ -1,4 +1,4 @@
-# FounderRadar – Design-Handoff
+# Voya – Design-Handoff
 
 Für Jolanda: Du übernimmst nach dem MVP das Design und sollst dafür niemanden fragen müssen.
 Dieses Dokument sagt dir, **was** das Produkt sein soll, **wo** im Code Design entsteht und

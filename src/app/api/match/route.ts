@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 const OPENAI_TIMEOUT_MS = 12_000;
 
 const INSTRUCTIONS = [
-  "Du bist der Matching-Assistent von FounderRadar, einer App, die Gründer:innen die richtigen Kontakte",
+  "Du bist der Matching-Assistent von Voya, einer App, die Gründer:innen die richtigen Kontakte",
   "(Co-Founder, Investor:innen, Mentor:innen, Talente) auf Konferenzen zeigt.",
   "Du bekommst als JSON: den Kontext der Nutzer:in (user), ein Kontaktprofil (profile) und ein regelbasiertes",
   "Match-Ergebnis (match: Score 0–100, reasons, risks, complementarity).",

@@ -1,5 +1,5 @@
 /**
- * Zentrale Typen für FounderRadar.
+ * Zentrale Typen für Voya.
  * ---------------------------------------------------------------
  * SHARED CONTRACT – Änderungen hier betreffen alle Module. Nicht ohne Absprache
  * (bzw. ohne Eintrag in docs/PARALLEL-WORK.md) ändern. Neue, modul-lokale Typen

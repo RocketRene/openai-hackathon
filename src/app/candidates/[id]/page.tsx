@@ -9,9 +9,9 @@ type Props = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const profile = getProfile(id);
-  if (!profile) return { title: "Kandidat:in nicht gefunden – FounderRadar" };
+  if (!profile) return { title: "Kandidat:in nicht gefunden – Voya" };
   return {
-    title: `${profile.name} – FounderRadar`,
+    title: `${profile.name} – Voya`,
     description: profile.headline || profile.about?.slice(0, 160) || undefined,
   };
 }

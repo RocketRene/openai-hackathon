@@ -1,4 +1,4 @@
-# FounderRadar – Funktionsumfang (abgeleitet aus dem Transkript)
+# Voya – Funktionsumfang (abgeleitet aus dem Transkript)
 
 **Produkt in einem Satz:** Ein Dashboard für Gründer:innen, das aus gescrapten Konferenz-/LinkedIn-Daten
 die richtigen Kontakte (Co-Founder, Investoren, Mentoren, Talente) priorisiert, personalisierten

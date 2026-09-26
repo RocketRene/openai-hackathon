@@ -18,7 +18,7 @@ export interface ChatPanelProps {
 }
 
 const DEFAULT_GREETING =
-  "Hi! Ich bin dein FounderRadar-Coach. Erzähl mir kurz: Welche Rolle hast du und wen suchst du?";
+  "Hi! Ich bin dein Voya. Erzähl mir kurz: Welche Rolle hast du und wen suchst du?";
 
 const QUICK_PROMPTS = [
   "Interview starten",

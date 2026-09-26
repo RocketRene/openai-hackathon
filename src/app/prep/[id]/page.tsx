@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { id } = await params;
   const profile = getProfile(id);
   return {
-    title: profile ? `Gespräch vorbereiten: ${profile.name} – FounderRadar` : "Gespräch vorbereiten – FounderRadar",
+    title: profile ? `Gespräch vorbereiten: ${profile.name} – Voya` : "Gespräch vorbereiten – Voya",
   };
 }
 

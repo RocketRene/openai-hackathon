@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/ui";
 import { getProfiles } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Kandidaten · FounderRadar",
+  title: "Kandidaten · Voya",
   description: "Durchsuchbare Profile aus IdeaLab 2026 und Demo-Daten, priorisiert nach Match-Score.",
 };
 

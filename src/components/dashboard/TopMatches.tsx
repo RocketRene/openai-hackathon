@@ -83,7 +83,7 @@ export default function TopMatches() {
     return (
       <Card title="Deine Top-Matches">
         <p className="text-sm text-[var(--muted)]">
-          FounderRadar kennt dich noch nicht. Sag uns kurz, wer du bist und wen du suchst – dann priorisieren wir
+          Voya kennt dich noch nicht. Sag uns kurz, wer du bist und wen du suchst – dann priorisieren wir
           die Kontakte aus IdeaLab 2026 und weiteren Events für dich: Co-Founder, Investor:innen, Mentor:innen oder
           Talente.
         </p>

@@ -180,7 +180,7 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
 
       // 2) Agent + Session aufbauen.
       const agent = new RealtimeAgent({
-        name: "FounderRadar",
+        name: "Voya",
         instructions: buildVoiceInstructions(mode, userContext, candidate),
         tools: createVoiceTools({ emit: (action) => onUiActionRef.current(action) }),
       });
@@ -301,7 +301,7 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
       : mode === "prep-simulation"
         ? `Der Agent spielt ${candidate?.name ?? "die Kandidat:in"} in einem Erstgespräch. Sag „Feedback“, um aus der Rolle zu treten.`
         : "Frag nach Kandidat:innen, Events oder wer zu dir passt.";
-  const assistantName = mode === "prep-simulation" && candidate ? candidate.name.split(" ")[0] : "FounderRadar";
+  const assistantName = mode === "prep-simulation" && candidate ? candidate.name.split(" ")[0] : "Voya";
 
   return (
     <div className={cx("rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4", className)}>

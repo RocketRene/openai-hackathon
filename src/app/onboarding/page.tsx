@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui";
 import OnboardingForm from "@/components/onboarding/OnboardingForm";
 
 export const metadata: Metadata = {
-  title: "Dein Profil – FounderRadar",
+  title: "Dein Profil – Voya",
   description: "Onboarding: Rolle, gesuchte Kontakte, Verticals, Idee, Stärken und Selbsteinschätzung.",
 };
 

@@ -8,7 +8,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "FounderRadar",
+  title: "Voya",
   description:
     "Findet aus Konferenz- und LinkedIn-Daten die richtigen Co-Founder, Investoren und Mentor:innen – mit personalisiertem Outreach und Voice-Vorbereitung.",
 };

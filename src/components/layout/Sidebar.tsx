@@ -43,7 +43,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           FR
         </span>
         <span>
-          <span className="block text-sm font-semibold tracking-tight">FounderRadar</span>
+          <span className="block text-sm font-semibold tracking-tight">Voya</span>
           <span className="block text-[11px] text-[var(--muted)]">Co-Founder · Investoren · Mentor:innen</span>
         </span>
       </Link>

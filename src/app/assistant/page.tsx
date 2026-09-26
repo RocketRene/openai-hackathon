@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/ui";
 import AssistantWorkspace from "@/components/assistant/AssistantWorkspace";
 
 export const metadata: Metadata = {
-  title: "Agent – FounderRadar",
+  title: "Agent – Voya",
   description: "Interview, Kandidaten, Vorbereitung – per Text oder Voice",
 };
 
