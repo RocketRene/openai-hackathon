@@ -1,12 +1,12 @@
 [
   {
-    "id": "jonas-weidner",
-    "name": "Jonas Weidner",
+    "id": "jonas-weigel",
+    "name": "Jonas Weigel",
     "headline": "Full-Stack Engineer · TUM · auf der Suche nach der ersten Startup-Stelle",
     "location": "München",
-    "photoUrl": "https://i.pravatar.cc/200?u=jonas-weidner",
+    "photoUrl": "https://i.pravatar.cc/200?u=jonas-weigel",
     "email": "jonas.weidner@example.com",
-    "linkedinUrl": "https://www.linkedin.com/in/jonas-weidner-dev",
+    "linkedinUrl": "https://www.linkedin.com/in/jonas-weigel-dev",
     "about": "Jonas studiert Informatik an der TUM und baut seit über drei Jahren Full-Stack-Produkte – vom ersten Prototyp bis zum Deployment. Bei Ledgerly hat er das Kernprodukt mit aufgebaut und weiß, wie sich ein SaaS-Tool anfühlt, das täglich genutzt wird. Er sucht jetzt bewusst ein sehr frühes Startup, bei dem er als einer der ersten Engineers Architekturentscheidungen mitgestalten kann. Nebenbei hackt er gerne bei Hackathons mit, weil ihm das Tempo dort gefällt.",
     "experience": [
       {
@@ -33,28 +33,69 @@
         "end": "voraussichtlich 2026"
       }
     ],
-    "skills": ["TypeScript", "React", "Next.js", "Node.js", "PostgreSQL", "Docker", "GraphQL", "AWS"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "TypeScript",
+      "React",
+      "Next.js",
+      "Node.js",
+      "PostgreSQL",
+      "Docker",
+      "GraphQL",
+      "AWS"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "talent",
     "founderRole": "tech",
-    "lookingFor": ["job as engineer", "technical cofounder"],
-    "verticals": ["b2b saas", "ai"],
-    "dims": { "vision": 5, "design": 4, "tech": 8, "detail": 7, "execution": 8 },
+    "lookingFor": [
+      "job as engineer",
+      "technical cofounder"
+    ],
+    "verticals": [
+      "b2b saas",
+      "ai"
+    ],
+    "dims": {
+      "vision": 5,
+      "design": 4,
+      "tech": 8,
+      "detail": 7,
+      "execution": 8
+    },
     "personality": {
       "type": "builder",
       "summary": "Jonas ist der Typ, der lieber einen Prototyp baut, als lange drüber zu reden – pragmatisch und schnell im Umsetzen.",
-      "traits": ["pragmatisch", "eigenständig", "lösungsorientiert", "neugierig"],
+      "traits": [
+        "pragmatisch",
+        "eigenständig",
+        "lösungsorientiert",
+        "neugierig"
+      ],
       "communicationStyle": "Direkt und knapp, mag konkrete technische Fragen statt Small Talk, schätzt schnelle Antworten.",
       "outreachTips": [
         "Konkretes technisches Problem oder Produkt zeigen, nicht nur die Vision",
         "Klarheit über Tech-Stack und Rolle schon in der ersten Nachricht",
         "Kurze Nachricht, direkt zum Punkt kommen"
       ],
-      "avoid": ["Lange Pitch-Decks ohne technischen Kontext", "Zu viel Buzzword-Bingo (\"disruptiv\", \"revolutionär\")"]
+      "avoid": [
+        "Lange Pitch-Decks ohne technischen Kontext",
+        "Zu viel Buzzword-Bingo (\"disruptiv\", \"revolutionär\")"
+      ]
     },
-    "events": ["idealab-2026", "berlin-ai-hackathon-2026"],
-    "tags": ["Werkstudent", "Hackathon", "early-stage"],
-    "source": { "type": "mock" }
+    "events": [
+      "idealab-2026",
+      "berlin-ai-hackathon-2026"
+    ],
+    "tags": [
+      "Werkstudent",
+      "Hackathon",
+      "early-stage"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "elena-brandt",
@@ -97,28 +138,67 @@
         "end": "2023"
       }
     ],
-    "skills": ["Python", "PyTorch", "TensorFlow", "NLP", "Computer Vision", "MLOps", "SQL", "Docker"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Python",
+      "PyTorch",
+      "TensorFlow",
+      "NLP",
+      "Computer Vision",
+      "MLOps",
+      "SQL",
+      "Docker"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "talent",
     "founderRole": "tech",
-    "lookingFor": ["job as engineer"],
-    "verticals": ["ai", "healthtech"],
-    "dims": { "vision": 6, "design": 3, "tech": 9, "detail": 8, "execution": 6 },
+    "lookingFor": [
+      "job as engineer"
+    ],
+    "verticals": [
+      "ai",
+      "healthtech"
+    ],
+    "dims": {
+      "vision": 6,
+      "design": 3,
+      "tech": 9,
+      "detail": 8,
+      "execution": 6
+    },
     "personality": {
       "type": "analyst",
       "summary": "Elena denkt in Daten und Experimenten – sie will verstehen, warum ein Modell funktioniert, bevor sie es einsetzt.",
-      "traits": ["analytisch", "gründlich", "zurückhaltend", "wissbegierig"],
+      "traits": [
+        "analytisch",
+        "gründlich",
+        "zurückhaltend",
+        "wissbegierig"
+      ],
       "communicationStyle": "Sachlich und detailliert, Fragen zu Daten und Methodik werden positiv aufgenommen, keine reine Sales-Sprache.",
       "outreachTips": [
         "Konkrete ML-Problemstellung oder Datensatz erwähnen",
         "Zeit für Rückfragen einplanen, keine Entscheidung unter Druck erwarten",
         "Auf Qualität der Daten/Infrastruktur eingehen, nicht nur auf die Idee"
       ],
-      "avoid": ["Übertriebene Versprechen zu \"AI-Magie\" ohne Substanz", "Drängen auf schnelle Zusage"]
+      "avoid": [
+        "Übertriebene Versprechen zu \"AI-Magie\" ohne Substanz",
+        "Drängen auf schnelle Zusage"
+      ]
     },
-    "events": ["berlin-ai-hackathon-2026"],
-    "tags": ["NLP", "HealthTech", "Forschung"],
-    "source": { "type": "mock" }
+    "events": [
+      "berlin-ai-hackathon-2026"
+    ],
+    "tags": [
+      "NLP",
+      "HealthTech",
+      "Forschung"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "tobias-reinhardt",
@@ -154,37 +234,77 @@
         "end": "voraussichtlich 2026"
       }
     ],
-    "skills": ["Flutter", "Dart", "Swift", "Kotlin", "Firebase", "REST APIs", "CI/CD", "UI/UX-Grundlagen"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Flutter",
+      "Dart",
+      "Swift",
+      "Kotlin",
+      "Firebase",
+      "REST APIs",
+      "CI/CD",
+      "UI/UX-Grundlagen"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "talent",
     "founderRole": "tech",
-    "lookingFor": ["job as engineer", "technical cofounder"],
-    "verticals": ["consumer", "mobility"],
-    "dims": { "vision": 5, "design": 5, "tech": 7, "detail": 6, "execution": 8 },
+    "lookingFor": [
+      "job as engineer",
+      "technical cofounder"
+    ],
+    "verticals": [
+      "consumer",
+      "mobility"
+    ],
+    "dims": {
+      "vision": 5,
+      "design": 5,
+      "tech": 7,
+      "detail": 6,
+      "execution": 8
+    },
     "personality": {
       "type": "builder",
       "summary": "Tobias hat schon mehrere Apps allein von der Idee bis in den App Store gebracht und will das jetzt im Team tun.",
-      "traits": ["hands-on", "kreativ", "verlässlich", "ungeduldig im guten Sinne"],
+      "traits": [
+        "hands-on",
+        "kreativ",
+        "verlässlich",
+        "ungeduldig im guten Sinne"
+      ],
       "communicationStyle": "Locker und direkt, zeigt gerne eigene Projekte, reagiert gut auf konkrete Beispiele statt Theorie.",
       "outreachTips": [
         "Auf seine bisherigen Apps/Projekte eingehen",
         "Konkrete Produktvision statt nur Finanzierungsrunde beschreiben",
         "Schnelle, informelle erste Kontaktaufnahme statt langem Formular"
       ],
-      "avoid": ["Zu formelle, lange E-Mails", "Rollenbeschreibung ohne Produktbezug"]
+      "avoid": [
+        "Zu formelle, lange E-Mails",
+        "Rollenbeschreibung ohne Produktbezug"
+      ]
     },
-    "events": ["idealab-2026"],
-    "tags": ["Flutter", "App Store", "Solo-Projekte"],
-    "source": { "type": "mock" }
+    "events": [
+      "idealab-2026"
+    ],
+    "tags": [
+      "Flutter",
+      "App Store",
+      "Solo-Projekte"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
-    "id": "sophie-lindner",
-    "name": "Sophie Lindner",
+    "id": "sophie-lindemann",
+    "name": "Sophie Lindemann",
     "headline": "Product Manager i.A. · WHU · B2B-SaaS & Fintech",
     "location": "Düsseldorf",
-    "photoUrl": "https://i.pravatar.cc/200?u=sophie-lindner",
+    "photoUrl": "https://i.pravatar.cc/200?u=sophie-lindemann",
     "email": "sophie.lindner@example.com",
-    "linkedinUrl": "https://www.linkedin.com/in/sophie-lindner-pm",
+    "linkedinUrl": "https://www.linkedin.com/in/sophie-lindemann-pm",
     "about": "Sophie studiert Management an der WHU mit Schwerpunkt Digital Product Management und hat bei PayNest gelernt, wie man aus Nutzerinterviews echte Priorisierung ableitet. Aktuell verantwortet sie bei Formwork kleinere Produktentscheidungen zusammen mit zwei Engineers. Sie mag es, zwischen Nutzerproblem, Datenlage und technischer Machbarkeit zu vermitteln. Für ihre erste feste Stelle sucht sie ein Team, das sie früh in Produktentscheidungen einbindet, statt nur Tickets abzuarbeiten.",
     "experience": [
       {
@@ -211,28 +331,68 @@
         "end": "voraussichtlich 2026"
       }
     ],
-    "skills": ["Product Discovery", "Roadmapping", "SQL", "Figma", "User Research", "A/B-Testing", "Jira", "Notion"],
-    "languages": ["Deutsch", "Englisch", "Französisch"],
+    "skills": [
+      "Product Discovery",
+      "Roadmapping",
+      "SQL",
+      "Figma",
+      "User Research",
+      "A/B-Testing",
+      "Jira",
+      "Notion"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch",
+      "Französisch"
+    ],
     "networkRole": "talent",
     "founderRole": "product",
-    "lookingFor": ["job as product manager"],
-    "verticals": ["b2b saas", "fintech"],
-    "dims": { "vision": 7, "design": 6, "tech": 4, "detail": 7, "execution": 7 },
+    "lookingFor": [
+      "job as product manager"
+    ],
+    "verticals": [
+      "b2b saas",
+      "fintech"
+    ],
+    "dims": {
+      "vision": 7,
+      "design": 6,
+      "tech": 4,
+      "detail": 7,
+      "execution": 7
+    },
     "personality": {
       "type": "operator",
       "summary": "Sophie bringt Struktur in frühe Produktideen – sie fragt zuerst nach dem Problem, nicht nach dem Feature.",
-      "traits": ["strukturiert", "kommunikativ", "nutzerorientiert", "zielstrebig"],
+      "traits": [
+        "strukturiert",
+        "kommunikativ",
+        "nutzerorientiert",
+        "zielstrebig"
+      ],
       "communicationStyle": "Freundlich, aber inhaltlich fordernd – erwartet klare Antworten auf \"welches Problem löst ihr\".",
       "outreachTips": [
         "Nutzerproblem und aktuellen Produktstatus klar benennen",
         "Einblick in Team und Entscheidungsprozesse geben",
         "Konkrete erste Aufgaben und Verantwortung skizzieren"
       ],
-      "avoid": ["Vage Rollenbeschreibungen (\"wir brauchen jemanden für Produkt\")", "Zu viel Fokus auf Titel statt Verantwortung"]
+      "avoid": [
+        "Vage Rollenbeschreibungen (\"wir brauchen jemanden für Produkt\")",
+        "Zu viel Fokus auf Titel statt Verantwortung"
+      ]
     },
-    "events": ["idealab-2026"],
-    "tags": ["Product Management", "B2B SaaS", "WHU"],
-    "source": { "type": "mock" }
+    "events": [
+      "idealab-2026"
+    ],
+    "tags": [
+      "Product Management",
+      "B2B SaaS",
+      "WHU"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "mara-vogt",
@@ -268,28 +428,68 @@
         "end": "voraussichtlich 2026"
       }
     ],
-    "skills": ["Figma", "User Research", "Prototyping", "Design Systems", "Wireframing", "HTML/CSS", "Illustration", "Usability Testing"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Figma",
+      "User Research",
+      "Prototyping",
+      "Design Systems",
+      "Wireframing",
+      "HTML/CSS",
+      "Illustration",
+      "Usability Testing"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "talent",
     "founderRole": "design",
-    "lookingFor": ["job as designer"],
-    "verticals": ["consumer", "edtech"],
-    "dims": { "vision": 7, "design": 9, "tech": 3, "detail": 8, "execution": 6 },
+    "lookingFor": [
+      "job as designer"
+    ],
+    "verticals": [
+      "consumer",
+      "edtech"
+    ],
+    "dims": {
+      "vision": 7,
+      "design": 9,
+      "tech": 3,
+      "detail": 8,
+      "execution": 6
+    },
     "personality": {
       "type": "visionary",
       "summary": "Mara denkt Produkte vom Nutzererlebnis her und will früh genug einsteigen, um das Design mitzuprägen.",
-      "traits": ["kreativ", "empathisch", "detailverliebt", "durchsetzungsfähig"],
+      "traits": [
+        "kreativ",
+        "empathisch",
+        "detailverliebt",
+        "durchsetzungsfähig"
+      ],
       "communicationStyle": "Bildhaft und persönlich, reagiert gut auf visuelle Referenzen wie Mockups oder Moodboards statt reinem Text.",
       "outreachTips": [
         "Aktuellen Design- und Produktstand zeigen (Screens, Prototyp)",
         "Nach ihrer Meinung zum Nutzererlebnis fragen, nicht nur zur Verfügbarkeit",
         "Raum für eigene gestalterische Entscheidungen in Aussicht stellen"
       ],
-      "avoid": ["Design als \"machen wir am Ende noch schnell\" darstellen", "Rein technische Beschreibung ohne Nutzerperspektive"]
+      "avoid": [
+        "Design als \"machen wir am Ende noch schnell\" darstellen",
+        "Rein technische Beschreibung ohne Nutzerperspektive"
+      ]
     },
-    "events": ["idealab-2026", "berlin-ai-hackathon-2026"],
-    "tags": ["UX/UI", "Design Systems", "Berlin"],
-    "source": { "type": "mock" }
+    "events": [
+      "idealab-2026",
+      "berlin-ai-hackathon-2026"
+    ],
+    "tags": [
+      "UX/UI",
+      "Design Systems",
+      "Berlin"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "paul-ostermann",
@@ -325,27 +525,68 @@
         "end": "voraussichtlich 2026"
       }
     ],
-    "skills": ["Sales", "Lead-Generierung", "Growth Hacking", "CRM (HubSpot)", "Kaltakquise", "Partnerships", "Datenanalyse", "Pitching"],
-    "languages": ["Deutsch", "Englisch", "Spanisch"],
+    "skills": [
+      "Sales",
+      "Lead-Generierung",
+      "Growth Hacking",
+      "CRM (HubSpot)",
+      "Kaltakquise",
+      "Partnerships",
+      "Datenanalyse",
+      "Pitching"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch",
+      "Spanisch"
+    ],
     "networkRole": "talent",
     "founderRole": "commercial",
-    "lookingFor": ["job as growth", "commercial cofounder"],
-    "verticals": ["fintech", "b2b saas"],
-    "dims": { "vision": 6, "design": 3, "tech": 2, "detail": 5, "execution": 8 },
+    "lookingFor": [
+      "job as growth",
+      "commercial cofounder"
+    ],
+    "verticals": [
+      "fintech",
+      "b2b saas"
+    ],
+    "dims": {
+      "vision": 6,
+      "design": 3,
+      "tech": 2,
+      "detail": 5,
+      "execution": 8
+    },
     "personality": {
       "type": "connector",
       "summary": "Paul lebt für den ersten Kundenanruf – er verbindet lieber Menschen und Deals, als lange allein zu analysieren.",
-      "traits": ["kontaktfreudig", "überzeugend", "energiegeladen", "wettbewerbsorientiert"],
+      "traits": [
+        "kontaktfreudig",
+        "überzeugend",
+        "energiegeladen",
+        "wettbewerbsorientiert"
+      ],
       "communicationStyle": "Persönlich und enthusiastisch, mag konkrete Zahlen wie Umsatz oder Pipeline und schnelle nächste Schritte.",
       "outreachTips": [
         "Konkrete Marktchance und erste Kundenzahlen nennen",
         "Klares Incentive- bzw. Commission-Modell ansprechen",
         "Schnellen nächsten Schritt anbieten, z. B. Call in derselben Woche"
       ],
-      "avoid": ["Nur über Produkt-Details sprechen ohne Marktbezug", "Lange Wartezeiten zwischen Kontaktaufnahme und Feedback"]
+      "avoid": [
+        "Nur über Produkt-Details sprechen ohne Marktbezug",
+        "Lange Wartezeiten zwischen Kontaktaufnahme und Feedback"
+      ]
     },
-    "events": ["idealab-2026"],
-    "tags": ["Sales", "Growth", "B2B"],
-    "source": { "type": "mock" }
+    "events": [
+      "idealab-2026"
+    ],
+    "tags": [
+      "Sales",
+      "Growth",
+      "B2B"
+    ],
+    "source": {
+      "type": "mock"
+    }
   }
 ]

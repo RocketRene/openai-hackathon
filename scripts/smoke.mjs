@@ -230,11 +230,11 @@ async function main() {
       ]),
   });
 
-  const profiles = await check({ name: "profiles (alle)", path: "/api/profiles", shape: shapeProfileList });
+  const profiles = await check({ name: "profiles (alle)", path: "/api/profiles?format=array", shape: shapeProfileList });
 
   await check({
     name: "profiles?networkRole=cofounder",
-    path: "/api/profiles?networkRole=cofounder",
+    path: "/api/profiles?networkRole=cofounder&format=array",
     shape: (b) => {
       const err = shapeProfileList(b);
       if (err) return err;

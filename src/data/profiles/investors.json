@@ -39,33 +39,78 @@
         "end": "2016"
       }
     ],
-    "skills": ["Due Diligence", "Term Sheets", "Portfolio Support", "Cap Table Management", "Fundraising-Beratung", "Marktanalyse", "Board-Arbeit", "Finanzmodellierung"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Due Diligence",
+      "Term Sheets",
+      "Portfolio Support",
+      "Cap Table Management",
+      "Fundraising-Beratung",
+      "Marktanalyse",
+      "Board-Arbeit",
+      "Finanzmodellierung"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "investor",
-    "lookingFor": ["startups to invest in", "dealflow"],
-    "verticals": ["climate", "b2b saas"],
+    "lookingFor": [
+      "startups to invest in",
+      "dealflow"
+    ],
+    "verticals": [
+      "climate",
+      "b2b saas"
+    ],
     "stage": "seed",
-    "dims": { "vision": 7, "design": 4, "tech": 5, "detail": 9, "execution": 7 },
+    "dims": {
+      "vision": 7,
+      "design": 4,
+      "tech": 5,
+      "detail": 9,
+      "execution": 7
+    },
     "personality": {
       "type": "analyst",
       "summary": "Sachlich und zahlengetrieben – Lena entscheidet auf Basis von Traction, Kohorten und einem klaren Marktmodell, nicht auf Basis von Bauchgefühl.",
-      "traits": ["analytisch", "direkt", "geduldig bei Details", "netzwerkstark"],
+      "traits": [
+        "analytisch",
+        "direkt",
+        "geduldig bei Details",
+        "netzwerkstark"
+      ],
       "communicationStyle": "Kurz und strukturiert, mag vorbereitete Unterlagen und konkrete Kennzahlen statt langer Geschichten.",
-      "outreachTips": ["Traction-Zahlen in den ersten zwei Sätzen nennen", "Kurzes Datenraum-Deck vorab schicken", "Konkrete Ask-Summe und Verwendung nennen"],
-      "avoid": ["Reine Vision ohne Zahlen präsentieren", "Unaufgeforderte Anrufe ohne vorherige Mail"]
+      "outreachTips": [
+        "Traction-Zahlen in den ersten zwei Sätzen nennen",
+        "Kurzes Datenraum-Deck vorab schicken",
+        "Konkrete Ask-Summe und Verwendung nennen"
+      ],
+      "avoid": [
+        "Reine Vision ohne Zahlen präsentieren",
+        "Unaufgeforderte Anrufe ohne vorherige Mail"
+      ]
     },
-    "events": ["idealab-2026", "slush-2026"],
-    "tags": ["VC", "Pre-Seed", "Climate Tech"],
-    "source": { "type": "mock" }
+    "events": [
+      "idealab-2026",
+      "slush-2026"
+    ],
+    "tags": [
+      "VC",
+      "Pre-Seed",
+      "Climate Tech"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
-    "id": "jonas-weidner",
-    "name": "Jonas Weidner",
+    "id": "jonas-wendland",
+    "name": "Jonas Wendland",
     "headline": "Partner @ Rheinland Capital – Seed-Stage Fintech & AI",
     "location": "Düsseldorf, Deutschland",
-    "photoUrl": "https://i.pravatar.cc/200?u=jonas-weidner",
+    "photoUrl": "https://i.pravatar.cc/200?u=jonas-wendland",
     "email": "jonas.weidner@example.com",
-    "linkedinUrl": "https://www.linkedin.com/in/jonas-weidner",
+    "linkedinUrl": "https://www.linkedin.com/in/jonas-wendland",
     "about": "Jonas ist Gründungspartner von Rheinland Capital, einem Seed-Fonds für Fintech und angewandte KI in Europa. Seine Thesis: regulierungsnahe Fintech-Produkte und vertikale KI-Anwendungen mit defensiblen Datenvorteilen. Rheinland Capital investiert Erstschecks von 300.000 € bis 2 Mio. € und reserviert Kapital für Folgerunden bis Series A. Jonas war zuvor selbst Gründer einer Payment-Infrastruktur und bringt operative Erfahrung aus Regulatorik und Bankenintegration mit. Er ist bekannt für sein großes Netzwerk zu Co-Investoren in London und Paris.",
     "experience": [
       {
@@ -98,24 +143,70 @@
         "end": "2011"
       }
     ],
-    "skills": ["Term Sheets", "Due Diligence", "Regulatorik-Beratung", "Cap Table Management", "Investorennetzwerk", "Pitch-Coaching", "Fundraising-Beratung", "Board-Arbeit"],
-    "languages": ["Deutsch", "Englisch", "Französisch"],
+    "skills": [
+      "Term Sheets",
+      "Due Diligence",
+      "Regulatorik-Beratung",
+      "Cap Table Management",
+      "Investorennetzwerk",
+      "Pitch-Coaching",
+      "Fundraising-Beratung",
+      "Board-Arbeit"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch",
+      "Französisch"
+    ],
     "networkRole": "investor",
-    "lookingFor": ["startups to invest in", "partnerships"],
-    "verticals": ["fintech", "ai"],
+    "lookingFor": [
+      "startups to invest in",
+      "partnerships"
+    ],
+    "verticals": [
+      "fintech",
+      "ai"
+    ],
     "stage": "seed",
-    "dims": { "vision": 8, "design": 4, "tech": 6, "detail": 8, "execution": 8 },
+    "dims": {
+      "vision": 8,
+      "design": 4,
+      "tech": 6,
+      "detail": 8,
+      "execution": 8
+    },
     "personality": {
       "type": "connector",
       "summary": "Jonas denkt in Netzwerken – er verbindet Gründer:innen aktiv mit Co-Investoren, Kund:innen und Bewerber:innen und sieht das als Teil seines Investments.",
-      "traits": ["gut vernetzt", "pragmatisch", "direkt", "hilfsbereit"],
+      "traits": [
+        "gut vernetzt",
+        "pragmatisch",
+        "direkt",
+        "hilfsbereit"
+      ],
       "communicationStyle": "Persönlich und locker, schätzt ein kurzes Kennenlerngespräch mehr als eine perfekte Mail.",
-      "outreachTips": ["Gemeinsame Kontakte oder Co-Investoren erwähnen", "Kurz anrufen statt nur zu schreiben", "Konkrete regulatorische Fragestellung ansprechen, wenn Fintech"],
-      "avoid": ["Zu förmliche, unpersönliche Anschreiben", "Massen-E-Mails ohne Bezug zur Thesis"]
+      "outreachTips": [
+        "Gemeinsame Kontakte oder Co-Investoren erwähnen",
+        "Kurz anrufen statt nur zu schreiben",
+        "Konkrete regulatorische Fragestellung ansprechen, wenn Fintech"
+      ],
+      "avoid": [
+        "Zu förmliche, unpersönliche Anschreiben",
+        "Massen-E-Mails ohne Bezug zur Thesis"
+      ]
     },
-    "events": ["bits-and-pretzels-2026"],
-    "tags": ["VC", "Seed", "Fintech", "Ex-Founder"],
-    "source": { "type": "mock" }
+    "events": [
+      "bits-and-pretzels-2026"
+    ],
+    "tags": [
+      "VC",
+      "Seed",
+      "Fintech",
+      "Ex-Founder"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "sophie-kramer",
@@ -164,24 +255,69 @@
         "end": "2014"
       }
     ],
-    "skills": ["Due Diligence", "Regulatorik-Beratung", "Marktanalyse", "Term Sheets", "Portfolio Support", "Wissenschaftliche Bewertung", "Finanzmodellierung", "Board-Arbeit"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Due Diligence",
+      "Regulatorik-Beratung",
+      "Marktanalyse",
+      "Term Sheets",
+      "Portfolio Support",
+      "Wissenschaftliche Bewertung",
+      "Finanzmodellierung",
+      "Board-Arbeit"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "investor",
-    "lookingFor": ["startups to invest in", "dealflow"],
-    "verticals": ["healthtech", "biotech"],
+    "lookingFor": [
+      "startups to invest in",
+      "dealflow"
+    ],
+    "verticals": [
+      "healthtech",
+      "biotech"
+    ],
     "stage": "pre-seed",
-    "dims": { "vision": 7, "design": 3, "tech": 7, "detail": 9, "execution": 6 },
+    "dims": {
+      "vision": 7,
+      "design": 3,
+      "tech": 7,
+      "detail": 9,
+      "execution": 6
+    },
     "personality": {
       "type": "analyst",
       "summary": "Sophie prüft jede Aussage gegen Daten und Studienlage – ohne belastbare Evidenz gibt es kein zweites Meeting.",
-      "traits": ["akribisch", "wissenschaftlich", "ruhig", "fordernd"],
+      "traits": [
+        "akribisch",
+        "wissenschaftlich",
+        "ruhig",
+        "fordernd"
+      ],
       "communicationStyle": "Schriftlich, ausführlich und faktenbasiert bevorzugt; braucht Zeit zur Prüfung vor Entscheidungen.",
-      "outreachTips": ["Regulatorischen Status (z. B. CE, FDA-Pfad) klar benennen", "Wissenschaftliche Publikationen oder Studien verlinken", "Realistischen Zeitplan bis zur Zulassung skizzieren"],
-      "avoid": ["Übertriebene Heilsversprechen ohne Daten", "Druck durch künstliche Deadlines aufbauen"]
+      "outreachTips": [
+        "Regulatorischen Status (z. B. CE, FDA-Pfad) klar benennen",
+        "Wissenschaftliche Publikationen oder Studien verlinken",
+        "Realistischen Zeitplan bis zur Zulassung skizzieren"
+      ],
+      "avoid": [
+        "Übertriebene Heilsversprechen ohne Daten",
+        "Druck durch künstliche Deadlines aufbauen"
+      ]
     },
-    "events": ["idealab-2026"],
-    "tags": ["VC", "Pre-Seed", "Biotech", "Healthtech"],
-    "source": { "type": "mock" }
+    "events": [
+      "idealab-2026"
+    ],
+    "tags": [
+      "VC",
+      "Pre-Seed",
+      "Biotech",
+      "Healthtech"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "markus-fellner",
@@ -223,24 +359,68 @@
         "end": "2012"
       }
     ],
-    "skills": ["Engineering-Aufbau", "Term Sheets", "Produktstrategie", "Portfolio Support", "Enterprise Sales", "Fundraising-Beratung", "Netzwerk zu Folgeinvestoren"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Engineering-Aufbau",
+      "Term Sheets",
+      "Produktstrategie",
+      "Portfolio Support",
+      "Enterprise Sales",
+      "Fundraising-Beratung",
+      "Netzwerk zu Folgeinvestoren"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "investor",
-    "lookingFor": ["startups to invest in", "dealflow"],
-    "verticals": ["b2b saas", "ai"],
+    "lookingFor": [
+      "startups to invest in",
+      "dealflow"
+    ],
+    "verticals": [
+      "b2b saas",
+      "ai"
+    ],
     "stage": "pre-seed",
-    "dims": { "vision": 8, "design": 5, "tech": 8, "detail": 8, "execution": 8 },
+    "dims": {
+      "vision": 8,
+      "design": 5,
+      "tech": 8,
+      "detail": 8,
+      "execution": 8
+    },
     "personality": {
       "type": "visionary",
       "summary": "Markus investiert in große technische Visionen – er will verstehen, wie aus dem Produkt in fünf Jahren eine Kategorie wird.",
-      "traits": ["technikbegeistert", "ungeduldig bei Kleinkram", "direkt", "founder-freundlich"],
+      "traits": [
+        "technikbegeistert",
+        "ungeduldig bei Kleinkram",
+        "direkt",
+        "founder-freundlich"
+      ],
       "communicationStyle": "Informell, kurz, am liebsten per Sprachnachricht oder kurzem Call statt langer Mails.",
-      "outreachTips": ["Produkt-Demo statt Deck anbieten", "Technische Differenzierung klar erklären", "Direkt und ohne Umwege auf den Punkt kommen"],
-      "avoid": ["Lange Pitch-Decks ohne Produktbezug", "Zu viel Buzzword-Sprache ohne Substanz"]
+      "outreachTips": [
+        "Produkt-Demo statt Deck anbieten",
+        "Technische Differenzierung klar erklären",
+        "Direkt und ohne Umwege auf den Punkt kommen"
+      ],
+      "avoid": [
+        "Lange Pitch-Decks ohne Produktbezug",
+        "Zu viel Buzzword-Sprache ohne Substanz"
+      ]
     },
-    "events": ["idealab-2026", "berlin-ai-hackathon-2026"],
-    "tags": ["Business Angel", "Ex-Founder", "Pre-Seed"],
-    "source": { "type": "mock" }
+    "events": [
+      "idealab-2026",
+      "berlin-ai-hackathon-2026"
+    ],
+    "tags": [
+      "Business Angel",
+      "Ex-Founder",
+      "Pre-Seed"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "carolin-neumann",
@@ -282,24 +462,69 @@
         "end": "2012"
       }
     ],
-    "skills": ["Markenaufbau", "Fundraising-Beratung", "Portfolio Support", "Community Building", "Term Sheets", "Netzwerk zu Folgeinvestoren", "Pitch-Coaching"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Markenaufbau",
+      "Fundraising-Beratung",
+      "Portfolio Support",
+      "Community Building",
+      "Term Sheets",
+      "Netzwerk zu Folgeinvestoren",
+      "Pitch-Coaching"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "investor",
-    "lookingFor": ["startups to invest in", "partnerships"],
-    "verticals": ["consumer", "ecommerce", "hr tech"],
+    "lookingFor": [
+      "startups to invest in",
+      "partnerships"
+    ],
+    "verticals": [
+      "consumer",
+      "ecommerce",
+      "hr tech"
+    ],
     "stage": "pre-seed",
-    "dims": { "vision": 7, "design": 6, "tech": 3, "detail": 8, "execution": 7 },
+    "dims": {
+      "vision": 7,
+      "design": 6,
+      "tech": 3,
+      "detail": 8,
+      "execution": 7
+    },
     "personality": {
       "type": "connector",
       "summary": "Carolin bringt Menschen zusammen – Co-Investor:innen, erste Kund:innen, potenzielle Teammitglieder. Sie versteht Investment als Teamsport.",
-      "traits": ["warmherzig", "gut vernetzt", "founder-freundlich", "unternehmerisch"],
+      "traits": [
+        "warmherzig",
+        "gut vernetzt",
+        "founder-freundlich",
+        "unternehmerisch"
+      ],
       "communicationStyle": "Persönlich und wertschätzend, mag ein kurzes Kennenlernen vor dem eigentlichen Pitch.",
-      "outreachTips": ["Team und Diversität im Gründerteam ansprechen", "Community- bzw. Wiederkauf-Kennzahlen zeigen", "Persönliche Geschichte hinter dem Produkt erzählen"],
-      "avoid": ["Rein zahlengetriebenes Pitchen ohne Markengeschichte", "Unpersönliche Serienmails"]
+      "outreachTips": [
+        "Team und Diversität im Gründerteam ansprechen",
+        "Community- bzw. Wiederkauf-Kennzahlen zeigen",
+        "Persönliche Geschichte hinter dem Produkt erzählen"
+      ],
+      "avoid": [
+        "Rein zahlengetriebenes Pitchen ohne Markengeschichte",
+        "Unpersönliche Serienmails"
+      ]
     },
-    "events": ["tum-cofounder-matching-oct-2026", "slush-2026"],
-    "tags": ["Business Angel", "Ex-Founder", "Consumer"],
-    "source": { "type": "mock" }
+    "events": [
+      "tum-cofounder-matching-oct-2026",
+      "slush-2026"
+    ],
+    "tags": [
+      "Business Angel",
+      "Ex-Founder",
+      "Consumer"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "thomas-brandt",
@@ -341,24 +566,70 @@
         "end": "2014"
       }
     ],
-    "skills": ["Due Diligence", "Term Sheets", "Industriepartnerschaften", "Regulatorik-Beratung", "Marktanalyse", "Board-Arbeit", "Pilotprojekt-Design"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Due Diligence",
+      "Term Sheets",
+      "Industriepartnerschaften",
+      "Regulatorik-Beratung",
+      "Marktanalyse",
+      "Board-Arbeit",
+      "Pilotprojekt-Design"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "investor",
-    "lookingFor": ["startups to invest in", "partnerships"],
-    "verticals": ["climate", "energy", "mobility"],
+    "lookingFor": [
+      "startups to invest in",
+      "partnerships"
+    ],
+    "verticals": [
+      "climate",
+      "energy",
+      "mobility"
+    ],
     "stage": "series-a",
-    "dims": { "vision": 6, "design": 3, "tech": 6, "detail": 9, "execution": 6 },
+    "dims": {
+      "vision": 6,
+      "design": 3,
+      "tech": 6,
+      "detail": 9,
+      "execution": 6
+    },
     "personality": {
       "type": "analyst",
       "summary": "Thomas denkt in Konzern-Prozessen: Jede Investmententscheidung muss intern sauber begründet und regulatorisch abgesichert sein.",
-      "traits": ["strukturiert", "geduldig", "netzwerkstark im Konzern", "risikobewusst"],
+      "traits": [
+        "strukturiert",
+        "geduldig",
+        "netzwerkstark im Konzern",
+        "risikobewusst"
+      ],
       "communicationStyle": "Formell und schriftlich, mit klarer Agenda; Entscheidungswege dauern länger als bei klassischen VCs.",
-      "outreachTips": ["Konkreten Industrie-Use-Case für den Konzern benennen", "Regulatorische und Sicherheitsaspekte proaktiv adressieren", "Realistischen Zeitplan für Piloten einplanen"],
-      "avoid": ["Ungeduld bei längeren internen Freigabeprozessen zeigen", "Konzernpartnerschaft als reinen Vertriebskanal verkaufen"]
+      "outreachTips": [
+        "Konkreten Industrie-Use-Case für den Konzern benennen",
+        "Regulatorische und Sicherheitsaspekte proaktiv adressieren",
+        "Realistischen Zeitplan für Piloten einplanen"
+      ],
+      "avoid": [
+        "Ungeduld bei längeren internen Freigabeprozessen zeigen",
+        "Konzernpartnerschaft als reinen Vertriebskanal verkaufen"
+      ]
     },
-    "events": ["bits-and-pretzels-2026", "slush-2026"],
-    "tags": ["CVC", "Corporate Venture Capital", "Series A", "Climate Tech"],
-    "source": { "type": "mock" }
+    "events": [
+      "bits-and-pretzels-2026",
+      "slush-2026"
+    ],
+    "tags": [
+      "CVC",
+      "Corporate Venture Capital",
+      "Series A",
+      "Climate Tech"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "elisabeth-vogt",
@@ -399,24 +670,68 @@
         "end": "2011"
       }
     ],
-    "skills": ["Due Diligence", "Finanzmodellierung", "Cap Table Management", "Term Sheets", "Board-Arbeit", "Langfristige Kapitalplanung", "Portfolio Support"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Due Diligence",
+      "Finanzmodellierung",
+      "Cap Table Management",
+      "Term Sheets",
+      "Board-Arbeit",
+      "Langfristige Kapitalplanung",
+      "Portfolio Support"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "investor",
-    "lookingFor": ["startups to invest in", "dealflow"],
-    "verticals": ["b2b saas", "consumer", "healthtech"],
+    "lookingFor": [
+      "startups to invest in",
+      "dealflow"
+    ],
+    "verticals": [
+      "b2b saas",
+      "consumer",
+      "healthtech"
+    ],
     "stage": "series-a",
-    "dims": { "vision": 6, "design": 4, "tech": 4, "detail": 9, "execution": 6 },
+    "dims": {
+      "vision": 6,
+      "design": 4,
+      "tech": 4,
+      "detail": 9,
+      "execution": 6
+    },
     "personality": {
       "type": "analyst",
       "summary": "Elisabeth prüft jede Zahl doppelt und bevorzugt solide Wirtschaftlichkeit gegenüber lauten Wachstumsversprechen.",
-      "traits": ["diskret", "gründlich", "geduldig", "unabhängig im Urteil"],
+      "traits": [
+        "diskret",
+        "gründlich",
+        "geduldig",
+        "unabhängig im Urteil"
+      ],
       "communicationStyle": "Zurückhaltend und faktenbasiert, bevorzugt schriftliche Unterlagen vor Gesprächen.",
-      "outreachTips": ["Unit Economics und Pfad zur Profitabilität klar darlegen", "Diskretion und langfristige Perspektive betonen", "Warm vorgestellt werden statt Kaltakquise"],
-      "avoid": ["Aggressive Verkaufsrhetorik", "Unrealistische Bewertungserwartungen ohne Substanz"]
+      "outreachTips": [
+        "Unit Economics und Pfad zur Profitabilität klar darlegen",
+        "Diskretion und langfristige Perspektive betonen",
+        "Warm vorgestellt werden statt Kaltakquise"
+      ],
+      "avoid": [
+        "Aggressive Verkaufsrhetorik",
+        "Unrealistische Bewertungserwartungen ohne Substanz"
+      ]
     },
-    "events": ["slush-2026"],
-    "tags": ["Family Office", "Series A", "Generalist"],
-    "source": { "type": "mock" }
+    "events": [
+      "slush-2026"
+    ],
+    "tags": [
+      "Family Office",
+      "Series A",
+      "Generalist"
+    ],
+    "source": {
+      "type": "mock"
+    }
   },
   {
     "id": "niklas-berger",
@@ -457,23 +772,70 @@
         "end": "2017"
       }
     ],
-    "skills": ["Technische Due Diligence", "Term Sheets", "Marktanalyse", "Portfolio Support", "Netzwerk zu Forschungsinstituten", "Finanzmodellierung", "Pilotprojekt-Design", "Board-Arbeit"],
-    "languages": ["Deutsch", "Englisch"],
+    "skills": [
+      "Technische Due Diligence",
+      "Term Sheets",
+      "Marktanalyse",
+      "Portfolio Support",
+      "Netzwerk zu Forschungsinstituten",
+      "Finanzmodellierung",
+      "Pilotprojekt-Design",
+      "Board-Arbeit"
+    ],
+    "languages": [
+      "Deutsch",
+      "Englisch"
+    ],
     "networkRole": "investor",
-    "lookingFor": ["startups to invest in", "dealflow"],
-    "verticals": ["deeptech", "robotics", "ai"],
+    "lookingFor": [
+      "startups to invest in",
+      "dealflow"
+    ],
+    "verticals": [
+      "deeptech",
+      "robotics",
+      "ai"
+    ],
     "stage": "seed",
-    "dims": { "vision": 7, "design": 3, "tech": 9, "detail": 9, "execution": 6 },
+    "dims": {
+      "vision": 7,
+      "design": 3,
+      "tech": 9,
+      "detail": 9,
+      "execution": 6
+    },
     "personality": {
       "type": "visionary",
       "summary": "Niklas begeistert sich für harte technische Probleme – er investiert dort, wo ein Team einen echten Vorsprung in der Technologie selbst hat.",
-      "traits": ["technikversessen", "neugierig", "direkt", "forschungsnah"],
+      "traits": [
+        "technikversessen",
+        "neugierig",
+        "direkt",
+        "forschungsnah"
+      ],
       "communicationStyle": "Mag technische Tiefe im Erstgespräch, stellt viele Nachfragen zu Architektur und Machbarkeit.",
-      "outreachTips": ["Technisches Deep-Dive-Dokument statt nur Pitch-Deck mitschicken", "Konkreten Forschungs- oder IP-Vorsprung benennen", "Ersten Pilotkunden oder Testaufbau zeigen"],
-      "avoid": ["Technische Fragen ausweichend beantworten", "Rein business-getriebenes Pitchen ohne technische Substanz"]
+      "outreachTips": [
+        "Technisches Deep-Dive-Dokument statt nur Pitch-Deck mitschicken",
+        "Konkreten Forschungs- oder IP-Vorsprung benennen",
+        "Ersten Pilotkunden oder Testaufbau zeigen"
+      ],
+      "avoid": [
+        "Technische Fragen ausweichend beantworten",
+        "Rein business-getriebenes Pitchen ohne technische Substanz"
+      ]
     },
-    "events": ["idealab-2026", "berlin-ai-hackathon-2026"],
-    "tags": ["VC", "Seed", "Deeptech", "Robotics"],
-    "source": { "type": "mock" }
+    "events": [
+      "idealab-2026",
+      "berlin-ai-hackathon-2026"
+    ],
+    "tags": [
+      "VC",
+      "Seed",
+      "Deeptech",
+      "Robotics"
+    ],
+    "source": {
+      "type": "mock"
+    }
   }
 ]
