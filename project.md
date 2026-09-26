@@ -8,7 +8,7 @@ Startup Matchmaker helps founders find the right people at conferences and turn 
 
 The product combines attendee data, professional backgrounds, and a short interview with the user to:
 
-1. understand what the user is building and whom they need;
+1. understand what the user is building, whom they need, and how their business and personal personality profiles influence the ideal match;
 2. rank the most relevant people at the event;
 3. explain why each person is a strong match;
 4. generate a personalized outreach strategy; and
@@ -79,15 +79,22 @@ The platform should help users:
    - Which industry or vertical matters?
    - Whom are you looking for?
    - Which skills and strengths do you already have?
+   - Which capabilities are still missing today?
+   - Which additional capabilities will the team need to scale the company in the future?
+   - What is your personality and working style from a business perspective?
+   - What is your personality and communication style on a personal level?
 
 3. **Complete an AI interview**
    - The assistant asks short follow-up questions.
+   - It creates separate business and personal personality profiles based on the user's self-description and answers.
    - The interview can be text-based first and voice-based when Realtime integration is available.
    - The assistant stops when it has enough information to create a useful search profile.
 
 4. **Review recommendations**
    - The dashboard presents a ranked shortlist.
    - Every result includes a match score, evidence, complementary strengths, possible gaps, and potential concerns.
+   - The assistant explains why the person is a strong match. For example, a candidate may balance the user's weaknesses, act as a productive counterpart, or contribute a complementary perspective and working style.
+   - The explanation must show the conclusions drawn from both profiles instead of presenting an unsupported score.
 
 5. **Open a candidate profile**
    - The user sees the candidate's event profile, professional background, interests, startup context, and the reason for the recommendation.
@@ -103,7 +110,8 @@ The platform should help users:
 
 ### 7.1 User profile and intent
 
-- Collect the user's startup idea, stage, vertical, goals, strengths, and missing skills.
+- Collect the user's startup idea, stage, vertical, goals, strengths, current skill gaps, and capabilities required for future scale.
+- Build two distinct, editable profiles: a business personality and working-style profile, and a personal personality and communication-style profile.
 - Use the user's event and professional profile as optional context.
 - Convert free-form answers into a structured search brief.
 - Allow the user to edit the generated brief.
@@ -125,6 +133,8 @@ Each recommendation should provide:
 - industry and interest overlap;
 - relevant experience;
 - likely contribution to the startup;
+- complementary business and personal traits;
+- how the candidate acts as a counterpart or adds a perspective the user currently lacks;
 - conversation hooks;
 - missing or uncertain information; and
 - a plain-language explanation of the ranking.
@@ -355,4 +365,3 @@ The MVP is complete when a user can:
 - Which profile fields are safe and appropriate to expose in the dashboard?
 - How should users report inaccurate profile data or recommendations?
 - What should happen after a successful preparation session: copy a message, request a connection, or schedule a meeting?
-
