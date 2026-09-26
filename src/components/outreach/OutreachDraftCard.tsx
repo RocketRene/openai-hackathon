@@ -61,6 +61,13 @@ export default function OutreachDraftCard({ draft, profile }: OutreachDraftCardP
     window.setTimeout(() => setCopyState("idle"), 2000);
   }
 
+  const edited = subject !== (draft.subject ?? "") || body !== draft.body;
+
+  function resetToDraft() {
+    setSubject(draft.subject ?? "");
+    setBody(draft.body);
+  }
+
   const notes = draft.personalityNotes?.length
     ? draft.personalityNotes
     : [profile.personality?.communicationStyle].filter((n): n is string => Boolean(n));
@@ -122,6 +129,11 @@ export default function OutreachDraftCard({ draft, profile }: OutreachDraftCardP
             <Button size="sm" variant="secondary" onClick={copyToClipboard} type="button">
               {copyState === "ok" ? "Kopiert!" : copyState === "fail" ? "Kopieren fehlgeschlagen" : "Kopieren"}
             </Button>
+            {edited && (
+              <Button size="sm" variant="ghost" onClick={resetToDraft} type="button" title="Auf den erzeugten Entwurf zurücksetzen">
+                Zurücksetzen
+              </Button>
+            )}
             {primaryAction && (
               <a
                 href={primaryAction.href}
