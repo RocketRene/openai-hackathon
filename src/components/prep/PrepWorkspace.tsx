@@ -72,30 +72,33 @@ function LoadingSkeleton() {
 export default function PrepWorkspace({ profile }: { profile: Profile }) {
   const { userContext, ready, loadDemo } = useUserContext();
   const [section, setSection] = useState<Section>("prep");
-  const [pack, setPack] = useState<PrepPack | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  // Ergebnis der letzten Anfrage, mit dem Key, für den es gilt. Ladezustand wird daraus abgeleitet
+  // (kein synchrones setState im Effect). Key ändert sich bei Kontext-Änderung (z. B. Demo laden).
+  const [result, setResult] = useState<{ key: string; pack: PrepPack | null; error: string | null } | null>(null);
+  const requestKey = ready ? `${profile.id}|${userContext?.updatedAt ?? "none"}|${reloadKey}` : null;
 
   useEffect(() => {
-    if (!ready) return;
+    if (!requestKey) return;
     const controller = new AbortController();
-    setLoading(true);
-    setError(null);
     fetchPrepPack(profile.id, userContext, controller.signal)
-      .then((p) => {
-        setPack(p);
-        setLoading(false);
-      })
+      .then((p) => setResult({ key: requestKey, pack: p, error: null }))
       .catch((e: unknown) => {
         if (controller.signal.aborted) return;
-        setError(e instanceof Error ? e.message : "Unbekannter Fehler.");
-        setLoading(false);
+        setResult((prev) => ({
+          key: requestKey,
+          pack: prev?.pack ?? null,
+          error: e instanceof Error ? e.message : "Unbekannter Fehler.",
+        }));
       });
     return () => controller.abort();
-    // userContext?.updatedAt: bei Kontext-Änderung (z. B. Demo laden) neu generieren.
+    // profile.id und userContext sind im requestKey enthalten.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, profile.id, userContext?.updatedAt, reloadKey]);
+  }, [requestKey]);
+
+  const loading = requestKey === null || result?.key !== requestKey;
+  const pack = result?.pack ?? null;
+  const error = !loading ? result?.error ?? null : null;
 
   const regenerate = useCallback(() => setReloadKey((k) => k + 1), []);
 
