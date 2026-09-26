@@ -146,6 +146,8 @@ export interface UserContext {
   dims: FounderDims;
   /** Vom Agenten gesammelte Notizen aus dem Interview. */
   notes?: string;
+  /** Rahmenbedingungen als Freitext: Standort/remote, Zeit, Starttermin, Finanzierung, Ausschlusskriterien (Voya-Brief). */
+  constraints?: string;
   completedInterview: boolean;
   /** ISO-Datum */
   updatedAt: string;
@@ -176,6 +178,24 @@ export interface OutreachDraft {
   /** Warum die Nachricht so formuliert ist (Persönlichkeitstyp). */
   personalityNotes: string[];
   generatedBy: "template" | "llm";
+}
+
+/** Belegbarer 30-Minuten-Leitfaden für ein Erstgespräch (Voya: prepare_interview). */
+export interface InterviewGuideSection {
+  title: string;
+  minutes: number;
+  questions: string[];
+}
+
+export interface InterviewGuide {
+  profileId: string;
+  name: string;
+  title: string;
+  /** z. B. "30 Minuten" */
+  duration: string;
+  sections: InterviewGuideSection[];
+  /** Was sich NICHT aus dem Profil ableiten lässt und im Gespräch geklärt werden muss. */
+  unknowns: string[];
 }
 
 export interface PrepQuestion {
@@ -242,7 +262,8 @@ export type UiAction =
   | { type: "show_candidate"; profileId: string }
   | { type: "show_candidates"; profileIds: string[] }
   | { type: "navigate"; href: string }
-  | { type: "update_user_context"; patch: Partial<UserContext> };
+  | { type: "update_user_context"; patch: Partial<UserContext> }
+  | { type: "show_interview_guide"; profileId: string; guide: InterviewGuide };
 
 export interface ChatRequest {
   messages: ChatMessage[];
@@ -265,6 +286,10 @@ export interface VoiceAgentProps {
   candidate?: Profile;
   onUiAction: (action: UiAction) => void;
   onTranscript?: (items: { role: "user" | "assistant"; text: string }[]) => void;
+  /** Bisheriger Text-Chat-Verlauf – wird beim Verbinden in die Voice-Session übernommen (Agent knüpft an). */
+  initialMessages?: ChatMessage[];
+  /** Profile, die gerade im UI sichtbar sind (Live-Panel) – der Agent bekommt sie als Kontext, nicht als Anweisung. */
+  visibleCandidateIds?: string[];
   className?: string;
 }
 
