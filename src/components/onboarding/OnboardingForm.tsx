@@ -296,6 +296,7 @@ function FormBody({
   };
 
   const wantsCofounder = form.lookingFor.includes("cofounder");
+  const seeksOwnRole = form.founderRole !== undefined && form.lookingForRoles.includes(form.founderRole);
 
   return (
     <form
@@ -431,6 +432,12 @@ function FormBody({
               ? "Das Matching bevorzugt Co-Founder mit genau diesen Rollen."
               : "Optional – hilft dem Team-Radar auch, wenn du gerade keinen Co-Founder suchst."}
           </p>
+          {seeksOwnRole && (
+            <p className="mt-1 text-xs text-[var(--warning)]">
+              Du suchst deine eigene Rolle ({founderRoleLabel(form.founderRole)}) – Absicht? Meist ergänzt eine
+              andere Rolle das Team besser.
+            </p>
+          )}
         </fieldset>
       </Card>
 
