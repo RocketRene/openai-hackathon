@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/*
+ * Design-Tokens – hier pivotiert die Designerin.
+ * Komponenten referenzieren ausschließlich diese Variablen (var(--accent) etc.).
+ */
+:root {
+  --background: #f6f7f9;
+  --foreground: #111827;
+  --muted: #6b7280;
+  --surface: #ffffff;
+  --surface-2: #f1f3f6;
+  --surface-3: #e5e8ee;
+  --border: #e2e5ea;
+  --accent: #2563eb;
+  --accent-soft: #dbeafe;
+  --success: #15803d;
+  --success-soft: #dcfce7;
+  --warning: #b45309;
+  --warning-soft: #fef3c7;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --sidebar-width: 240px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b0f17;
+    --foreground: #e5e7eb;
+    --muted: #9ca3af;
+    --surface: #111827;
+    --surface-2: #1f2937;
+    --surface-3: #273446;
+    --border: #273446;
+    --accent: #3b82f6;
+    --accent-soft: #1e3a8a;
+    --success: #4ade80;
+    --success-soft: #14532d;
+    --warning: #fbbf24;
+    --warning-soft: #78350f;
+    --danger: #f87171;
+    --danger-soft: #7f1d1d;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}

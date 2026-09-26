@@ -1,0 +1,244 @@
+[
+  {
+    "id": "jonas-vogel",
+    "name": "Jonas Vogel",
+    "headline": "Serial Entrepreneur · 2x Exit · Angel Investor",
+    "location": "Berlin, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=jonas-vogel",
+    "email": "jonas.vogel@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/jonas-vogel-mock",
+    "about": "Jonas hat zwei Startups von der Gründung bis zum erfolgreichen Exit geführt und kennt den kompletten Weg von der ersten Idee bis zum Term Sheet. Er hilft Gründer:innen dabei, ihre Produktvision zu schärfen, das richtige Tempo bei der Skalierung zu finden und typische Fehler beim Fundraising zu vermeiden. Als Business Angel investiert er inzwischen selbst in frühphasige B2B-SaaS- und Logistik-Startups. Am meisten Energie gibt ihm der Austausch mit Teams, die technisch stark sind, aber beim Go-to-Market noch unsicher sind.",
+    "experience": [
+      { "title": "Angel Investor & Mentor", "company": "Selbstständig", "start": "2023", "end": null, "description": "Investiert in und begleitet Frühphasen-Startups im B2B-SaaS- und Logistikbereich." },
+      { "title": "Gründer & CEO", "company": "AdLoop", "start": "2019", "end": "2023", "description": "Programmatic-Advertising-Plattform für E-Commerce; Exit durch Übernahme der MediaGroup AG." },
+      { "title": "Gründer & CTO", "company": "Parcelly", "start": "2014", "end": "2019", "description": "Last-Mile-Logistik-SaaS für den DACH-Mittelstand; Übernahme durch die LogiCorp Holding." },
+      { "title": "Software Engineer", "company": "SAP", "start": "2011", "end": "2014" }
+    ],
+    "education": [
+      { "school": "TU München", "degree": "M.Sc.", "field": "Informatik", "start": "2007", "end": "2011" }
+    ],
+    "skills": ["Fundraising", "Produktstrategie", "Skalierung", "B2B SaaS", "Go-to-Market", "Team-Aufbau", "Pitch-Coaching", "Exit-Verhandlungen"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "mentor",
+    "founderRole": "tech",
+    "lookingFor": ["mentees", "startups to invest in", "advisor role"],
+    "verticals": ["b2b saas", "mobility"],
+    "dims": { "vision": 9, "design": 5, "tech": 8, "detail": 6, "execution": 9 },
+    "personality": {
+      "type": "visionary",
+      "summary": "Denkt in großen Marktbildern, bleibt aber hartnäckig genug, um sie auch umzusetzen.",
+      "traits": ["hartnäckig", "direkt", "marktgetrieben", "ungeduldig mit Buzzwords"],
+      "communicationStyle": "Kurz und auf den Punkt; schätzt klare Zahlen und eine erkennbare These mehr als lange Decks.",
+      "outreachTips": [
+        "Konkrete Frage oder Kennzahl mitschicken statt allgemein 'Kaffee trinken' vorzuschlagen",
+        "Traction-Zahlen oder Prototyp direkt mitschicken",
+        "Auf seine beiden Exits Bezug nehmen, nicht nur allgemein gratulieren"
+      ],
+      "avoid": ["Vage Anfragen ohne erkennbares Anliegen", "Reine Grüß-Nachrichten ohne Kontext", "Zu langes Anschreiben vor dem ersten Call"]
+    },
+    "events": ["idealab-2026", "bits-and-pretzels-2026"],
+    "tags": ["exit", "b2b-saas", "logistics", "angel"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "sophie-lindner",
+    "name": "Sophie Lindner",
+    "headline": "Ex-CEO GreenFleet · Board Member · Scale-up Mentorin",
+    "location": "München, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=sophie-lindner",
+    "email": "sophie.lindner@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/sophie-lindner-mock",
+    "about": "Sophie hat GreenFleet als CEO von der Series A bis zur Series C geführt und das Team von 12 auf über 300 Mitarbeitende skaliert. Nach ihrem Rückzug aus dem operativen Geschäft sitzt sie heute in mehreren Beiräten und mentort Gründer:innen beim Aufbau von Führungsteams und Organisationsstrukturen. Sie ist besonders stark darin, unklare Prioritäten in einen umsetzbaren Plan zu übersetzen. Gründer:innen, die kurz vor oder in der Wachstumsphase stehen, profitieren am meisten von ihrer Erfahrung.",
+    "experience": [
+      { "title": "Non-Executive Board Member", "company": "diverse Scale-ups", "start": "2025", "end": null, "description": "Beiratsmandate bei drei Wachstums-Startups im Mobility- und Climate-Bereich." },
+      { "title": "CEO", "company": "GreenFleet", "start": "2018", "end": "2025", "description": "E-Mobility-Flottenmanagement; Skalierung von Series A bis Series C, Team-Wachstum auf über 300 Personen." },
+      { "title": "VP Operations", "company": "GreenFleet", "start": "2016", "end": "2018" },
+      { "title": "Unternehmensberaterin", "company": "McKinsey & Company", "start": "2012", "end": "2016" }
+    ],
+    "education": [
+      { "school": "WHU – Otto Beisheim School of Management", "degree": "MBA", "start": "2010", "end": "2012" },
+      { "school": "Universität Mannheim", "degree": "B.Sc.", "field": "Betriebswirtschaftslehre", "start": "2007", "end": "2010" }
+    ],
+    "skills": ["Skalierung", "Führungsteam-Aufbau", "Organisationsentwicklung", "Fundraising Series A-C", "Operations", "Board-Arbeit", "Priorisierung", "Change Management"],
+    "languages": ["Deutsch", "Englisch", "Französisch"],
+    "networkRole": "mentor",
+    "founderRole": "operations",
+    "lookingFor": ["mentees", "advisor role"],
+    "verticals": ["mobility", "climate"],
+    "stage": "growth",
+    "dims": { "vision": 8, "design": 5, "tech": 4, "detail": 6, "execution": 9 },
+    "personality": {
+      "type": "operator",
+      "summary": "Bringt Ordnung in Chaos und treibt Entscheidungen konsequent bis zur Umsetzung.",
+      "traits": ["strukturiert", "pragmatisch", "ergebnisorientiert", "geduldig im Coaching"],
+      "communicationStyle": "Strukturiert und ruhig; mag vorbereitete Agenden und konkrete Entscheidungsfragen statt offener Brainstorm-Runden.",
+      "outreachTips": [
+        "Konkrete Entscheidungsfrage stellen statt eines offenen 'Kaffee trinken'",
+        "Vorab kurz die aktuelle Wachstumsphase und größte Herausforderung schildern",
+        "Zeitfenster von 30 Minuten explizit vorschlagen"
+      ],
+      "avoid": ["Spontane Anrufe ohne Termin", "Zu frühes Pitchen ohne konkrete Frage"]
+    },
+    "events": ["idealab-2026", "slush-2026"],
+    "tags": ["scale-up", "mobility", "operations", "board"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "melanie-roth",
+    "name": "Melanie Roth",
+    "headline": "Program Director, North Star Accelerator",
+    "location": "Berlin, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=melanie-roth",
+    "email": "melanie.roth@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/melanie-roth-mock",
+    "about": "Melanie leitet den North Star Accelerator in Berlin und hat in den letzten fünf Jahren über 80 Frühphasen-Teams begleitet. Sie kennt die typischen Stolpersteine zwischen Pre-Seed und Seed genau und verfügt über ein großes Netzwerk zu Investor:innen, Corporates und anderen Gründer:innen. Besonders wichtig ist ihr ehrliches, direktes Feedback statt Wohlfühl-Coaching. Sie hilft am liebsten Teams, die schon ein erstes Signal vom Markt haben, aber noch nicht wissen, wie sie es einordnen sollen.",
+    "experience": [
+      { "title": "Program Director", "company": "North Star Accelerator", "start": "2021", "end": null, "description": "Verantwortlich für Auswahl, Curriculum und Investor-Netzwerk des Accelerator-Programms." },
+      { "title": "Investment Associate", "company": "Compass Capital", "start": "2018", "end": "2021" },
+      { "title": "Werkstudentin Venture Capital", "company": "Compass Capital", "start": "2017", "end": "2018" }
+    ],
+    "education": [
+      { "school": "Freie Universität Berlin", "degree": "M.Sc.", "field": "Management", "start": "2015", "end": "2017" }
+    ],
+    "skills": ["Investor-Netzwerk", "Pre-Seed", "Pitch-Feedback", "Programm-Design", "Matchmaking", "Fundraising-Vorbereitung", "Marktvalidierung"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "mentor",
+    "lookingFor": ["mentees", "dealflow", "partnerships"],
+    "verticals": ["b2b saas", "ai"],
+    "dims": { "vision": 7, "design": 5, "tech": 3, "detail": 6, "execution": 7 },
+    "personality": {
+      "type": "connector",
+      "summary": "Verbindet Menschen und Themen intuitiv und behält dabei stets das große Ökosystem im Blick.",
+      "traits": ["gut vernetzt", "direktes Feedback", "neugierig", "ungeduldig bei Stillstand"],
+      "communicationStyle": "Locker und schnell; bevorzugt kurze Sprachnachrichten oder Messages gegenüber langen E-Mails.",
+      "outreachTips": [
+        "Klar sagen, worum es geht, statt eines unverbindlichen 'Kaffee trinken'",
+        "Aktuellen Stand in 2-3 Sätzen zusammenfassen, keine Vollständigkeit",
+        "Klar sagen, ob es um Bewerbung, Intro oder Feedback geht"
+      ],
+      "avoid": ["Lange PDF-Anhänge ohne Vorwarnung", "Bewerbungen kurz vor Deadline ohne vorherigen Kontakt", "Unklare Angaben zu Team oder Traction"]
+    },
+    "events": ["idealab-2026", "tum-cofounder-matching-oct-2026"],
+    "tags": ["accelerator", "pre-seed", "network"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "elisabeth-hartmann",
+    "name": "Elisabeth Hartmann",
+    "headline": "Professorin für Entrepreneurship, WHU",
+    "location": "Vallendar, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=elisabeth-hartmann",
+    "email": "elisabeth.hartmann@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/elisabeth-hartmann-mock",
+    "about": "Elisabeth forscht und lehrt zu Entrepreneurship und Innovationsmanagement an der WHU und begleitet seit über zehn Jahren studentische Gründungsteams. Sie hilft dabei, Geschäftsmodelle sauber zu durchdenken, Annahmen sichtbar zu machen und diese systematisch zu testen, bevor Kapital verbrannt wird. Ihr wissenschaftlicher Blick ergänzt sich gut mit praxisnahen Mentor:innen aus der Gründerszene. Sie betreut bevorzugt Teams in einer sehr frühen Phase, oft noch vor der eigentlichen Gründung.",
+    "experience": [
+      { "title": "Professorin für Entrepreneurship", "company": "WHU – Otto Beisheim School of Management", "start": "2015", "end": null, "description": "Forschung und Lehre zu Entrepreneurship, Betreuung studentischer Startup-Teams." },
+      { "title": "Postdoctoral Researcher", "company": "London Business School", "start": "2012", "end": "2015" },
+      { "title": "Wissenschaftliche Mitarbeiterin", "company": "Universität zu Köln", "start": "2008", "end": "2012" }
+    ],
+    "education": [
+      { "school": "Universität zu Köln", "degree": "Ph.D.", "field": "Entrepreneurship", "start": "2008", "end": "2012" },
+      { "school": "Universität Mannheim", "degree": "Diplom-Kauffrau", "start": "2002", "end": "2007" }
+    ],
+    "skills": ["Geschäftsmodell-Entwicklung", "Hypothesenvalidierung", "Forschungsmethodik", "Innovationsmanagement", "Curriculum-Design", "Case-Teaching", "Frühphasen-Coaching"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "mentor",
+    "lookingFor": ["mentees", "advisor role"],
+    "verticals": ["edtech", "deeptech"],
+    "dims": { "vision": 7, "design": 4, "tech": 4, "detail": 8, "execution": 5 },
+    "personality": {
+      "type": "analyst",
+      "summary": "Hinterfragt Annahmen systematisch und hilft, Geschäftsmodelle vor dem Praxistest gedanklich zu stresstesten.",
+      "traits": ["strukturiert", "gründlich", "geduldig", "faktenorientiert"],
+      "communicationStyle": "Bevorzugt E-Mail mit klarer Fragestellung; nimmt sich in Sprechstunden viel Zeit, wenn ein Termin steht.",
+      "outreachTips": [
+        "Eine konkrete Fragestellung mitschicken statt 'Kaffee trinken' vorzuschlagen",
+        "Kurz das Geschäftsmodell oder die konkrete Fragestellung skizzieren",
+        "Sprechstunden-Slots nutzen statt spontaner Anfragen"
+      ],
+      "avoid": ["Unvorbereitete Termine", "Anfragen ohne erkennbare eigene Vorarbeit"]
+    },
+    "events": ["idealab-2026", "tum-cofounder-matching-oct-2026"],
+    "tags": ["academia", "entrepreneurship-research", "whu"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "katharina-weiss",
+    "name": "Katharina Weiss",
+    "headline": "Partnerin, Startup- & Venture-Capital-Recht",
+    "location": "Berlin, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=katharina-weiss",
+    "email": "katharina.weiss@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/katharina-weiss-mock",
+    "about": "Katharina berät seit über zehn Jahren Startups und Investor:innen bei Gründung, Finanzierungsrunden und Gesellschafterfragen. Sie hilft Gründer:innen, Term Sheets und Beteiligungsverträge wirklich zu verstehen, bevor sie unterschrieben werden, und typische Fallstricke bei Vesting oder Liquidationspräferenzen zu vermeiden. Ihr Fokus liegt auf pragmatischen, verständlichen Lösungen statt möglichst dicken Verträgen. Am meisten hilft sie Teams kurz vor oder während einer Finanzierungsrunde.",
+    "experience": [
+      { "title": "Partnerin", "company": "Berger Fuhrmann Rechtsanwälte", "start": "2019", "end": null, "description": "Leitung der Praxisgruppe Venture Capital & Startups." },
+      { "title": "Senior Associate", "company": "Berger Fuhrmann Rechtsanwälte", "start": "2014", "end": "2019" },
+      { "title": "Rechtsreferendariat", "company": "Kammergericht Berlin", "start": "2012", "end": "2014" }
+    ],
+    "education": [
+      { "school": "Humboldt-Universität zu Berlin", "degree": "2. Staatsexamen", "field": "Rechtswissenschaften", "start": "2007", "end": "2014" }
+    ],
+    "skills": ["Gesellschaftsrecht", "Term Sheets", "Cap Table", "ESOP/VSOP", "Vertragsverhandlung", "Finanzierungsrunden", "Vesting", "Due Diligence"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "expert",
+    "lookingFor": ["advisor role", "partnerships"],
+    "verticals": ["legaltech", "b2b saas"],
+    "dims": { "vision": 5, "design": 3, "tech": 3, "detail": 9, "execution": 6 },
+    "personality": {
+      "type": "analyst",
+      "summary": "Liest jeden Vertrag zweimal und erklärt danach in einfachen Worten, worauf es wirklich ankommt.",
+      "traits": ["präzise", "verlässlich", "ruhig", "detailversessen"],
+      "communicationStyle": "Sachlich und strukturiert; schätzt konkrete Dokumente oder Fragen vorab, statt allgemeiner Rechtsfragen.",
+      "outreachTips": [
+        "Konkretes rechtliches Anliegen nennen statt 'Kaffee trinken' vorzuschlagen",
+        "Relevante Dokumente (z. B. Term-Sheet-Entwurf) vorab teilen",
+        "Konkreten Zeitdruck oder Deadline nennen, falls vorhanden"
+      ],
+      "avoid": ["Allgemeine Fragen wie 'Was muss ich rechtlich beachten?'", "Kurzfristige Anfragen ohne jeglichen Kontext", "Erwartung kostenloser Erstberatung ohne Rahmen"]
+    },
+    "events": ["idealab-2026", "bits-and-pretzels-2026"],
+    "tags": ["legal", "venture-capital", "contracts"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "michael-straub",
+    "name": "Michael Straub",
+    "headline": "Fractional CFO für Seed- bis Series-A-Startups",
+    "location": "Hamburg, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=michael-straub",
+    "email": "michael.straub@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/michael-straub-mock",
+    "about": "Michael arbeitet als Fractional CFO gleichzeitig für mehrere Startups zwischen Seed und Series A und übernimmt dort Finanzplanung, Reporting und Investor-Kommunikation, ohne dass ein Vollzeit-CFO nötig ist. Er hilft Gründer:innen, ein belastbares Finanzmodell aufzubauen und die richtigen KPIs für das jeweilige Geschäftsmodell zu definieren. Vor seiner Zeit als Fractional CFO war er selbst Finance Director in einem E-Commerce-Scale-up. Besonders gefragt ist er kurz vor Fundraising-Runden, wenn Zahlen und Story zusammenpassen müssen.",
+    "experience": [
+      { "title": "Fractional CFO", "company": "Selbstständig", "start": "2022", "end": null, "description": "Finanzplanung, Reporting und Fundraising-Vorbereitung für mehrere Startups parallel." },
+      { "title": "Finance Director", "company": "Moovento", "start": "2017", "end": "2022", "description": "E-Commerce-Scale-up; Aufbau von Finance- und Controlling-Team." },
+      { "title": "Senior Manager, Corporate Finance", "company": "KPMG", "start": "2012", "end": "2017" }
+    ],
+    "education": [
+      { "school": "Universität Hamburg", "degree": "M.Sc.", "field": "Finance & Accounting", "start": "2008", "end": "2012" }
+    ],
+    "skills": ["Finanzmodellierung", "Investor Reporting", "KPI-Definition", "Cashflow-Planung", "Fundraising-Vorbereitung", "Controlling", "Board Reporting", "Unit Economics"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "expert",
+    "lookingFor": ["advisor role", "partnerships"],
+    "verticals": ["ecommerce", "b2b saas"],
+    "stage": "growth",
+    "dims": { "vision": 5, "design": 3, "tech": 4, "detail": 9, "execution": 7 },
+    "personality": {
+      "type": "operator",
+      "summary": "Bringt Zahlen und Story in Einklang und behält auch unter Fundraising-Druck den Überblick.",
+      "traits": ["zahlengetrieben", "ruhig", "verlässlich", "direkt bei Kritik"],
+      "communicationStyle": "Bevorzugt vorbereitete Zahlen und konkrete Fragen; wenig Interesse an unstrukturierten Status-Updates.",
+      "outreachTips": [
+        "Konkrete Zahl oder Frage mitschicken statt 'Kaffee trinken' vorzuschlagen",
+        "Aktuellen Finanzstatus (Runway, MRR) kurz mitschicken",
+        "Zeitpunkt der geplanten Finanzierungsrunde nennen"
+      ],
+      "avoid": ["Anfragen ohne jede Zahl oder Kennzahl", "Erwartung von kostenloser Dauerbetreuung"]
+    },
+    "events": ["idealab-2026", "berlin-ai-hackathon-2026"],
+    "tags": ["finance", "fractional-cfo", "fundraising"],
+    "source": { "type": "mock" }
+  }
+]

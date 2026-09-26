@@ -1,0 +1,215 @@
+# Transkript – Ideen-Briefing (Hackathon, 26.09.2026)
+
+> Rohes Transkript der Team-Besprechung. Dient als Kontext für alle Agenten und Menschen im Projekt.
+> Die daraus abgeleitete Feature-Liste steht in [FEATURES.md](FEATURES.md), die Arbeitsregeln in [../AGENTS.md](../AGENTS.md).
+
+```
+00:00:00,520 --> 00:00:02,300 [speaker_0]
+Könnt ihr jetzt noch mal die Idee sagen?
+
+00:00:03,420 --> 00:00:06,700 [speaker_1]
+Wir transkribieren das bevor, dass wir die gleich in die AI nehmen als Kontext, ja?
+
+00:00:07,960 --> 00:01:25,100 [speaker_2]
+Es geht darum, wir bauen ein Tool. Von Konferenzen scrapen wir die E-Mails.
+Wir haben einen targetierten Outreach, den wir analysieren können.
+Wir analysieren die Profile von den einzelnen Teilnehmern und können dadurch einen Outreach
+erstellen, der personalisiert ist und auf den Persönlichkeitstyp angepasst ist. Das bedeutet,
+dass in Cases von Co-Founder-Matching das Risiko, einen, einen schlechten Match zu haben,
+schon mal verringert wird. Du sparst dir automatisch Zeit,
+weil du nicht so viele Leute gleichzeitig anschreiben musst und sofort die priorisierten Kontakte
+aufgelistet hast. Zudem kannst du dich für das Gespräch vorbereiten. Das bedeutet,
+das Gespräch wird nicht schiefgehen aufgrund davon, dass wir sagen: „Okay,
+wir haben den targetierten Outreach und wir können mit dem Voice Mode einsprechen und uns für das
+Gespräch vorbereiten, um eben, ja, alles auf die eine Karte zu setzen und das erfolgreich zu machen,
+weil Co-Founder finden ist risikoreich. Es werden immer mehr, ähm, Start-ups gegründet.
+Das bedeutet, der Markt wächst davon und es gibt viele Events, die organisiert werden. Ja,
+und vielleicht gibt es auch die Möglichkeit, das nicht nur auf Co-Founder zu machen,
+sondern auch auf VCs.
+So haben wir das nur im Start-up-Feld und haben Co-Founder und es ist alles relativ spezifisch in
+derselben Bubble und nicht nur Networking. Danke.
+
+00:01:25,120 --> 00:01:26,540 [speaker_0]
+Haben wir das Voice-Ding jetzt schon drin?
+
+00:01:26,820 --> 00:01:35,300 [speaker_1]
+Also okay, wie ist dann noch mal der, der, der User Flow?
+Der User kommt auf die Webseite und muss erst mal so ein bisschen Kontext von sich abgeben oder der
+sieht vielleicht ein paar Kandidaten, aber dann sagt er, was er will.
+
+00:01:35,580 --> 00:01:35,980 [speaker_2]
+Ich würde sagen-
+
+00:01:36,020 --> 00:01:41,380 [speaker_1]
+Dann muss so ein bisschen von mir ausgehen. Ich, ich suche, keine Ahnung,
+einen Commercial Co-Founder, weil ich mache Tech.
+
+00:01:41,820 --> 00:01:41,900 [speaker_2]
+Ja.
+
+00:01:42,380 --> 00:01:45,420 [speaker_1]
+Und dann vielleicht will ich in dem und dem Vertical was bauen.
+
+00:01:45,480 --> 00:01:45,640 [speaker_0]
+Ja.
+
+00:01:45,680 --> 00:01:45,820 [speaker_2]
+Ja.
+
+00:01:45,940 --> 00:01:56,340 [speaker_1]
+Und dann der Agent, der interviewt mich und wenn er glaubt, er weiß genug über mich,
+dann kommt er mit ein paar Kandidaten und sagt: „Okay, wenn du mit dem reden solltest,
+dann wird der wahrscheinlich das von dir wissen wollen."
+
+00:01:56,400 --> 00:02:16,700 [speaker_2]
+Ja. Und der bereitet dich auf das Gespräch vor und ich würde das nur im Start-up-Feld haben. Heißt,
+VC, Gelder eintreiben, Mentoren, vielleicht Leute,
+die schon Erfahrung haben und die du halt Fragen einfach stellen kannst und Co-Founder-Matching.
+Das bedeutet, du hast Advice, Geld und Partner da drin und Expertise und Technicals.
+So kannst du den richtigen Partner für dich finden, um alle Areas, Technicals,
+Background auszulegen.
+
+00:02:16,740 --> 00:02:32,640 [speaker_3]
+Zum zweiten Use Case: Da machen wir das nicht nur für unter Studenten-Networking oder so,
+sondern zum Beispiel, wenn irgendwelche Start-ups noch Mitarbeiter suchen,
+nicht nur irgendwelche Co-Founder, sondern vielleicht suchen sie, keine Ahnung,
+noch einen Engineer oder so, dass man sich auch darüber preparen kann,
+weil es ist dieselbe Funktion, aber halt einfach nur eine andere Rolle.
+
+00:02:33,120 --> 00:02:33,120 [speaker_1]
+Ja.
+
+00:02:33,160 --> 00:02:34,520 [speaker_3]
+Und dann haben wir das. Ja.
+
+00:02:34,860 --> 00:02:35,020 [speaker_2]
+Ja.
+
+00:02:35,180 --> 00:02:35,660 [speaker_0]
+And Base.
+
+00:02:36,280 --> 00:02:38,940 [speaker_3]
+Der Voice-Agent-Part ist halt, dass wir, ähm-
+
+00:02:40,280 --> 00:02:41,700 [speaker_2]
+Also Einsprechen für das Interview.
+
+00:02:41,760 --> 00:02:49,280 [speaker_3]
+Genau, dass wir eine Interview Preparation oder wie man die Leute approacht, dass man das so...
+Und auch, dass man selber so erklärt, was kann man und der Agent-
+
+00:02:49,320 --> 00:02:50,780 [speaker_0]
+Also eine Simulation mit-
+
+00:02:50,880 --> 00:02:54,380 [speaker_3]
+Simulation und selber interviewen, damit man besser gematcht werden kann.
+
+00:02:54,900 --> 00:02:57,600 [speaker_0]
+Mit vielleicht, ja.
+
+00:02:58,940 --> 00:03:28,580 [speaker_2]
+Heißt, im besten Fall technisch bräuchten wir ein Modell, was evaluiert: Okay,
+das sind die Top-Personen, die wir targetieren wollen. Welchen Background haben die?
+Vielleicht können wir da so einen Ring, äh, erstellen, weil, ähm, müssen wir mal gucken:
+Was braucht man, um ein Start-up zu gründen? Man braucht eine gewisse Vision,
+man braucht einen visuellen Typen, man braucht einen technischen Typen,
+man braucht Details und man braucht Umsetzungskraft. Vielleicht gibt es da so einen Chart,
+den wir machen können, um zu gucken: Okay, wie gut und successful kann dieses Business sein?
+Weißt du?
+
+00:03:28,900 --> 00:03:29,220 [speaker_0]
+Ja.
+
+00:03:29,280 --> 00:03:35,460 [speaker_2]
+Um halt da schon mal die Charakteristiken von dem Founder als perfektes Team zu evaluieren,
+weil VCs schauen immer-
+
+00:03:35,980 --> 00:03:37,580 [speaker_0]
+Und dann, was noch fehlt vielleicht.
+
+00:03:37,580 --> 00:03:37,580 [speaker_2]
+Ja.
+
+00:03:37,580 --> 00:03:37,580 [speaker_0]
+Ja.
+
+00:03:37,580 --> 00:03:38,840 [speaker_1]
+Das ist wieder ganz Business Development.
+
+00:03:38,840 --> 00:03:47,240 [speaker_0]
+Okay, dann bauen wir das als Dashboard in, in eine App mit rein. René, du machst das,
+machst das Back-- Äh, Web-App. Web-App, ja, ja.
+
+00:03:47,660 --> 00:03:48,620 [speaker_1]
+Und dann geben wir so einen Link.
+
+00:03:48,680 --> 00:03:59,740 [speaker_0]
+Du machst das Backend. Wie bekomme ich das? Ich bekomme die ganzen Daten.
+Ich habe gescrapte Daten von LinkedIn und so weiter. Äh, die guckst du einfach durch.
+Ist ein JSON-Dump.
+
+00:04:00,300 --> 00:04:01,500 [speaker_1]
+Wie willst denn du deinen Agent bauen?
+
+00:04:02,520 --> 00:04:08,700 [speaker_0]
+Ähm, den Agent nehmen wir Voice Agent von OpenAI, direkt einen Key rein, zack.
+
+00:04:09,080 --> 00:04:10,560 [speaker_1]
+Alles deren Library?
+
+00:04:10,660 --> 00:04:26,320 [speaker_0]
+Alles deren Library. Ähm, ich möchte spezifisch OpenAI nur nehmen.
+Die haben jetzt das neue Real-Time-Model, wo du Real-Time-Gespräche führen kannst.
+Das baust du mit rein, mit einem guten, äh, System Prompt. Äh,
+allgemein vom Design her wird das ein cleanes Dashboard, ähm, mäßig mit-
+
+00:04:26,560 --> 00:04:27,940 [speaker_1]
+Ah, perfecto. Danke schön.
+
+00:04:28,160 --> 00:04:33,620 [speaker_0]
+Ich zieh aus. Ich habe mir reingepisst wegen dem [stöhnt] . Ähm, du wirst das Frontend.
+
+00:04:34,220 --> 00:04:37,260 [speaker_1]
+Ja, ähm, da, da wären wir-
+
+00:04:37,320 --> 00:04:38,040 [speaker_0]
+Was mache ich denn dann?
+
+00:04:38,160 --> 00:04:40,080 [speaker_1]
+Assistant UI. Du brauchst diesen Voice Mode.
+
+00:04:41,040 --> 00:04:43,920 [speaker_0]
+Äh, Voice Mode ist halt gar nichts. Aber ja.
+
+00:04:43,960 --> 00:05:02,440 [speaker_1]
+Ja, wir brauchen doch, wir brauchen einen Skill. Wir brauchen einen Skill,
+dass der Agent so ein bisschen weiß, was er machen soll. Und was ich haben will, ist,
+dass wenn du redest, dass-- und ich sage: „Ey, guck dir mal den Max an." Und dann will ich doch,
+dass im Frontend, wenn ich das sage, der Max mit seinem Profilbild, mit seinem ganzen LinkedIn,
+die ganzen Daten, die wir aus LinkedIn haben, die-
+
+00:05:02,860 --> 00:05:04,720 [speaker_0]
+Es muss schon alles anzeigbar sein auch.
+
+00:05:05,260 --> 00:05:07,520 [speaker_1]
+Und, äh, ja.
+
+00:05:07,560 --> 00:06:29,660 [speaker_0]
+Genau, die kannst du so, ist wie LinkedIn, kannst du dann suchen,
+nur halt wirklich gepivotet auf diesen Use Case Co-Founder und was wir vorhin besprochen haben.
+Dann auch so noch, äh, Tipps allgemein, so eine Tipps-Seite: Was fehlt für mein Start-up? Ähm,
+was brauche ich für Skills? Ich gebe da erst so meine Ideen ein bisschen ein oder sage:
+„Ich bin offen für alle Ideen.
+Ich gebe meine Stärken selber vielleicht mit ein." Es scrapt ja auch mein LinkedIn, also passt das,
+habe ich das auch mit drin. Wir machen ein cleanes, äh, Frontend. Ähm, da kannst du erst mal, äh,
+ganz grobes Design machst du mir, einen richtigen MVP, wo nur alle Funktionen schon drin sind.
+Sieht noch nicht gut aus. Jolanda, du übernimmst dann das Design, wenn das fertig ist. Ich hoffe,
+das klappt jetzt schnell. Ähm, das machst du richtig schnell.
+Also erst mal zusammen runter schreiben, was sind die Funktionen. Dann machst du dieses Dashboard.
+Machst du so fertig, dass, äh,
+eine Kollegin da selbstständig drauf am Design pivoten kann und wir machen das komplette, äh,
+funktionale Backend. Genau. Also der Plan ist erst MVP f-- ready,
+dann alles immer auf das Repo pushen, was ich hier gebe. Und, äh, genau, wenn du Fragen hast,
+stellst du die, nachdem das MVP fertig ist. Und dann gehen wir noch mal rein in Grill Me,
+ein bisschen zu verfeinern.
+```

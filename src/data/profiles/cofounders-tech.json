@@ -1,0 +1,522 @@
+[
+  {
+    "id": "lena-hoffmann",
+    "name": "Lena Hoffmann",
+    "headline": "ML Engineer (ex-Google) auf der Suche nach einem Commercial Co-Founder für AI-Agents",
+    "location": "München, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=lena-hoffmann",
+    "email": "lena.hoffmann@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/lena-hoffmann",
+    "about": "Lena hat sieben Jahre als Machine-Learning-Engineerin bei Google in Zürich und München gearbeitet, zuletzt im Search-Ranking-Team. Seit einem Sabbatical baut sie Prototypen für autonome AI-Agents im B2B-Kontext und hat bereits einen kleinen Pilotkunden aus der Logistikbranche gewonnen. Sie sucht eine:n Co-Founder mit Vertriebs- und Business-Development-Erfahrung, um aus dem Prototyp ein Produkt zu machen. Technisch traut sie sich fast alles zu, vertrieblich möchte sie bewusst nicht die Führung übernehmen.",
+    "experience": [
+      {
+        "title": "Senior ML Engineer",
+        "company": "Google",
+        "start": "2019",
+        "end": "2026",
+        "description": "Search-Ranking- und Ads-Relevance-Modelle, Führung eines vierköpfigen Teams."
+      },
+      {
+        "title": "ML Engineer",
+        "company": "Google",
+        "start": "2017",
+        "end": "2019",
+        "description": "Aufbau von Spam-Detection-Modellen für Gmail."
+      },
+      {
+        "title": "Werkstudentin Data Science",
+        "company": "Celonis",
+        "start": "2015",
+        "end": "2017",
+        "description": "Process-Mining-Prototypen für Enterprise-Kunden."
+      }
+    ],
+    "education": [
+      {
+        "school": "TU München",
+        "degree": "M.Sc.",
+        "field": "Informatik",
+        "start": "2013",
+        "end": "2017"
+      }
+    ],
+    "skills": ["Python", "PyTorch", "LLM Fine-Tuning", "Distributed Systems", "Go", "Kubernetes", "A/B-Testing", "System Design"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "tech",
+    "lookingFor": ["commercial cofounder", "pre-seed investment", "mentor"],
+    "verticals": ["ai", "b2b saas"],
+    "stage": "idea",
+    "dims": { "vision": 7, "design": 4, "tech": 9, "detail": 7, "execution": 8 },
+    "personality": {
+      "type": "builder",
+      "summary": "Baut lieber drei Prototypen zu viel als einen zu wenig – Lena denkt in funktionierendem Code, nicht in Slides.",
+      "traits": ["pragmatisch", "direkt", "ungeduldig mit Meetings", "hilft anderen gern beim Debuggen"],
+      "communicationStyle": "Kurz und konkret, am liebsten mit einer Demo statt eines Decks. Reagiert gut auf Nachrichten mit technischem Detail.",
+      "outreachTips": [
+        "Mit einer konkreten Produktidee oder einem Prototyp-Link einsteigen, nicht mit Small Talk.",
+        "Auf ihre GitHub-Aktivität oder ihren letzten Vortrag Bezug nehmen.",
+        "Ein konkretes Zeitfenster für einen Call vorschlagen, keine offene Frage 'wann passt es dir?'"
+      ],
+      "avoid": ["Lange Buzzword-lastige Pitches ohne technische Substanz.", "Reine LinkedIn-Vernetzungsanfragen ohne Kontext."]
+    },
+    "events": ["idealab-2026", "berlin-ai-hackathon-2026"],
+    "tags": ["ex-google", "ml", "ai-agents", "münchen"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "jonas-weber",
+    "name": "Jonas Weber",
+    "headline": "Robotik-Promovend (TUM) – baut autonome Greifsysteme, sucht Mitgründer:in fürs Business",
+    "location": "München, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=jonas-weber",
+    "email": "jonas.weber@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/jonas-weber",
+    "about": "Jonas promoviert am Lehrstuhl für Robotik der TU München zu Greifalgorithmen für unstrukturierte Umgebungen und hat zwei Patente aus seiner Forschung angemeldet. Neben der Promotion hat er einen funktionsfähigen Demonstrator gebaut, der in einer Kooperation mit einem Mittelständler aus der Logistik getestet wird. Er ist ein sehr gründlicher Ingenieur, der lieber einmal zu oft testet als zu wenig, tut sich aber schwer mit Fundraising und Storytelling. Gesucht wird eine kommerziell denkende Person, die aus der Forschung ein Geschäft macht.",
+    "experience": [
+      {
+        "title": "Wissenschaftlicher Mitarbeiter / Doktorand",
+        "company": "TU München, Lehrstuhl für Robotik",
+        "start": "2022",
+        "end": null,
+        "description": "Forschung zu Greifalgorithmen und Reinforcement Learning für Industrieroboter."
+      },
+      {
+        "title": "Robotics Engineer (Werkstudent)",
+        "company": "KUKA",
+        "start": "2020",
+        "end": "2022",
+        "description": "Entwicklung von Steuerungssoftware für Sechsachs-Roboterarme."
+      }
+    ],
+    "education": [
+      {
+        "school": "TU München",
+        "degree": "Promotion (laufend)",
+        "field": "Robotik",
+        "start": "2022"
+      },
+      {
+        "school": "Karlsruher Institut für Technologie (KIT)",
+        "degree": "M.Sc.",
+        "field": "Maschinenbau",
+        "start": "2018",
+        "end": "2020"
+      }
+    ],
+    "skills": ["ROS", "C++", "Python", "Reinforcement Learning", "Computer Vision", "CAD (SolidWorks)", "Embedded Systems", "Sensor Fusion"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "tech",
+    "lookingFor": ["commercial cofounder", "product cofounder"],
+    "verticals": ["robotics", "deeptech"],
+    "stage": "pre-seed",
+    "dims": { "vision": 6, "design": 5, "tech": 10, "detail": 9, "execution": 6 },
+    "personality": {
+      "type": "analyst",
+      "summary": "Vertraut nur Daten und eigenen Tests – Jonas hinterfragt jede Annahme, bevor er sie einbaut.",
+      "traits": ["gründlich", "geduldig", "skeptisch gegenüber Hype", "erklärt gerne im Detail"],
+      "communicationStyle": "Ausführlich und faktenbasiert, mag es, wenn man sich vorher mit dem Thema beschäftigt hat. Kein Fan von Small Talk.",
+      "outreachTips": [
+        "Konkrete Fragen zu seiner Forschung oder dem Demonstrator stellen.",
+        "Zeit für ein längeres, inhaltliches Erstgespräch einplanen (45–60 Min).",
+        "Vorab ein, zwei relevante Paper oder Artikel schicken zeigt Ernsthaftigkeit."
+      ],
+      "avoid": ["Ungeduld, wenn er ins Detail geht.", "Business-Buzzwords ohne technisches Verständnis.", "Druck, schnell eine Entscheidung zu treffen."]
+    },
+    "events": ["idealab-2026"],
+    "tags": ["phd", "robotik", "hardware", "tum"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "mia-krueger",
+    "name": "Mia Krüger",
+    "headline": "Vom Krankenhaus in den Code: Self-taught Full-Stack-Entwicklerin für Healthtech",
+    "location": "Berlin, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=mia-krueger",
+    "email": "mia.krueger@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/mia-krueger",
+    "about": "Mia hat sechs Jahre als Krankenpflegerin gearbeitet, bevor sie über ein Bootcamp in die Softwareentwicklung gewechselt ist. Diese Kombination gibt ihr einen ungewöhnlich genauen Blick für echte Probleme im Klinikalltag – ihr aktuelles Side-Project ist ein Tool zur Dienstplan-Optimierung, das bereits auf zwei Stationen getestet wird. Sie codet schnell und pragmatisch, mit Fokus auf 'was bringt den Pfleger:innen heute etwas' statt auf technische Eleganz. Gesucht wird eine Person mit Vertriebs- oder Klinik-Einkaufs-Erfahrung, um daraus ein echtes Produkt zu machen.",
+    "experience": [
+      {
+        "title": "Full-Stack Developer",
+        "company": "Freelance / eigenes Projekt",
+        "start": "2024",
+        "end": null,
+        "description": "Aufbau eines Dienstplan-Tools für Pflegeteams (Next.js, Postgres)."
+      },
+      {
+        "title": "Junior Developer",
+        "company": "Ada Health",
+        "start": "2023",
+        "end": "2024",
+        "description": "Frontend-Arbeit an der Symptom-Checker-App, Zusammenarbeit mit dem Medizin-Team."
+      },
+      {
+        "title": "Gesundheits- und Krankenpflegerin",
+        "company": "Charité Berlin",
+        "start": "2017",
+        "end": "2022",
+        "description": "Intensivstation, zuletzt auch Dienstplanung für das Team."
+      }
+    ],
+    "education": [
+      {
+        "school": "Le Wagon Berlin",
+        "degree": "Bootcamp-Zertifikat",
+        "field": "Web Development",
+        "start": "2022",
+        "end": "2023"
+      },
+      {
+        "school": "Charité Gesundheitsakademie",
+        "degree": "Ausbildung",
+        "field": "Gesundheits- und Krankenpflege",
+        "start": "2014",
+        "end": "2017"
+      }
+    ],
+    "skills": ["JavaScript", "TypeScript", "React", "Next.js", "PostgreSQL", "Node.js", "User Research", "Figma (Basics)"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "tech",
+    "lookingFor": ["commercial cofounder", "design cofounder"],
+    "verticals": ["healthtech", "b2b saas"],
+    "stage": "idea",
+    "dims": { "vision": 6, "design": 6, "tech": 8, "detail": 6, "execution": 9 },
+    "personality": {
+      "type": "builder",
+      "summary": "Baut lieber eine funktionierende, unperfekte Version heute als eine perfekte in drei Monaten.",
+      "traits": ["bodenständig", "empathisch", "ungeduldig mit Theorie ohne Praxisbezug", "direkt"],
+      "communicationStyle": "Locker und ehrlich, erzählt gern konkrete Geschichten aus dem Klinikalltag statt abstrakt zu bleiben.",
+      "outreachTips": [
+        "Konkretes Interesse an ihrer Klinikerfahrung zeigen, nicht nur am Code.",
+        "Sich auf ein Treffen vor Ort oder einen Videocall statt nur Textnachrichten einlassen.",
+        "Über ihr Dienstplan-Projekt sprechen, das zeigt, dass man sich vorbereitet hat."
+      ],
+      "avoid": ["Von oben herab über ihren Quereinstieg reden.", "Rein akademische Diskussionen ohne Anwendungsbezug."]
+    },
+    "events": ["berlin-ai-hackathon-2026", "idealab-2026"],
+    "tags": ["quereinstieg", "bootcamp", "healthtech", "berlin"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "paul-nguyen",
+    "name": "Paul Nguyen",
+    "headline": "Ex-CTO eines gescheiterten Fintech-Startups – bereit für Runde zwei",
+    "location": "Köln, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=paul-nguyen",
+    "email": "paul.nguyen@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/paul-nguyen",
+    "about": "Paul war Mitgründer und CTO eines Fintech-Startups, das nach drei Jahren und einer Seed-Runde mangels Product-Market-Fit abgewickelt wurde – eine Erfahrung, aus der er sehr genau weiß, was beim nächsten Mal anders laufen muss. Er hat ein Team von bis zu zwölf Entwickler:innen geführt, eine Kooperation mit einer Partnerbank technisch umgesetzt und kennt den deutschen Fintech-Regulierungsdschungel gut. Aktuell sondiert er eine neue Idee im B2B-Zahlungsbereich und sucht bewusst eine kommerziell orientierte Person, damit er sich diesmal aufs Produkt konzentrieren kann. Er ist geduldig mit Prozessen, aber ungeduldig mit Beliebigkeit.",
+    "experience": [
+      {
+        "title": "Co-Founder & CTO",
+        "company": "PayFlow (insolvent 2025)",
+        "start": "2021",
+        "end": "2025",
+        "description": "Aufbau der gesamten Banking-Infrastruktur, Team-Lead für 12 Entwickler:innen, Kooperation mit einer Partnerbank."
+      },
+      {
+        "title": "Backend Engineer",
+        "company": "N26",
+        "start": "2018",
+        "end": "2021",
+        "description": "Payments-Team, Arbeit an PSD2-Schnittstellen und Kartenzahlungen."
+      },
+      {
+        "title": "Werkstudent Softwareentwicklung",
+        "company": "SAP",
+        "start": "2016",
+        "end": "2018",
+        "description": "Java-Backend für interne Finance-Tools."
+      }
+    ],
+    "education": [
+      {
+        "school": "Universität zu Köln",
+        "degree": "M.Sc.",
+        "field": "Wirtschaftsinformatik",
+        "start": "2014",
+        "end": "2018"
+      }
+    ],
+    "skills": ["Java", "Kotlin", "Payment Systems", "Regulatorik (PSD2/KYC)", "System Architecture", "Team Leadership", "AWS", "PostgreSQL"],
+    "languages": ["Deutsch", "Englisch", "Vietnamesisch"],
+    "networkRole": "cofounder",
+    "founderRole": "tech",
+    "lookingFor": ["product cofounder", "pre-seed investment", "first hires"],
+    "verticals": ["fintech", "b2b saas"],
+    "stage": "pre-seed",
+    "dims": { "vision": 8, "design": 5, "tech": 9, "detail": 7, "execution": 9 },
+    "personality": {
+      "type": "operator",
+      "summary": "Hat ein Startup von null bis zur Abwicklung durchgemacht und führt jetzt lieber mit klaren Prozessen als mit Bauchgefühl.",
+      "traits": ["strukturiert", "krisenerfahren", "verlässlich", "direkt bei Problemen"],
+      "communicationStyle": "Sachlich und ergebnisorientiert, schätzt klare Agenden und konkrete nächste Schritte nach jedem Gespräch.",
+      "outreachTips": [
+        "Konkret werden, welches Problem gelöst werden soll, nicht nur 'Lust auf ein Startup'.",
+        "Seine Erfahrung mit PayFlow wertschätzend ansprechen, nicht als Scheitern framen.",
+        "Eine klare Agenda fürs erste Gespräch mitschicken."
+      ],
+      "avoid": [
+        "Blauäugige 'wir revolutionieren einfach alles'-Pitches ohne Regulatorik-Verständnis.",
+        "Unverbindliches Hin-und-Her ohne konkreten Termin.",
+        "Über sein früheres Startup als 'Misserfolg' sprechen."
+      ]
+    },
+    "events": ["idealab-2026", "bits-and-pretzels-2026"],
+    "tags": ["ex-cto", "fintech", "köln", "second-time-founder"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "sophie-bauer",
+    "name": "Sophie Bauer",
+    "headline": "Hardware-Ingenieurin (ex-Tesla) – baut Batteriemanagement für die Energiewende",
+    "location": "Hamburg, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=sophie-bauer",
+    "email": "sophie.bauer@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/sophie-bauer",
+    "about": "Sophie hat vier Jahre im Battery-Engineering-Team von Tesla in Berlin-Brandenburg gearbeitet und dort an Zellmanagement-Systemen für Energiespeicher mitgewirkt. Sie ist überzeugt, dass dezentrale Second-Life-Batteriespeicher für Gewerbebetriebe ein riesiger, kaum bedienter Markt sind, und hat dazu bereits einen funktionierenden Labor-Prototyp gebaut. Als Vollblut-Ingenieurin denkt sie in Jahrzehnten und Systemgrenzen, nicht in Quartalen – Storytelling und Vertrieb überlässt sie lieber jemand anderem. Sie sucht eine kaufmännisch versierte Person, die mit ihr die ersten Pilotkunden gewinnt.",
+    "experience": [
+      {
+        "title": "Battery Systems Engineer",
+        "company": "Tesla (Gigafactory Berlin-Brandenburg)",
+        "start": "2021",
+        "end": "2026",
+        "description": "Entwicklung von Battery-Management-Systemen für stationäre Speicher."
+      },
+      {
+        "title": "Elektrotechnik-Ingenieurin",
+        "company": "Siemens Energy",
+        "start": "2019",
+        "end": "2021",
+        "description": "Leistungselektronik für Netzstabilisierung."
+      }
+    ],
+    "education": [
+      {
+        "school": "RWTH Aachen",
+        "degree": "M.Sc.",
+        "field": "Elektrotechnik",
+        "start": "2014",
+        "end": "2019"
+      }
+    ],
+    "skills": ["Batteriemanagementsysteme", "Leistungselektronik", "Embedded C", "MATLAB/Simulink", "Schaltungsdesign", "Projektmanagement Hardware", "Energiesystemmodellierung"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "tech",
+    "lookingFor": ["commercial cofounder", "seed investment"],
+    "verticals": ["climate", "energy"],
+    "stage": "pre-seed",
+    "dims": { "vision": 7, "design": 4, "tech": 9, "detail": 8, "execution": 7 },
+    "personality": {
+      "type": "visionary",
+      "summary": "Denkt in Energiesystemen der nächsten zwanzig Jahre und lässt sich von kurzfristigem Kleinklein nicht beirren.",
+      "traits": ["langfristig denkend", "prinzipientreu", "ruhig", "wenig Interesse an Small Talk"],
+      "communicationStyle": "Inhaltlich tief, erklärt gerne den großen Zusammenhang, bevor sie ins Detail geht. Braucht Zeit, um warm zu werden.",
+      "outreachTips": [
+        "Mit dem größeren Bild (Energiewende, Netzstabilität) einsteigen, nicht mit Pitch-Deck-Jargon.",
+        "Interesse an ihrem Labor-Prototyp zeigen und konkrete Fragen dazu stellen.",
+        "Geduld für ein erstes, eher unverbindliches Kennenlerngespräch mitbringen."
+      ],
+      "avoid": ["Druck auf schnelle Monetarisierung ohne technisches Verständnis.", "Oberflächliches Greenwashing-Vokabular.", "Ungeduld, wenn sie ins technische Detail geht."]
+    },
+    "events": ["bits-and-pretzels-2026"],
+    "tags": ["hardware", "climate", "ex-tesla", "hamburg"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "elias-fischer",
+    "name": "Elias Fischer",
+    "headline": "Backend-Engineer (ex-Amazon) – will Payment-Infrastruktur für KMU in Österreich bauen",
+    "location": "Wien, Österreich",
+    "photoUrl": "https://i.pravatar.cc/200?u=elias-fischer",
+    "email": "elias.fischer@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/elias-fischer",
+    "about": "Elias hat fünf Jahre bei Amazon in Berlin an hochskalierten Backend-Systemen für den Zahlungsabgleich gearbeitet und bringt entsprechend viel Erfahrung mit verteilten Systemen unter Last mit. Nach seiner Rückkehr nach Wien will er diese Erfahrung nutzen, um eine schlanke Payment- und Buchhaltungs-Infrastruktur für kleine und mittlere Betriebe zu bauen, die sich keine Enterprise-Lösung leisten können. Er ist ruhig, gründlich und ein exzellenter Mentor für jüngere Entwickler:innen, aber wenig an Vertrieb interessiert. Gesucht wird eine kommerziell denkende Person mit Zugang zum österreichischen oder deutschen Mittelstand.",
+    "experience": [
+      {
+        "title": "Senior Backend Engineer",
+        "company": "Amazon (Payments)",
+        "start": "2020",
+        "end": "2026",
+        "description": "Verteilte Systeme für Zahlungsabgleich, Skalierung auf mehrere Millionen Transaktionen täglich."
+      },
+      {
+        "title": "Software Engineer",
+        "company": "adidas Runtastic",
+        "start": "2018",
+        "end": "2020",
+        "description": "Backend für Tracking-Features der Fitness-App."
+      }
+    ],
+    "education": [
+      {
+        "school": "TU Wien",
+        "degree": "M.Sc.",
+        "field": "Informatik",
+        "start": "2014",
+        "end": "2018"
+      }
+    ],
+    "skills": ["Java", "Kotlin", "Distributed Systems", "AWS", "Event-Driven Architecture", "PostgreSQL", "Kafka", "API-Design"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "tech",
+    "lookingFor": ["commercial cofounder", "mentor"],
+    "verticals": ["fintech", "ai"],
+    "stage": "idea",
+    "dims": { "vision": 6, "design": 5, "tech": 9, "detail": 8, "execution": 8 },
+    "personality": {
+      "type": "builder",
+      "summary": "Baut Systeme so, dass sie auch bei zehnfacher Last nicht umfallen – und erwartet von sich selbst dieselbe Verlässlichkeit.",
+      "traits": ["ruhig", "verlässlich", "mentorenhaft", "gründlich"],
+      "communicationStyle": "Sachlich und geduldig, erklärt gerne ausführlich, freut sich aber über kurze, klare Nachrichten zum Einstieg.",
+      "outreachTips": [
+        "Konkrete Fragen zu seiner Idee für KMU-Payment-Infrastruktur stellen.",
+        "Erwähnen, falls man Zugang zu Mittelstandskunden in AT/DE hat – das ist sein größter Engpass.",
+        "Ruhig und unaufgeregt schreiben, keine Hype-Sprache."
+      ],
+      "avoid": ["Hektische, aufgeregte Nachrichten mit vielen Ausrufezeichen.", "Unrealistische Wachstumsversprechen ohne Substanz."]
+    },
+    "events": ["idealab-2026"],
+    "tags": ["ex-amazon", "fintech", "wien", "backend"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "anna-steinberg",
+    "name": "Anna Steinberg",
+    "headline": "PhD ETH Zürich – Computational Biology für schnellere Antikörper-Entwicklung",
+    "location": "Zürich, Schweiz",
+    "photoUrl": "https://i.pravatar.cc/200?u=anna-steinberg",
+    "email": "anna.steinberg@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/anna-steinberg",
+    "about": "Anna hat an der ETH Zürich in Computational Biology promoviert und dabei ein Machine-Learning-Modell entwickelt, das die Bindungsaffinität von Antikörper-Kandidaten deutlich schneller vorhersagt als klassische Wet-Lab-Verfahren. Ihre Forschung wurde bereits zweimal auf internationalen Konferenzen ausgezeichnet und sie hat ein kleines Team studentischer Hilfskräfte geleitet. Sie denkt in Hypothesen und Experimenten und ist gegenüber vollmundigen Business-Versprechen sehr skeptisch, bis Daten sie überzeugen. Für die Ausgründung sucht sie eine Person mit Erfahrung in Biotech-Fundraising und Partnerschaften mit Pharmaunternehmen.",
+    "experience": [
+      {
+        "title": "Doktorandin",
+        "company": "ETH Zürich, Institut für Computational Biology",
+        "start": "2021",
+        "end": null,
+        "description": "Entwicklung von ML-Modellen zur Vorhersage von Antikörper-Bindungsaffinität."
+      },
+      {
+        "title": "Research Assistant",
+        "company": "Max-Planck-Institut für Biophysik",
+        "start": "2019",
+        "end": "2021",
+        "description": "Strukturbiologie-Simulationen, Molecular Dynamics."
+      }
+    ],
+    "education": [
+      {
+        "school": "ETH Zürich",
+        "degree": "PhD",
+        "field": "Computational Biology",
+        "start": "2021",
+        "end": "2026"
+      },
+      {
+        "school": "Universität Heidelberg",
+        "degree": "M.Sc.",
+        "field": "Bioinformatik",
+        "start": "2017",
+        "end": "2019"
+      }
+    ],
+    "skills": ["Python", "PyTorch", "Molecular Dynamics", "Protein Structure Prediction", "Statistics", "R", "Bioinformatics Pipelines", "Scientific Writing"],
+    "languages": ["Deutsch", "Englisch", "Französisch"],
+    "networkRole": "cofounder",
+    "founderRole": "tech",
+    "lookingFor": ["commercial cofounder", "pre-seed investment", "partnerships"],
+    "verticals": ["deeptech", "biotech", "healthtech"],
+    "stage": "pre-seed",
+    "dims": { "vision": 8, "design": 3, "tech": 10, "detail": 9, "execution": 6 },
+    "personality": {
+      "type": "analyst",
+      "summary": "Überzeugt sich selbst nur mit Daten – und erwartet, dass andere ihre Behauptungen genauso belegen.",
+      "traits": ["hypothesengetrieben", "skeptisch", "präzise", "zurückhaltend im ersten Kontakt"],
+      "communicationStyle": "Wissenschaftlich präzise, mag klare Fragestellungen und konkrete Evidenz statt Enthusiasmus.",
+      "outreachTips": [
+        "Mit einer klaren, konkreten Fragestellung oder einem Datenpunkt einsteigen.",
+        "Referenzen zu ihren publizierten Papers zeigen, dass man sich vorbereitet hat.",
+        "Realistische Zeithorizonte nennen – Biotech braucht Geduld, das weiß sie und erwartet es auch von Partnern."
+      ],
+      "avoid": [
+        "Übertriebene Versprechen zur Zeit bis zur Marktreife.",
+        "Business-Pitches ohne wissenschaftliche Substanz.",
+        "Zu forsches Auftreten beim Erstkontakt."
+      ]
+    },
+    "events": ["idealab-2026", "slush-2026"],
+    "tags": ["phd", "biotech", "eth-zürich", "deeptech"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "tobias-richter",
+    "name": "Tobias Richter",
+    "headline": "Ex-Zalando Engineer, jetzt Indie Hacker – sucht Product Cofounder für B2B-Tool",
+    "location": "Berlin, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=tobias-richter",
+    "email": "tobias.richter@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/tobias-richter",
+    "about": "Tobias war sechs Jahre Senior Engineer bei Zalando und hat dort den internen Checkout-Baukasten mitgebaut, bevor er vor einem Jahr gekündigt hat, um als Indie Hacker eigene Produkte zu bauen. Sein aktuelles Tool, ein Analytics-Add-on für Shopify-Händler, hat inzwischen zahlende Kund:innen im niedrigen vierstelligen MRR-Bereich, wächst ihm aber ohne Vertriebs- und Produktfokus zu langsam. Er baut extrem schnell und öffentlich (Build in Public), verliert aber schnell das Interesse an Kundengesprächen und Priorisierung. Gesucht wird jemand, der Produktentscheidungen und Kundenbeziehungen übernimmt, während er weiter shippt.",
+    "experience": [
+      {
+        "title": "Indie Hacker / Solo-Founder",
+        "company": "ShopMetrics (eigenes Projekt)",
+        "start": "2025",
+        "end": null,
+        "description": "Analytics-Add-on für Shopify-Händler, Build in Public, erste zahlende Kund:innen."
+      },
+      {
+        "title": "Senior Software Engineer",
+        "company": "Zalando",
+        "start": "2019",
+        "end": "2025",
+        "description": "Checkout-Plattform, interner Baukasten für Payment-Flows in 15 Ländern."
+      },
+      {
+        "title": "Software Engineer",
+        "company": "HRS Group",
+        "start": "2017",
+        "end": "2019",
+        "description": "Booking-Backend, Preis- und Verfügbarkeits-APIs."
+      }
+    ],
+    "education": [
+      {
+        "school": "Hochschule für Technik und Wirtschaft Berlin (HTW)",
+        "degree": "B.Sc.",
+        "field": "Informatik",
+        "start": "2013",
+        "end": "2017"
+      }
+    ],
+    "skills": ["TypeScript", "React", "Node.js", "Shopify APIs", "Stripe", "PostgreSQL", "Growth Analytics", "Build in Public / Content"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "tech",
+    "lookingFor": ["product cofounder", "design cofounder", "first hires"],
+    "verticals": ["b2b saas", "ecommerce"],
+    "stage": "idea",
+    "dims": { "vision": 6, "design": 6, "tech": 8, "detail": 6, "execution": 9 },
+    "personality": {
+      "type": "connector",
+      "summary": "Baut am liebsten öffentlich und vernetzt sich nebenbei mit der halben Indie-Hacker-Szene – Priorisierung ist seine Schwachstelle, nicht das Netzwerken.",
+      "traits": ["extrovertiert", "schnell begeistert", "ungeduldig", "vernetzt"],
+      "communicationStyle": "Locker, schnell, viel über Twitter/X und Discord statt E-Mail. Antwortet schnell, wenn ihn das Thema packt.",
+      "outreachTips": [
+        "Sein Build-in-Public-Content (Twitter/X, Newsletter) referenzieren.",
+        "Konkret vorschlagen, welchen Teil des Produkts man übernehmen würde.",
+        "Schnelligkeit zeigen – er verliert das Interesse bei langsamem E-Mail-Ping-Pong."
+      ],
+      "avoid": ["Langsame, formelle Kommunikation über viele Runden.", "Zu viel Fokus auf Prozesse statt aufs gebaute Produkt."]
+    },
+    "events": ["berlin-ai-hackathon-2026"],
+    "tags": ["indie-hacker", "ex-zalando", "build-in-public", "berlin"],
+    "source": { "type": "mock" }
+  }
+]
