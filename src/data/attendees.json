@@ -1,0 +1,118 @@
+[
+  {
+    "name": "Anna Fischer",
+    "email": "anna.fischer@example.com",
+    "company": "Fischer Climate Tech",
+    "event": "bits-and-pretzels-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/anna-fischer-climate",
+    "nameKey": "anna fischer"
+  },
+  {
+    "name": "David Schneider",
+    "email": "david.schneider@example.com",
+    "company": "Schneider Capital",
+    "event": "idealab-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/david-schneider-vc",
+    "nameKey": "david schneider"
+  },
+  {
+    "name": "Dr. Henrik Ólafsson",
+    "email": "henrik.olafsson@example.com",
+    "company": "Nordic Seed Fund",
+    "event": "slush-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/henrikolafsson",
+    "nameKey": "dr henrik olafsson"
+  },
+  {
+    "name": "Felix Wagner",
+    "email": "felix.wagner@example.com",
+    "company": "Wagner Fintech",
+    "event": "berlin-ai-hackathon-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/felix-wagner-ai",
+    "nameKey": "felix wagner"
+  },
+  {
+    "name": "Jean-Luc Moreau",
+    "email": "jean-luc.moreau@example.com",
+    "company": "Moreau Mobilité",
+    "event": "slush-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/jeanlucmoreau",
+    "nameKey": "jean luc moreau"
+  },
+  {
+    "name": "Jonas Weber",
+    "email": "jonas.weber@example.com",
+    "company": "Weber Robotics",
+    "event": "idealab-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/jonasweber",
+    "nameKey": "jonas weber"
+  },
+  {
+    "name": "Laura Schmidt",
+    "email": "laura.schmidt@example.com",
+    "company": "Schmidt & Söhne",
+    "event": "idealab-2026",
+    "nameKey": "laura schmidt"
+  },
+  {
+    "name": "Lena Hoffmann",
+    "email": "lena.hoffmann@example.com",
+    "company": "Hoffmann & Partner GmbH, Berlin",
+    "event": "idealab-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/lena-hoffmann",
+    "nameKey": "lena hoffmann"
+  },
+  {
+    "name": "Max Brandt",
+    "email": "max.brandt@example.com",
+    "company": "Brandt Ventures GmbH",
+    "event": "idealab-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/max-brandt",
+    "nameKey": "max brandt"
+  },
+  {
+    "name": "Mia Neumann",
+    "email": "mia.neumann@example.com",
+    "company": "Neumann Design Studio",
+    "event": "idealab-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/mia-neumann",
+    "nameKey": "mia neumann"
+  },
+  {
+    "name": "Noah Krüger",
+    "email": "noah.krueger@example.com",
+    "company": "Krüger Legal Tech",
+    "event": "idealab-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/noah-krueger",
+    "nameKey": "noah kruger"
+  },
+  {
+    "name": "Priya Raghunathan",
+    "email": "priya.raghunathan@example.com",
+    "company": "Raghunathan Labs",
+    "event": "berlin-ai-hackathon-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/priya-raghunathan",
+    "nameKey": "priya raghunathan"
+  },
+  {
+    "name": "Sophie Keller",
+    "email": "sophie.keller@example.com",
+    "company": "Keller Health",
+    "event": "idealab-2026",
+    "nameKey": "sophie keller"
+  },
+  {
+    "name": "Tim Becker",
+    "email": "tim.becker@example.com",
+    "event": "idealab-2026",
+    "linkedinUrl": "https://www.linkedin.com/in/timbecker",
+    "nameKey": "tim becker"
+  },
+  {
+    "name": "Zoë van der Berg",
+    "email": "zoe.vdberg@example.com",
+    "company": "VDB Consulting",
+    "event": "bits-and-pretzels-2026",
+    "nameKey": "zoe van der berg"
+  }
+]
