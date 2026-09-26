@@ -199,8 +199,13 @@ export async function POST(req: Request) {
 
   const user = normalizeUserContext(userContext);
   const match = scoreMatch(user, profile);
-  const explanation = (await llmExplanation(profile, match, user)) ?? templateExplanation(profile, match, user);
+  const llmText = await llmExplanation(profile, match, user);
 
-  const result: MatchResult & { explanation: string } = { ...match, explanation };
+  // generatedBy folgt der Konvention von OutreachDraft/PrepPack (Zusatzfeld, Contract bleibt erfüllt).
+  const result: MatchResult & { explanation: string; generatedBy: "template" | "llm" } = {
+    ...match,
+    explanation: llmText ?? templateExplanation(profile, match, user),
+    generatedBy: llmText ? "llm" : "template",
+  };
   return NextResponse.json(result);
 }
