@@ -24,7 +24,7 @@ export default function EventsPage() {
   const totalAttendees = Array.from(attendeeCounts.values()).reduce((sum, n) => sum + n, 0);
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-8">
+    <div>
       <PageHeader
         title="Events"
         subtitle="Konferenzen und Meetups als Quelle deiner Kontakte"
@@ -53,6 +53,6 @@ export default function EventsPage() {
           })}
         </div>
       )}
-    </main>
+    </div>
   );
 }

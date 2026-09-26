@@ -53,7 +53,7 @@ export default async function EventDetailPage({ params }: { params: Params }) {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-8">
+    <div>
       <nav className="mb-4 text-sm text-[var(--muted)]">
         <Link href="/events" className="hover:underline">
           ← Alle Events
@@ -164,6 +164,6 @@ export default async function EventDetailPage({ params }: { params: Params }) {
           </>
         )}
       </Card>
-    </main>
+    </div>
   );
 }
