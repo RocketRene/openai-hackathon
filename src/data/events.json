@@ -1,0 +1,45 @@
+[
+  {
+    "slug": "idealab-2026",
+    "name": "IdeaLab! 2026",
+    "date": "25.–26. Sep 2026",
+    "location": "Vallendar (WHU)",
+    "description": "Studentische Gründerkonferenz der WHU. 569 Teilnehmer:innen aus der Event-App exportiert und mit LinkedIn angereichert – unsere Hauptdatenquelle.",
+    "url": "https://www.idealab.io",
+    "type": "conference"
+  },
+  {
+    "slug": "bits-and-pretzels-2026",
+    "name": "Bits & Pretzels 2026",
+    "date": "27.–29. Sep 2026",
+    "location": "München",
+    "description": "Gründerfestival mit Founders, Investoren und Corporates.",
+    "url": "https://www.bitsandpretzels.com",
+    "type": "conference"
+  },
+  {
+    "slug": "slush-2026",
+    "name": "Slush 2026",
+    "date": "19.–20. Nov 2026",
+    "location": "Helsinki",
+    "description": "Eines der größten Startup-Events Europas, stark VC-lastig.",
+    "url": "https://www.slush.org",
+    "type": "conference"
+  },
+  {
+    "slug": "tum-cofounder-matching-oct-2026",
+    "name": "TUM Co-Founder Matching",
+    "date": "15. Okt 2026",
+    "location": "München (TUM Venture Labs)",
+    "description": "Matching-Abend für Studierende und Alumni, die ein Gründerteam suchen.",
+    "type": "meetup"
+  },
+  {
+    "slug": "berlin-ai-hackathon-2026",
+    "name": "Berlin AI Hackathon 2026",
+    "date": "26.–27. Sep 2026",
+    "location": "Berlin",
+    "description": "48h-Hackathon rund um AI-Agents. Viele Engineers, die nach Teams suchen.",
+    "type": "hackathon"
+  }
+]
