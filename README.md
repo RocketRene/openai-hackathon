@@ -1,3 +1,17 @@
+# Voya – Co-Founder Studio
+
+Öffentliche Cloudflare-App: https://voya.ventosa.workers.dev
+
+Voya kombiniert Text- und Sprachgespräche mit den vorhandenen IdeaLab-/LinkedIn-Profilen.
+Während eines Gesprächs zeigt die App das passende Profil mit Foto, LinkedIn-Link und
+Berufserfahrung. Das Voice-Modell ist GPT-Realtime-2.1 mit Reasoning-Stufe `medium`.
+
+- App und Deployment: `/Users/rene/github.com/RocketRene/openai-hackathon/web/README.md`
+- API-Client und Export-Werkzeuge: `/Users/rene/github.com/RocketRene/openai-hackathon/docs/idealab-client.md`
+- Die parallel entwickelte FounderRadar-App liegt weiterhin im Repository-Hauptverzeichnis.
+
+---
+
 # FounderRadar – OpenAI Hackathon 2026
 
 Findet aus Konferenz-/LinkedIn-Daten die richtigen Kontakte für Gründer:innen (Co-Founder,

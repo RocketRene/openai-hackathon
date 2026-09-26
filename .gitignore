@@ -45,3 +45,22 @@ next-env.d.ts
 
 # claude code agent worktrees
 /.claude/worktrees/
+
+# Voya studio and Python tools
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.env
+.env.*
+exports/
+node_modules/
+*.tsbuildinfo
+!web/.env.example
+.playwright-mcp/
+
+.wrangler/
+web/generated/
+web/worker-configuration.d.ts

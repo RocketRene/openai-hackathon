@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "idealab-login"
+version = "0.2.0"
+description = "IdeaLab API client and enriched candidate profile export"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+chat = ["websockets>=15,<17"]
+enrich = ["tomli>=2; python_version < '3.11'"]
+
+[project.scripts]
+idealab-login = "idealab_login.__main__:main"
+idealab-enrich-linkedin = "idealab_login.enrich_linkedin:main"
+
+[tool.setuptools.packages.find]
+include = ["idealab_login*"]
