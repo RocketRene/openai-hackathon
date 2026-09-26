@@ -3,24 +3,33 @@
 /*
  * Design-Tokens – hier pivotiert die Designerin.
  * Komponenten referenzieren ausschließlich diese Variablen (var(--accent) etc.).
+ * Richtung: cleanes, ruhiges Dashboard – viel Weißraum, klare Hierarchie, ein Akzent (Indigo).
  */
 :root {
-  --background: #f6f7f9;
-  --foreground: #111827;
-  --muted: #6b7280;
+  --background: #f5f6f8;
+  --foreground: #0f172a;
+  --muted: #64748b;
   --surface: #ffffff;
-  --surface-2: #f1f3f6;
-  --surface-3: #e5e8ee;
-  --border: #e2e5ea;
-  --accent: #2563eb;
-  --accent-soft: #dbeafe;
+  --surface-2: #f1f3f7;
+  --surface-3: #e5e8ef;
+  --border: #e4e7ee;
+  --accent: #4f46e5;
+  --accent-strong: #4338ca;
+  --accent-soft: #eef2ff;
+  --accent-contrast: #ffffff;
   --success: #15803d;
   --success-soft: #dcfce7;
   --warning: #b45309;
   --warning-soft: #fef3c7;
   --danger: #b91c1c;
   --danger-soft: #fee2e2;
-  --sidebar-width: 240px;
+  --ring: rgba(79, 70, 229, 0.35);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 1px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 8px 24px -12px rgba(15, 23, 42, 0.18);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --sidebar-width: 256px;
+  --sidebar-bg: #ffffff;
 }
 
 @theme inline {
@@ -32,26 +41,77 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0b0f17;
+    --background: #0b0f19;
     --foreground: #e5e7eb;
-    --muted: #9ca3af;
+    --muted: #94a3b8;
     --surface: #111827;
-    --surface-2: #1f2937;
-    --surface-3: #273446;
-    --border: #273446;
-    --accent: #3b82f6;
-    --accent-soft: #1e3a8a;
+    --surface-2: #171f2e;
+    --surface-3: #232d40;
+    --border: #232d40;
+    --accent: #818cf8;
+    --accent-strong: #a5b4fc;
+    --accent-soft: #1e1b4b;
+    --accent-contrast: #0b0f19;
     --success: #4ade80;
     --success-soft: #14532d;
     --warning: #fbbf24;
     --warning-soft: #78350f;
     --danger: #f87171;
     --danger-soft: #7f1d1d;
+    --ring: rgba(129, 140, 248, 0.45);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 12px 32px -16px rgba(0, 0, 0, 0.7);
+    --sidebar-bg: #0e131f;
   }
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* Schmale, dezente Scrollbars in Panels */
+.fr-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-3) transparent;
+}
+
+/* Sanftes Einblenden für Listen/Karten */
+@keyframes fr-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.fr-fade-in {
+  animation: fr-fade-in 0.25s ease-out both;
+}
+
+/* Skeleton-Shimmer */
+@keyframes fr-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.fr-skeleton {
+  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 37%, var(--surface-2) 63%);
+  background-size: 200% 100%;
+  animation: fr-shimmer 1.4s linear infinite;
 }
