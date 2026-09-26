@@ -161,6 +161,8 @@ export default function NetworkOverview() {
   const tagItems = top(
     countPerProfile(profiles, (p) => (p.tags ?? []).filter((t) => !t.toLowerCase().startsWith("idealab:"))),
     15,
+    undefined,
+    total,
   );
 
   const locationItems = top(countPerProfile(profiles, (p) => [cityOf(p.location)]), 10, undefined, total);
@@ -168,11 +170,15 @@ export default function NetworkOverview() {
   const schoolItems = top(
     countPerProfile(profiles, (p) => (p.education ?? []).map((e) => e.school)),
     10,
+    undefined,
+    total,
   );
 
   const companyItems = top(
     countPerProfile(profiles, (p) => (p.experience ?? []).map((e) => e.company)),
     10,
+    undefined,
+    total,
   );
 
   const lookingForItems = top(
