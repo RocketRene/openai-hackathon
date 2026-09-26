@@ -44,15 +44,16 @@ function Row({ label, profiles, render }: { label: string; profiles: Profile[]; 
   );
 }
 
-function DimBar({ value, best }: { value: number; best: boolean }) {
-  const pct = Math.round((Math.max(0, Math.min(10, value)) / 10) * 100);
+function DimBar({ value, max = 10, suffix = "", best }: { value: number; max?: number; suffix?: string; best: boolean }) {
+  const pct = Math.round((Math.max(0, Math.min(max, value)) / max) * 100);
   return (
     <div className="flex items-center gap-2">
       <div className="h-1.5 w-20 rounded-full bg-[var(--surface-3)]">
         <div className={cx("h-1.5 rounded-full", best ? "bg-[var(--accent)]" : "bg-[var(--muted)]")} style={{ width: `${pct}%` }} />
       </div>
-      <span className={cx("w-5 text-right text-xs tabular-nums", best ? "font-semibold text-[var(--foreground)]" : "text-[var(--muted)]")}>
+      <span className={cx("min-w-5 text-right text-xs tabular-nums", best ? "font-semibold text-[var(--foreground)]" : "text-[var(--muted)]")}>
         {value}
+        {suffix}
       </span>
     </div>
   );
@@ -97,6 +98,7 @@ export function ShortlistCompare() {
   }, [profiles, userContext]);
 
   const bestScore = useMemo(() => Math.max(-1, ...Array.from(scores.values(), (s) => s.score)), [scores]);
+  const bestComp = useMemo(() => Math.max(-1, ...Array.from(scores.values(), (s) => s.complementarity)), [scores]);
   const compare = profiles.length > 1;
 
   if (!ready) {
@@ -191,6 +193,16 @@ export function ShortlistCompare() {
                     {match.reasons[0] && <p className="mt-0.5 text-xs text-[var(--muted)]">{match.reasons[0].label}</p>}
                   </div>
                 );
+              }}
+            />
+
+            <Row
+              label="Komplementarität"
+              profiles={profiles}
+              render={(p) => {
+                const match = scores.get(p.id);
+                if (!match) return <span className="text-[var(--muted)]">–</span>;
+                return <DimBar value={match.complementarity} max={100} suffix="%" best={compare && match.complementarity === bestComp} />;
               }}
             />
 
