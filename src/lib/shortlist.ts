@@ -107,11 +107,15 @@ function getServerSnapshot(): string[] {
 }
 
 function subscribe(onChange: () => void): () => void {
+  // `storage` kommt aus anderen Tabs – nur auf unseren Key (oder `clear()`, key === null) reagieren.
+  const onStorage = (e: StorageEvent) => {
+    if (e.key === null || e.key === SHORTLIST_KEY) onChange();
+  };
   window.addEventListener(SHORTLIST_CHANGE_EVENT, onChange);
-  window.addEventListener("storage", onChange);
+  window.addEventListener("storage", onStorage);
   return () => {
     window.removeEventListener(SHORTLIST_CHANGE_EVENT, onChange);
-    window.removeEventListener("storage", onChange);
+    window.removeEventListener("storage", onStorage);
   };
 }
 
