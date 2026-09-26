@@ -1,1 +1,389 @@
-[]
+[
+  {
+    "id": "lena-brandt",
+    "name": "Lena Brandt",
+    "headline": "Ex-Head of Product bei Foodtech-Scaleup, sucht technisches Cofounder-Team",
+    "location": "Berlin, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=lena-brandt",
+    "email": "lena.brandt@example.com",
+    "linkedinUrl": "https://linkedin.com/in/lena-brandt-product",
+    "about": "Lena hat sechs Jahre lang Produktteams bei einem Berliner Foodtech-Scaleup aufgebaut und dort den Sprung von Seed auf Series B mitgegangen. Sie liebt es, aus unübersichtlichen Nutzerproblemen klare Roadmaps zu bauen und Teams auf eine gemeinsame Vision einzuschwören. Nach dem Exit sucht sie jetzt ein neues Gründerteam, in dem sie Produktverantwortung von Tag eins übernehmen kann. Am liebsten im Consumer- oder Marketplace-Bereich mit starkem technischem Gegenpart.",
+    "experience": [
+      {
+        "title": "Head of Product",
+        "company": "FoodFleet (Foodtech-Scaleup)",
+        "start": "2021",
+        "end": "2026",
+        "description": "Produktverantwortung für Marketplace- und Logistik-Features, Team von 12 PMs/Designer:innen aufgebaut."
+      },
+      {
+        "title": "Senior Product Manager",
+        "company": "Delivery Hero",
+        "start": "2018",
+        "end": "2021",
+        "description": "Wachstums-Features für die Restaurant-App in DACH."
+      },
+      {
+        "title": "Product Manager",
+        "company": "Zalando",
+        "start": "2016",
+        "end": "2018",
+        "description": "Erste Produktrolle nach dem Studium, Fokus Checkout-Experience."
+      }
+    ],
+    "education": [
+      {
+        "school": "WHU – Otto Beisheim School of Management",
+        "degree": "MSc",
+        "field": "Management",
+        "start": "2014",
+        "end": "2016"
+      },
+      {
+        "school": "Universität Mannheim",
+        "degree": "BSc",
+        "field": "Wirtschaftsinformatik",
+        "start": "2011",
+        "end": "2014"
+      }
+    ],
+    "skills": ["Produktstrategie", "Roadmapping", "User Research", "A/B-Testing", "Stakeholder-Management", "Marketplace-Ökonomie", "SQL", "Teamaufbau"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "product",
+    "lookingFor": ["technical cofounder", "commercial cofounder"],
+    "verticals": ["consumer", "ecommerce"],
+    "stage": "pre-seed",
+    "dims": { "vision": 9, "design": 6, "tech": 3, "detail": 8, "execution": 8 },
+    "personality": {
+      "type": "visionary",
+      "summary": "Lena denkt zuerst in Zukunftsbildern und leitet daraus die nächsten Schritte ab – sie zieht Menschen mit Begeisterung für das große Ziel mit.",
+      "traits": ["begeisternd", "strategisch", "ungeduldig bei Details", "direkt"],
+      "communicationStyle": "Kurz und bildhaft, am liebsten im Gespräch statt per E-Mail; mag es, wenn man mit einer klaren These startet.",
+      "outreachTips": ["Mit der großen Vision einsteigen, nicht mit Details", "Konkreten Gesprächstermin statt langer Mail vorschlagen", "Auf gemeinsame Foodtech-/Marketplace-Erfahrung verweisen"],
+      "avoid": ["Zu viele Zahlen ohne Kontext in der ersten Nachricht", "Lange Bulletpoint-Listen"]
+    },
+    "events": ["bits-and-pretzels-2026", "slush-2026"],
+    "tags": ["ex-scaleup", "marketplace", "team-aufbau"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "jonas-weidner",
+    "name": "Jonas Weidner",
+    "headline": "Senior Product Manager – Edtech & Healthtech",
+    "location": "München, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=jonas-weidner",
+    "email": "jonas.weidner@example.com",
+    "linkedinUrl": "https://linkedin.com/in/jonas-weidner",
+    "about": "Jonas baut seit fünf Jahren Produkte an der Schnittstelle von Edtech und Healthtech und hat zuletzt eine Lernplattform für Pflegekräfte von 0 auf 40.000 Nutzer:innen gebracht. Ihm liegt besonders daran, Nutzerforschung eng mit Business-Zielen zu verzahnen. Er ist ein ruhiger, verbindlicher Typ, der gerne zwischen Tech-Team und Vertrieb vermittelt. Aktuell sucht er ein Gründerteam im Bildungs- oder Gesundheitsbereich, bei dem er als Product Cofounder einsteigen kann.",
+    "experience": [
+      {
+        "title": "Senior Product Manager",
+        "company": "CareLearn",
+        "start": "2022",
+        "end": "2026",
+        "description": "Lernplattform für Pflegekräfte, Wachstum von 0 auf 40.000 Nutzer:innen."
+      },
+      {
+        "title": "Product Manager",
+        "company": "Studyflix",
+        "start": "2020",
+        "end": "2022",
+        "description": "Verantwortung für Content-Empfehlungen und Nutzer-Onboarding."
+      },
+      {
+        "title": "Werkstudent Produktmanagement",
+        "company": "Freeletics",
+        "start": "2018",
+        "end": "2020",
+        "description": "Unterstützung bei Nutzerbefragungen und Feature-Tests."
+      }
+    ],
+    "education": [
+      {
+        "school": "TU München",
+        "degree": "MSc",
+        "field": "Management & Technology",
+        "start": "2016",
+        "end": "2020"
+      }
+    ],
+    "skills": ["Nutzerforschung", "Produkt-Roadmap", "Stakeholder-Kommunikation", "Figma", "SQL", "Prioritisierung", "B2B2C-Modelle", "Onboarding-Optimierung"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "product",
+    "lookingFor": ["technical cofounder", "design cofounder"],
+    "verticals": ["edtech", "healthtech"],
+    "stage": "idea",
+    "dims": { "vision": 7, "design": 5, "tech": 4, "detail": 8, "execution": 7 },
+    "personality": {
+      "type": "connector",
+      "summary": "Jonas verbindet gerne Menschen und Perspektiven – er hört erst genau zu, bevor er Kontakte oder Ideen zusammenbringt.",
+      "traits": ["verbindlich", "zuhörend", "netzwerkstark", "geduldig"],
+      "communicationStyle": "Persönlich und warm, schätzt ein kurzes Kennenlerngespräch mehr als eine formelle Anfrage.",
+      "outreachTips": ["Gemeinsame Bekannte oder Events erwähnen", "Ein lockeres Kennenlerngespräch statt Pitch vorschlagen", "Konkretes Nutzerproblem im Edtech-/Healthtech-Bereich schildern"],
+      "avoid": ["Zu aggressives Verkaufen der eigenen Idee", "Unpersönliche Massen-Nachrichten"]
+    },
+    "events": ["idealab-2026", "tum-cofounder-matching-oct-2026"],
+    "tags": ["edtech", "healthtech", "b2b2c"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "mira-lindqvist",
+    "name": "Mira Lindqvist",
+    "headline": "Head of Product Operations – B2B SaaS",
+    "location": "Zürich, Schweiz",
+    "photoUrl": "https://i.pravatar.cc/200?u=mira-lindqvist",
+    "email": "mira.lindqvist@example.com",
+    "linkedinUrl": "https://linkedin.com/in/mira-lindqvist",
+    "about": "Mira hat als Head of Product Operations bei einem Zürcher B2B-SaaS-Unternehmen die Prozesse zwischen Produkt, Sales und Customer Success neu aufgesetzt. Sie denkt strukturiert, dokumentiert gerne sauber und sorgt dafür, dass Entscheidungen auf Daten statt Bauchgefühl beruhen. Vor ihrer Zeit in der Produktrolle hat sie mehrere Jahre im Consulting gearbeitet, was ihr einen sehr pragmatischen Blick auf Prioritäten gibt. Sie möchte als Product Cofounder in ein frühes B2B-SaaS-Team einsteigen, idealerweise mit einem technischen und einem kommerziellen Gegenpart.",
+    "experience": [
+      {
+        "title": "Head of Product Operations",
+        "company": "Nexolt (B2B SaaS)",
+        "start": "2023",
+        "end": "2026",
+        "description": "Prozesse zwischen Produkt, Sales und Customer Success aufgebaut."
+      },
+      {
+        "title": "Product Operations Manager",
+        "company": "Contentful",
+        "start": "2020",
+        "end": "2023",
+        "description": "Einführung von OKRs und Reporting-Standards fürs Produktteam."
+      },
+      {
+        "title": "Consultant",
+        "company": "McKinsey & Company",
+        "start": "2017",
+        "end": "2020",
+        "description": "Schwerpunkt Tech- und Operations-Projekte."
+      }
+    ],
+    "education": [
+      {
+        "school": "Universität St. Gallen (HSG)",
+        "degree": "MA",
+        "field": "Strategy and International Management",
+        "start": "2015",
+        "end": "2017"
+      },
+      {
+        "school": "Universität Zürich",
+        "degree": "BA",
+        "field": "Betriebswirtschaftslehre",
+        "start": "2012",
+        "end": "2015"
+      }
+    ],
+    "skills": ["Produktprozesse", "Datenanalyse", "SQL", "Roadmapping", "Cross-funktionale Führung", "OKRs", "Prioritisierung", "Stakeholder-Management"],
+    "languages": ["Deutsch", "Englisch", "Schwedisch"],
+    "networkRole": "cofounder",
+    "founderRole": "product",
+    "lookingFor": ["technical cofounder", "commercial cofounder"],
+    "verticals": ["b2b saas"],
+    "stage": "pre-seed",
+    "dims": { "vision": 7, "design": 4, "tech": 4, "detail": 9, "execution": 8 },
+    "personality": {
+      "type": "operator",
+      "summary": "Mira bringt Ordnung in Chaos – sie baut Prozesse, bevor sie zum Problem werden, und behält auch unter Zeitdruck den Überblick.",
+      "traits": ["strukturiert", "verlässlich", "analytisch", "pragmatisch"],
+      "communicationStyle": "Sachlich und präzise; schätzt eine klare Agenda und konkrete Fragen statt offener Gespräche.",
+      "outreachTips": ["Konkrete Agenda oder Fragen vorab schicken", "Auf Prozess- und Datenkompetenz eingehen", "Zeitrahmen für das Gespräch klar benennen"],
+      "avoid": ["Unstrukturierte Spontan-Anrufe", "Zu viel Pathos ohne konkrete nächste Schritte"]
+    },
+    "events": ["idealab-2026"],
+    "tags": ["b2b-saas", "operations", "prozesse"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "clara-vogt",
+    "name": "Clara Vogt",
+    "headline": "Senior UX/Product Designerin – Consumer Apps",
+    "location": "Köln, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=clara-vogt",
+    "email": "clara.vogt@example.com",
+    "linkedinUrl": "https://linkedin.com/in/clara-vogt-design",
+    "about": "Clara gestaltet seit sieben Jahren Consumer-Apps und hat zuletzt das komplette Redesign einer Fitness-App mit über einer Million Nutzer:innen verantwortet. Sie versteht Design als Brücke zwischen Nutzerbedürfnissen und Geschäftszielen und arbeitet dafür eng mit Product und Engineering zusammen. Besonders gern moderiert sie Workshops, in denen unterschiedliche Perspektiven im Team zusammenfinden. Jetzt sucht sie ein Gründerteam, in dem sie als Design Cofounder von Anfang an das Produkterlebnis prägen kann.",
+    "experience": [
+      {
+        "title": "Senior Product Designerin",
+        "company": "Freeletics",
+        "start": "2021",
+        "end": "2026",
+        "description": "Redesign der Fitness-App, Design-System-Aufbau, Team von 5 Designer:innen geführt."
+      },
+      {
+        "title": "UX Designerin",
+        "company": "AboutYou",
+        "start": "2019",
+        "end": "2021",
+        "description": "Verantwortung für den Checkout- und Such-Flow im Fashion-Ecommerce."
+      },
+      {
+        "title": "Junior Designerin",
+        "company": "Freelance",
+        "start": "2017",
+        "end": "2019",
+        "description": "Erste Projekte für lokale Start-ups und Agenturen."
+      }
+    ],
+    "education": [
+      {
+        "school": "Köln International School of Design (KISD)",
+        "degree": "BA",
+        "field": "Integrated Design",
+        "start": "2013",
+        "end": "2017"
+      }
+    ],
+    "skills": ["UX Research", "Interaction Design", "Figma", "Design Systems", "Prototyping", "Workshop-Moderation", "Usability Testing", "Visual Design"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "design",
+    "lookingFor": ["technical cofounder", "commercial cofounder"],
+    "verticals": ["consumer", "media"],
+    "stage": "idea",
+    "dims": { "vision": 7, "design": 9, "tech": 3, "detail": 8, "execution": 6 },
+    "personality": {
+      "type": "connector",
+      "summary": "Clara bringt in Workshops unterschiedliche Meinungen zusammen und sorgt dafür, dass sich am Ende alle im Ergebnis wiederfinden.",
+      "traits": ["empathisch", "moderierend", "kreativ", "offen"],
+      "communicationStyle": "Warm und dialogorientiert; mag es, Ideen gemeinsam weiterzuentwickeln statt fertige Konzepte zu bekommen.",
+      "outreachTips": ["Mit einer offenen Frage zum Produktproblem starten", "Auf gemeinsame Consumer-Erfahrung eingehen", "Ein informelles Treffen bei Kaffee statt formellem Call vorschlagen"],
+      "avoid": ["Fertige Lösungen ohne Raum für ihre Perspektive präsentieren", "Rein technische Deep-Dives ohne Nutzerbezug"]
+    },
+    "events": ["idealab-2026", "berlin-ai-hackathon-2026"],
+    "tags": ["consumer-apps", "design-systems", "ux-research"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "finn-ostrowski",
+    "name": "Finn Ostrowski",
+    "headline": "Brand & Visual Designer",
+    "location": "Hamburg, Deutschland",
+    "photoUrl": "https://i.pravatar.cc/200?u=finn-ostrowski",
+    "email": "finn.ostrowski@example.com",
+    "linkedinUrl": "https://linkedin.com/in/finn-ostrowski",
+    "about": "Finn hat als Brand Designer mehrere DTC-Marken im Ecommerce-Bereich von der ersten Wortmarke bis zur fertigen Markenwelt begleitet. Er denkt in konsistenten visuellen Systemen und legt großen Wert darauf, dass eine Marke sich über alle Kanäle hinweg gleich anfühlt. Neben klassischem Branding hat er zunehmend auch Social-Content und Kampagnen selbst produziert. Er sucht jetzt ein Gründerteam, bei dem er Marke und visuelle Identität von Tag eins mitgestalten kann.",
+    "experience": [
+      {
+        "title": "Senior Brand Designer",
+        "company": "Freelance / eigenes Studio",
+        "start": "2022",
+        "end": "2026",
+        "description": "Markenentwicklung für acht DTC-Ecommerce-Marken, von Naming bis Packaging."
+      },
+      {
+        "title": "Brand Designer",
+        "company": "Jung von Matt",
+        "start": "2019",
+        "end": "2022",
+        "description": "Markenkampagnen für mehrere DTC- und Retail-Kund:innen."
+      }
+    ],
+    "education": [
+      {
+        "school": "HAW Hamburg",
+        "degree": "BA",
+        "field": "Kommunikationsdesign",
+        "start": "2012",
+        "end": "2016"
+      }
+    ],
+    "skills": ["Brand Identity", "Typografie", "Adobe Creative Suite", "Social Content", "Kampagnenentwicklung", "Packaging Design", "Art Direction", "Illustration"],
+    "languages": ["Deutsch", "Englisch"],
+    "networkRole": "cofounder",
+    "founderRole": "design",
+    "lookingFor": ["commercial cofounder", "technical cofounder"],
+    "verticals": ["ecommerce", "consumer"],
+    "stage": "idea",
+    "dims": { "vision": 6, "design": 10, "tech": 2, "detail": 7, "execution": 7 },
+    "personality": {
+      "type": "builder",
+      "summary": "Finn setzt lieber selbst etwas um, als lange zu planen – er zeigt gerne einen ersten visuellen Entwurf statt nur davon zu erzählen.",
+      "traits": ["hands-on", "gestalterisch", "ungeduldig", "experimentierfreudig"],
+      "communicationStyle": "Locker und visuell – reagiert besser auf Moodboards oder Skizzen als auf lange Textnachrichten.",
+      "outreachTips": ["Ein visuelles Beispiel oder eine Referenz mitschicken", "Schnell auf ein konkretes erstes Projekt zu sprechen kommen", "Kurze, direkte Nachricht statt langer Vorstellung"],
+      "avoid": ["Sehr lange, textlastige Erstnachrichten", "Zu viel Theorie ohne sichtbares Ergebnis"]
+    },
+    "events": ["bits-and-pretzels-2026"],
+    "tags": ["branding", "dtc", "ecommerce"],
+    "source": { "type": "mock" }
+  },
+  {
+    "id": "noa-de-groot",
+    "name": "Noa de Groot",
+    "headline": "Design Engineer – Design Systems & Frontend",
+    "location": "Amsterdam, Niederlande",
+    "photoUrl": "https://i.pravatar.cc/200?u=noa-de-groot",
+    "email": "noa.degroot@example.com",
+    "linkedinUrl": "https://linkedin.com/in/noa-de-groot",
+    "about": "Noa bewegt sich seit Jahren an der Schnittstelle von Design und Frontend-Entwicklung und hat bei einem Proptech-Scaleup das Design System von Grund auf mitgebaut und in React implementiert. Sie liebt es, Interfaces nicht nur zu gestalten, sondern auch selbst sauber im Code umzusetzen. Dadurch versteht sie technische Constraints früh und kann Kompromisse zwischen Machbarkeit und Nutzererlebnis gut einschätzen. Sie sucht ein Gründerteam, in dem sie Design und Frontend eng verzahnt als Design Cofounder verantworten kann.",
+    "experience": [
+      {
+        "title": "Design Engineer",
+        "company": "Doorway (Proptech)",
+        "start": "2022",
+        "end": "2026",
+        "description": "Design System in React/Tailwind aufgebaut und in der gesamten Produktsuite ausgerollt."
+      },
+      {
+        "title": "Product Designer",
+        "company": "Adyen",
+        "start": "2020",
+        "end": "2022",
+        "description": "Gestaltung von Merchant-Dashboards und Zahlungsflows."
+      },
+      {
+        "title": "Frontend-Entwicklerin (Teilzeit)",
+        "company": "Freelance",
+        "start": "2019",
+        "end": "2020",
+        "description": "Umsetzung von React-Komponenten für kleinere Start-ups."
+      },
+      {
+        "title": "UX Design Intern",
+        "company": "Booking.com",
+        "start": "2018",
+        "end": "2019",
+        "description": "Unterstützung im Search- und Booking-Flow-Team."
+      }
+    ],
+    "education": [
+      {
+        "school": "TU Delft",
+        "degree": "MSc",
+        "field": "Design for Interaction",
+        "start": "2017",
+        "end": "2019"
+      },
+      {
+        "school": "Hogeschool van Amsterdam",
+        "degree": "BA",
+        "field": "Communication & Multimedia Design",
+        "start": "2013",
+        "end": "2017"
+      }
+    ],
+    "skills": ["Design Systems", "React", "TypeScript", "Figma", "Accessibility", "CSS/Tailwind", "Prototyping", "Component-Architektur"],
+    "languages": ["Niederländisch", "Englisch", "Deutsch"],
+    "networkRole": "cofounder",
+    "founderRole": "design",
+    "lookingFor": ["commercial cofounder", "product cofounder"],
+    "verticals": ["proptech", "b2b saas"],
+    "stage": "pre-seed",
+    "dims": { "vision": 6, "design": 9, "tech": 7, "detail": 9, "execution": 7 },
+    "personality": {
+      "type": "analyst",
+      "summary": "Noa hinterfragt gerne Details und Constraints, bevor sie sich festlegt – ihre Entwürfe sind am Ende technisch und gestalterisch stimmig.",
+      "traits": ["genau", "technisch versiert", "ruhig", "gründlich"],
+      "communicationStyle": "Schriftlich und durchdacht; beantwortet lieber eine präzise Frage ausführlich als in einem schnellen Call zu improvisieren.",
+      "outreachTips": ["Konkrete technische oder gestalterische Fragestellung mitschicken", "Schriftlichen Erstkontakt per E-Mail oder LinkedIn wählen", "Genug Zeit für eine durchdachte Antwort einplanen"],
+      "avoid": ["Spontane Anrufe ohne Vorwarnung", "Vage Anfragen ohne konkretes Projekt"]
+    },
+    "events": ["berlin-ai-hackathon-2026"],
+    "tags": ["design-engineering", "design-systems", "frontend"],
+    "source": { "type": "mock" }
+  }
+]
