@@ -70,6 +70,8 @@ function networkRoleLabel(role: NetworkRole): string {
   return NETWORK_ROLES.find((r) => r.value === role)?.label ?? role;
 }
 
+const NAME_INPUT_ID = "onboarding-name";
+
 function toggle<T>(list: T[], item: T): T[] {
   return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
 }
@@ -277,6 +279,9 @@ function FormBody({
     const name = form.name.trim();
     if (!name) {
       setError("Bitte gib deinen Namen an – so spricht dich der Agent an.");
+      const el = document.getElementById(NAME_INPUT_ID);
+      el?.scrollIntoView({ block: "center", behavior: "smooth" });
+      el?.focus();
       return;
     }
     setError(null);
@@ -346,6 +351,7 @@ function FormBody({
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Name *">
             <Input
+              id={NAME_INPUT_ID}
               value={form.name}
               onChange={(e) => patch({ name: e.target.value })}
               placeholder="Vor- und Nachname"
