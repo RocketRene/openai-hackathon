@@ -191,6 +191,7 @@ export function ShortlistCompare() {
                     <span className={cx("text-lg font-semibold tabular-nums", best ? "text-[var(--accent)]" : "text-[var(--foreground)]")}>{match.score}</span>
                     <span className="text-xs text-[var(--muted)]"> / 100</span>
                     {match.reasons[0] && <p className="mt-0.5 text-xs text-[var(--muted)]">{match.reasons[0].label}</p>}
+                    {match.risks[0] && <p className="mt-0.5 text-xs text-[var(--warning)]">{match.risks[0]}</p>}
                   </div>
                 );
               }}
