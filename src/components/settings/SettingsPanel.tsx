@@ -70,6 +70,7 @@ export default function SettingsPanel() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [healthError, setHealthError] = useState<string | null>(null);
   const [healthLoading, setHealthLoading] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
 
   const { userContext, ready, replace, clear, loadDemo } = useUserContext();
   const [message, setMessage] = useState<{ tone: "success" | "danger"; text: string } | null>(null);
@@ -77,6 +78,8 @@ export default function SettingsPanel() {
 
   useEffect(() => {
     let cancelled = false;
+    setHealthLoading(true);
+    setHealthError(null);
     fetch("/api/health", { cache: "no-store" })
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -94,7 +97,10 @@ export default function SettingsPanel() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [reloadKey]);
+
+  const sourcesTotal = health ? Object.values(health.sources).reduce((sum, n) => sum + n, 0) : 0;
+  const withoutSource = health ? Math.max(0, health.profiles - sourcesTotal) : 0;
 
   function handleExport() {
     if (!userContext) return;
@@ -147,7 +153,12 @@ export default function SettingsPanel() {
     <div className="flex flex-col gap-6">
       {/* ---------------- Status ---------------- */}
       <section>
-        <h2 className="mb-3 text-base font-semibold text-[var(--foreground)]">Systemstatus</h2>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="text-base font-semibold text-[var(--foreground)]">Systemstatus</h2>
+          <Button variant="ghost" size="sm" onClick={() => setReloadKey((k) => k + 1)} disabled={healthLoading}>
+            Neu laden
+          </Button>
+        </div>
         {healthError && (
           <p className="mb-3 rounded-md border border-[var(--danger)] bg-[var(--danger-soft)] px-3 py-2 text-sm text-[var(--danger)]">
             /api/health konnte nicht geladen werden ({healthError}).
@@ -204,6 +215,7 @@ export default function SettingsPanel() {
                 {(Object.keys(SOURCE_LABELS) as Array<keyof HealthResponse["sources"]>).map((key) => (
                   <StatusRow key={key} label={SOURCE_LABELS[key]} value={health.sources[key]} />
                 ))}
+                {withoutSource > 0 && <StatusRow label="Ohne Quellenangabe" value={withoutSource} />}
               </div>
             )}
           </Card>
