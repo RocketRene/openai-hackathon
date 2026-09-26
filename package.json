@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "import:idealab": "node scripts/import-idealab.mjs",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@openai/agents": "^0.18.0",

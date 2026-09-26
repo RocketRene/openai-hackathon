@@ -71,9 +71,21 @@ Brauchst du eine Änderung daran → im eigenen Modul lokal lösen und im Abschl
 - **Fotos:** echte Profile: `avatar_url` aus dem Export; Mock: `https://i.pravatar.cc/200?u=<id>`.
 - **Ohne OPENAI_API_KEY** muss jede API einen Template-/Regel-Fallback liefern (kein 500).
 
-## Arbeitsablauf pro Agent
+## Arbeitsablauf pro Agent (Stand 26.09., harte Zeitgrenze!)
 
-1. Im eigenen Worktree: `ln -s /home/marvin/Documents/Projects/HackathonIdeaLab/node_modules node_modules` (falls nicht vorhanden).
+1. Worktree prüfen: `ls src/lib/types.ts` – fehlt es, `git fetch origin && git merge --ff-only origin/main`.
+   `ln -s /home/marvin/Documents/Projects/HackathonIdeaLab/node_modules node_modules` (falls nicht vorhanden).
 2. Nur eigene Dateien schreiben. Prüfen: `npx tsc --noEmit 2>&1 | grep -E "<eigene Pfade>"` und `npx eslint <eigene Dateien>`.
 3. Kein `next build`, kein `next dev`, kein `npm install`.
-4. Committen auf Branch `agent/<paket>` (nur eigene Dateien). Nicht pushen – der Koordinator merged.
+4. Eigener Branch `agent/<paket>` (oder der vom Worktree vorgegebene). **Früh und oft committen, jeden Commit
+   sofort pushen:** `git push -u origin HEAD`.
+5. **Selbst auf main bringen**, sobald die eigenen Dateien tsc-sauber sind:
+   `git fetch origin && git rebase origin/main && git push origin HEAD && git push origin HEAD:main`
+   (bei Race: fetch + rebase erneut, dann push wiederholen). Niemals `--force`.
+
+## Contract-Notizen aus den Paketen
+
+- `/api/profiles` liefert `{ items, total, facets }`; mit `?format=array` ein reines `Profile[]`.
+- Vokabular `lookingFor` zusätzlich: `job as growth`.
+- `FOUNDER_ROLE_LABELS` (deutsche Rollen-Labels) liegt in `src/lib/team.ts`; deutsche NetworkRole-Labels lokal in
+  `src/components/assistant/LiveCandidatePanel.tsx` – Kandidaten für `types.ts` nach dem MVP.
