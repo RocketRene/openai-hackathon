@@ -287,6 +287,7 @@ export default function OutreachWorkspace() {
               const channel = row.channel ?? defaultChannelFor(profile);
               const selected = selectedId === profile.id;
               const pinned = preselectedId === profile.id;
+              const topReason = [...(match.reasons ?? [])].sort((a, b) => b.weight - a.weight)[0];
 
               return (
                 <li
@@ -314,6 +315,12 @@ export default function OutreachWorkspace() {
                       <p className="truncate text-sm text-[var(--muted)]" title={profile.headline}>
                         {profile.headline}
                       </p>
+                      {topReason && (
+                        <p className="truncate text-xs text-[var(--muted)]" title={topReason.detail}>
+                          <span className="font-medium text-[var(--foreground)]">Warum priorisiert:</span> {topReason.label}
+                          {topReason.detail ? ` – ${topReason.detail}` : ""}
+                        </p>
+                      )}
                     </div>
                     <div className="text-right" title="Match-Score">
                       <span className="text-lg font-semibold text-[var(--foreground)]">{Math.round(match.score)}</span>
