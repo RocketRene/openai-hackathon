@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function ShortlistPage() {
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8">
+    <div>
       <PageHeader title="Shortlist" subtitle="Deine gemerkten Kontakte im Vergleich" />
       <ShortlistCompare />
-    </main>
+    </div>
   );
 }
