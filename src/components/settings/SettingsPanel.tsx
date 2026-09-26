@@ -78,8 +78,6 @@ export default function SettingsPanel() {
 
   useEffect(() => {
     let cancelled = false;
-    setHealthLoading(true);
-    setHealthError(null);
     fetch("/api/health", { cache: "no-store" })
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -101,6 +99,12 @@ export default function SettingsPanel() {
 
   const sourcesTotal = health ? Object.values(health.sources).reduce((sum, n) => sum + n, 0) : 0;
   const withoutSource = health ? Math.max(0, health.profiles - sourcesTotal) : 0;
+
+  function handleReloadHealth() {
+    setHealthLoading(true);
+    setHealthError(null);
+    setReloadKey((k) => k + 1);
+  }
 
   function handleExport() {
     if (!userContext) return;
@@ -155,7 +159,7 @@ export default function SettingsPanel() {
       <section>
         <div className="mb-3 flex items-center justify-between gap-2">
           <h2 className="text-base font-semibold text-[var(--foreground)]">Systemstatus</h2>
-          <Button variant="ghost" size="sm" onClick={() => setReloadKey((k) => k + 1)} disabled={healthLoading}>
+          <Button variant="ghost" size="sm" onClick={handleReloadHealth} disabled={healthLoading}>
             Neu laden
           </Button>
         </div>
