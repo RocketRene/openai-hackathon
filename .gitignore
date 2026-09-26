@@ -42,3 +42,6 @@ next-env.d.ts
 
 # keep the example env committed
 !.env.example
+
+# claude code agent worktrees
+/.claude/worktrees/
