@@ -3,7 +3,7 @@
  * Client-seitiger Store für den Nutzer-Kontext (MVP: localStorage).
  * Alle Komponenten lesen/schreiben über diese Funktionen bzw. den Hook – nie direkt localStorage.
  */
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import type { UserContext } from "./types";
 
 const STORAGE_KEY = "founderradar.userContext.v1";
@@ -84,38 +84,53 @@ export function clearUserContext(): void {
   }
 }
 
+function subscribe(cb: () => void) {
+  window.addEventListener(CHANGE_EVENT, cb);
+  window.addEventListener("storage", cb);
+  return () => {
+    window.removeEventListener(CHANGE_EVENT, cb);
+    window.removeEventListener("storage", cb);
+  };
+}
+
+function getSnapshot(): string | null {
+  try {
+    return window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function getServerSnapshot(): string | null | undefined {
+  return undefined;
+}
+
 /**
- * Hook: liefert den Kontext (null bis geladen), plus Setter.
- * `ready` ist false, solange localStorage noch nicht gelesen wurde (Hydration).
+ * Hook: liefert den Kontext (null, wenn keiner gespeichert ist), plus Setter.
+ * `ready` ist false, solange localStorage noch nicht gelesen wurde (SSR/Hydration).
  */
 export function useUserContext() {
-  const [ctx, setCtx] = useState<UserContext | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const sync = () => setCtx(loadUserContext());
-    sync();
-    setReady(true);
-    window.addEventListener(CHANGE_EVENT, sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener(CHANGE_EVENT, sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, []);
+  const raw = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const ready = raw !== undefined;
+  const ctx = useMemo<UserContext | null>(() => {
+    if (!raw) return null;
+    try {
+      return { ...DEFAULT_USER_CONTEXT, ...(JSON.parse(raw) as Partial<UserContext>) };
+    } catch {
+      return null;
+    }
+  }, [raw]);
 
   const update = useCallback((patch: Partial<UserContext>) => {
-    setCtx(patchUserContext(patch));
+    patchUserContext(patch);
   }, []);
 
   const replace = useCallback((next: UserContext) => {
     saveUserContext(next);
-    setCtx(loadUserContext());
   }, []);
 
   const loadDemo = useCallback(() => {
     saveUserContext(DEMO_USER_CONTEXT);
-    setCtx(loadUserContext());
   }, []);
 
   return { userContext: ctx, ready, update, replace, loadDemo, clear: clearUserContext };
