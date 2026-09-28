@@ -36,7 +36,7 @@ function QuickChip({
       onClick={onClick}
       disabled={disabled}
       className={cx(
-        "inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 py-1.5 text-left text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-left text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:cursor-not-allowed disabled:opacity-50",
         highlight
           ? "border-transparent bg-[var(--accent-soft)] text-[var(--accent)] hover:opacity-80"
           : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-2)]",
@@ -140,7 +140,7 @@ export default function SimulationPanel({
       {/* Voice-Agent – hervorgehoben */}
       <section
         aria-labelledby="sim-voice-title"
-        className="rounded-[var(--radius)] border border-[var(--accent)]/30 bg-[var(--accent-soft)] p-5 shadow-[var(--shadow-sm)]"
+        className="rounded-[var(--radius-lg)] border border-[var(--accent)]/30 bg-[var(--accent-soft)] p-5 shadow-[var(--shadow-sm)]"
       >
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div className="flex items-start gap-3">
@@ -165,7 +165,7 @@ export default function SimulationPanel({
       {/* Text-Simulation */}
       <section
         aria-labelledby="sim-chat-title"
-        className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-sm)]"
+        className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-sm)]"
       >
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -246,7 +246,7 @@ export default function SimulationPanel({
         </div>
 
         {/* Eingabe – bleibt unten sichtbar */}
-        <div className="sticky bottom-0 rounded-b-[var(--radius)] border-t border-[var(--border)] bg-[var(--surface)]/95 p-3 backdrop-blur">
+        <div className="sticky bottom-0 rounded-b-[var(--radius-lg)] border-t border-[var(--border)] bg-[var(--surface)]/95 p-3 backdrop-blur">
           <form onSubmit={onSubmit} className="flex items-end gap-2">
             <Textarea
               value={input}

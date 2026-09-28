@@ -76,7 +76,7 @@ function PrepSkeleton() {
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className="flex items-center gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]"
+            className="flex items-center gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]"
           >
             <Skeleton className="h-7 w-7 shrink-0 rounded-full" />
             <Skeleton className={cx("h-4", i % 2 ? "w-2/3" : "w-1/2")} />
@@ -199,7 +199,7 @@ export default function PrepWorkspace({ profile }: { profile: Profile }) {
 
       {/* Kontext-Hinweis */}
       {ready && !userContext && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius)] border border-[var(--warning)]/40 bg-[var(--warning-soft)] px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--warning)]/40 bg-[var(--warning-soft)] px-4 py-3">
           <div className="flex items-start gap-2.5">
             <IconAlert size={16} className="mt-0.5 shrink-0 text-[var(--warning)]" />
             <p className="text-sm text-[var(--foreground)]">
@@ -236,7 +236,7 @@ export default function PrepWorkspace({ profile }: { profile: Profile }) {
                 aria-controls={`prep-panel-${tab.id}`}
                 onClick={() => setSection(tab.id)}
                 className={cx(
-                  "inline-flex h-8 flex-1 items-center justify-center gap-2 rounded-full px-4 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] sm:flex-none",
+                  "inline-flex h-9 flex-1 items-center justify-center gap-2 rounded-full px-4 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] sm:flex-none",
                   active
                     ? "bg-[var(--accent)] text-[var(--accent-contrast)] shadow-[var(--shadow-sm)]"
                     : "text-[var(--muted)] hover:text-[var(--foreground)]",
@@ -270,7 +270,7 @@ export default function PrepWorkspace({ profile }: { profile: Profile }) {
         {pack && (
           <div className={cx("space-y-4 transition-opacity", loading && "opacity-60")}>
             {error && !loading && (
-              <div className="flex items-start gap-2.5 rounded-[var(--radius)] border border-[var(--danger)]/40 bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]">
+              <div className="flex items-start gap-2.5 rounded-[var(--radius-lg)] border border-[var(--danger)]/40 bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]">
                 <IconAlert size={16} className="mt-0.5 shrink-0" />
                 <p>{error} Es wird die letzte Version angezeigt.</p>
               </div>

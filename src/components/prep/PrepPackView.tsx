@@ -70,10 +70,10 @@ function Eyebrow({ children, tone = "muted" }: { children: ReactNode; tone?: "mu
 function QuestionCard({ q, index, defaultOpen }: { q: PrepQuestion; index: number; defaultOpen: boolean }) {
   return (
     <details
-      className="group rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-sm)] transition hover:border-[var(--accent)]/40 open:border-[var(--accent)]/40"
+      className="group rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] shadow-[var(--shadow-sm)] transition hover:border-[var(--accent)]/40 open:border-[var(--accent)]/40"
       open={defaultOpen}
     >
-      <summary className="flex cursor-pointer list-none items-start gap-3 rounded-[var(--radius)] p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-start gap-3 rounded-[var(--radius-lg)] p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] [&::-webkit-details-marker]:hidden">
         <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent)]">
           {index + 1}
         </span>
@@ -137,9 +137,14 @@ export default function PrepPackView({
             )}
           </Badge>
           {onRegenerate && (
-            <Button variant="secondary" size="sm" onClick={onRegenerate} disabled={regenerating}>
-              <IconRefresh size={14} className={cx(regenerating && "animate-spin")} />
-              {regenerating ? "Generiere …" : "Neu generieren"}
+            <Button variant="secondary" size="sm" onClick={onRegenerate} loading={regenerating}>
+              {regenerating ? (
+                "Generiere …"
+              ) : (
+                <>
+                  <IconRefresh size={14} /> Neu generieren
+                </>
+              )}
             </Button>
           )}
         </div>
@@ -151,7 +156,7 @@ export default function PrepPackView({
           <span id="prep-questions-title">Das wird {vorname} wissen wollen</span>
         </SectionTitle>
         {questions.length === 0 ? (
-          <div className="rounded-[var(--radius)] border border-dashed border-[var(--border)] px-6 py-8 text-center text-sm text-[var(--muted)]">
+          <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] px-6 py-8 text-center text-sm text-[var(--muted)]">
             Keine Fragen generiert.
           </div>
         ) : (
