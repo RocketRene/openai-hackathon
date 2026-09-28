@@ -15,9 +15,16 @@ export interface ChatPanelProps {
   onUiAction: (action: UiAction) => void;
   /** Lokale Begrüßung des Assistenten (ohne API-Aufruf). */
   initialAssistantMessage?: string;
+  /**
+   * Optional kontrolliert: Verlauf von außen (z. B. AssistantWorkspace hält ihn gemeinsam mit dem
+   * Voice-Agent). Wenn gesetzt, ist `onMessagesChange` die einzige Schreibstelle.
+   */
+  messages?: ChatMessage[];
+  /** Meldet jeden neuen Verlauf nach oben (auch im unkontrollierten Modus). */
+  onMessagesChange?: (messages: ChatMessage[]) => void;
 }
 
-const DEFAULT_GREETING =
+export const DEFAULT_GREETING =
   "Hi! Ich bin dein Voya. Erzähl mir kurz: Welche Rolle hast du und wen suchst du?";
 
 const QUICK_PROMPTS = [
@@ -25,6 +32,7 @@ const QUICK_PROMPTS = [
   "Zeig mir passende Kandidaten",
   "Guck dir mal den Max an",
   "Wer sind Investoren für Pre-Seed?",
+  "Bereite mich auf das Gespräch mit Lena vor",
 ];
 
 async function readErrorMessage(res: Response): Promise<string> {
@@ -37,11 +45,38 @@ async function readErrorMessage(res: Response): Promise<string> {
   return `Der Agent hat nicht geantwortet (HTTP ${res.status}).`;
 }
 
-export default function ChatPanel({ mode, candidateId, onUiAction, initialAssistantMessage }: ChatPanelProps) {
+export default function ChatPanel({
+  mode,
+  candidateId,
+  onUiAction,
+  initialAssistantMessage,
+  messages: controlledMessages,
+  onMessagesChange,
+}: ChatPanelProps) {
   const { userContext, update } = useUserContext();
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const [internalMessages, setInternalMessages] = useState<ChatMessage[]>([
     { role: "assistant", content: initialAssistantMessage ?? DEFAULT_GREETING },
   ]);
+  const messages = controlledMessages ?? internalMessages;
+  // Aktuellster Verlauf für asynchrone Appends (Antwort vom Server), auch im kontrollierten Modus.
+  const messagesRef = useRef(messages);
+  const onMessagesChangeRef = useRef(onMessagesChange);
+  useEffect(() => {
+    messagesRef.current = messages;
+    onMessagesChangeRef.current = onMessagesChange;
+  }, [messages, onMessagesChange]);
+  const controlled = controlledMessages !== undefined;
+
+  const setMessages = useCallback(
+    (updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+      const next = typeof updater === "function" ? updater(messagesRef.current) : updater;
+      messagesRef.current = next;
+      if (!controlled) setInternalMessages(next);
+      onMessagesChangeRef.current?.(next);
+    },
+    [controlled],
+  );
+
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +115,7 @@ export default function ChatPanel({ mode, candidateId, onUiAction, initialAssist
         setLoading(false);
       }
     },
-    [userContext, mode, candidateId, update, onUiAction],
+    [userContext, mode, candidateId, update, onUiAction, setMessages],
   );
 
   const send = useCallback(
@@ -92,7 +127,7 @@ export default function ChatPanel({ mode, candidateId, onUiAction, initialAssist
       setInput("");
       void requestReply(history);
     },
-    [messages, loading, requestReply],
+    [messages, loading, requestReply, setMessages],
   );
 
   /** Letzte Nutzer-Nachricht erneut schicken, ohne sie zu duplizieren. */

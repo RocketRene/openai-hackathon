@@ -2,7 +2,9 @@
  * Tools des Voice-Agents (OpenAI Agents SDK).
  * ---------------------------------------------------------------
  * Paket "voice-agent". Läuft nur im Browser (Client-Component), weil der
- * Nutzer-Kontext in localStorage liegt. Daten ausschließlich über src/lib/data.ts.
+ * Nutzer-Kontext in localStorage liegt. Daten ausschließlich über src/lib/data.ts,
+ * Suche über src/lib/search.ts (lexikalisch, Voya-Port), Leitfaden über
+ * src/lib/interview-guide.ts, Merkliste über src/lib/shortlist.ts.
  *
  * SDK-Eigenheit: `tool()` ist per Default strict – alle Felder sind "required".
  * Optionale Felder deshalb als `.nullable()` (nicht `.optional()`), das Modell
@@ -12,10 +14,16 @@ import { tool } from "@openai/agents/realtime";
 import { z } from "zod";
 
 import { findProfileByName, getEvents, getProfile, getProfiles, getProfilesForEvent, searchProfiles } from "@/lib/data";
+import { buildInterviewGuide, summarizeInterviewGuide } from "@/lib/interview-guide";
 import { rankCandidates } from "@/lib/matching";
+import { lexicalSearch } from "@/lib/search";
+import { addToShortlist, loadShortlist } from "@/lib/shortlist";
 import { DEFAULT_USER_CONTEXT, loadUserContext, patchUserContext } from "@/lib/user-context";
 import { PERSONALITY_LABELS, type Profile, type UiAction, type UserContext } from "@/lib/types";
 import { LIKELY_QUESTIONS_BY_ROLE } from "./voice-prompts";
+
+/** Voya-Hinweis: die lexikalische Suche zählt Treffer, sie bewertet keine Eignung. */
+const SEARCH_NOTE = "Suchbegriff-Treffer, keine Eignungswahrscheinlichkeit.";
 
 export interface VoiceToolsContext {
   /** Leitet UI-Aktionen (Profil anzeigen, Liste anzeigen, Kontext-Update) an die Seite weiter. */
@@ -98,8 +106,40 @@ function compactUserContext(ctx: UserContext) {
     strengths: ctx.strengths,
     dims: ctx.dims,
     notes: ctx.notes ?? "",
+    constraints: ctx.constraints ?? "",
     completedInterview: ctx.completedInterview,
   };
+}
+
+/** Quelle eines Profils, wie sie im UI steht (Voya: Quellen-Transparenz). */
+function sourceLabel(p: Profile): string {
+  switch (p.source?.type) {
+    case "linkedin":
+      return "LinkedIn + IdeaLab";
+    case "conference":
+      return "IdeaLab";
+    case "mock":
+      return "Demo";
+    default:
+      return "manuell";
+  }
+}
+
+/** Listen vereinigen: Bestehendes bleibt, Neues kommt dazu (Voya: „erhalten und ergänzen“). */
+function mergeList<T>(current: readonly T[] | undefined, incoming: readonly T[] | null | undefined): T[] | null {
+  if (!incoming) return null;
+  const merged = Array.from(new Set([...(current ?? []), ...incoming]));
+  return merged;
+}
+
+/** Freitext anhängen statt ersetzen; doppelte Sätze werden nicht erneut angehängt. */
+function mergeText(current: string | undefined, incoming: string | null | undefined): string | null {
+  const add = incoming?.replace(/\s+/g, " ").trim();
+  if (!add) return null;
+  const base = current?.trim() ?? "";
+  if (!base) return add;
+  if (base.toLowerCase().includes(add.toLowerCase())) return null;
+  return `${base}${/[.!?]$/.test(base) ? "" : "."} ${add}`;
 }
 
 const LEADING_FILLER = /^(den|die|der|das|dem|des|mal|bitte|doch|herrn?|frau|an|auf)\s+/i;
@@ -205,12 +245,12 @@ export function createVoiceTools(ctx: VoiceToolsContext) {
   const searchCandidates = tool({
     name: "search_candidates",
     description:
-      "Durchsucht alle Kontakte (Co-Founder, Investor:innen, Mentor:innen, Talente, Expert:innen) nach Freitext und Filtern und zeigt die Treffer im Dashboard. Nicht genutzte Filter als null übergeben.",
+      "Durchsucht alle Kontakte (Co-Founder, Investor:innen, Mentor:innen, Talente, Expert:innen) mit einer lexikalischen Suche über Name, Headline, Ort, Skills, Verticals, Stationen, Ausbildung und Tags und zeigt die Treffer im Dashboard. Kurze berufliche Suchbegriffe nutzen (z. B. „fintech python“, „machine learning münchen“); bei wenig Treffern deutsche und englische Varianten probieren. Das Ergebnis zählt Suchbegriff-Treffer, es ist keine Eignungswahrscheinlichkeit. Nicht genutzte Filter als null übergeben.",
     parameters: z.object({
       query: z
         .string()
         .nullable()
-        .describe("Freitext über Name, Headline, Skills, Firma, Ort, Verticals – null, wenn kein Suchbegriff"),
+        .describe("Kurze Suchbegriffe über Name, Headline, Skills, Firma, Ort, Verticals, Ausbildung – null, wenn kein Suchbegriff"),
       networkRole: NETWORK_ROLE.nullable().describe(
         "Rolle im Ökosystem: cofounder, investor, mentor, talent oder expert – null für alle",
       ),
@@ -225,38 +265,54 @@ export function createVoiceTools(ctx: VoiceToolsContext) {
     }),
     execute: async (input) => {
       const limit = input.limit ?? 5;
-      const results = searchProfiles({
-        query: input.query ?? undefined,
+      const query = input.query?.trim() ?? "";
+
+      // 1) Strukturierte Filter über das Gateway (ohne Freitext), 2) lexikalische Suche darüber.
+      const filtered = searchProfiles({
         networkRole: input.networkRole ?? undefined,
         founderRole: input.founderRole ?? undefined,
         vertical: input.vertical?.trim().toLowerCase() || undefined,
       });
+      const hits = lexicalSearch(filtered, query, { limit: 50 });
 
-      // Wenn ein Nutzer-Kontext existiert, nach Match-Score sortieren.
+      // Ohne Suchbegriff (nur Filter) nach Match-Score sortieren, sofern ein Nutzer-Kontext existiert.
       const user = loadUserContext();
-      let ordered = results;
-      if (user && results.length > 1) {
-        const byId = new Map(results.map((p) => [p.id, p] as const));
-        ordered = rankCandidates(user, results).flatMap((r) => {
-          const p = byId.get(r.profileId);
-          return p ? [p] : [];
+      let ordered = hits;
+      if (!query && user && hits.length > 1) {
+        const byId = new Map(hits.map((h) => [h.profile.id, h] as const));
+        ordered = rankCandidates(
+          user,
+          hits.map((h) => h.profile),
+        ).flatMap((r) => {
+          const h = byId.get(r.profileId);
+          return h ? [h] : [];
         });
       }
 
       const top = ordered.slice(0, limit);
       if (top.length > 0) {
-        ctx.emit({ type: "show_candidates", profileIds: top.map((p) => p.id) });
+        ctx.emit({ type: "show_candidates", profileIds: top.map((h) => h.profile.id) });
       }
 
       return asJson({
         status: top.length > 0 ? "ok" : "empty",
-        total: results.length,
+        query,
+        total: hits.length,
         shown: top.length,
-        candidates: top.map(compactListEntry),
+        candidates: top.map((h) => ({
+          ...compactListEntry(h.profile),
+          matches: h.matches,
+          matchCount: h.score,
+          source: sourceLabel(h.profile),
+          firstExperience: h.profile.experience?.[0]
+            ? `${h.profile.experience[0].title} @ ${h.profile.experience[0].company}`
+            : null,
+        })),
+        note: SEARCH_NOTE,
         hint:
           top.length === 0
-            ? "Keine Treffer. Filter lockern (z. B. Vertical weglassen) oder anderen Suchbegriff probieren."
-            : "Nenne höchstens drei Namen laut und biete an, mehr zu zeigen oder ein Profil zu öffnen.",
+            ? "Keine Treffer. Kürzere oder andere Suchbegriffe probieren (deutsch/englisch), Filter lockern."
+            : "Nenne höchstens drei Namen laut und sag pro Person, welche Suchbegriffe getroffen haben – nicht, wie gut sie passt. Biete an, ein Profil zu öffnen.",
       });
     },
   });
@@ -264,7 +320,7 @@ export function createVoiceTools(ctx: VoiceToolsContext) {
   const saveUserContext = tool({
     name: "save_user_context",
     description:
-      "Speichert, was du über die Nutzer:in gelernt hast (Rolle, was gesucht wird, Vertical, Idee, Stärken, Stage …). Nur die neuen oder geänderten Felder übergeben, alles andere null. Listen ersetzen den bisherigen Wert komplett – also immer die vollständige Liste schicken.",
+      "Hält bestätigte Angaben über die Nutzer:in im Suchprofil fest (Rolle, was gesucht wird, Vertical, Idee, Stärken, Stage, Rahmenbedingungen …). Bestehende Inhalte bleiben erhalten und werden ergänzt: Listen werden mit dem Bisherigen vereinigt, Freitext (constraints, notes) wird angehängt, null lässt ein Feld unverändert. Nur übergeben, was die Nutzer:in tatsächlich gesagt hat – nichts erfinden.",
     parameters: z.object({
       name: z.string().nullable().describe("Name der Nutzer:in"),
       headline: z.string().nullable().describe("Kurzbeschreibung, z. B. „Tech-Founder, Full-Stack & AI“"),
@@ -293,10 +349,17 @@ export function createVoiceTools(ctx: VoiceToolsContext) {
         })
         .nullable()
         .describe("Selbsteinschätzung, nur wenn die Nutzer:in dazu etwas gesagt hat; einzelne Werte null lassen"),
-      notes: z.string().nullable().describe("Freitext-Notizen aus dem Gespräch, die sonst nirgends hinpassen"),
+      notes: z.string().nullable().describe("Freitext-Notizen aus dem Gespräch, die sonst nirgends hinpassen (wird angehängt)"),
+      constraints: z
+        .string()
+        .nullable()
+        .describe(
+          "Rahmenbedingungen als Freitext, wird angehängt: Standort/remote, verfügbare Zeit, Gründungsbeginn, Finanzierung/Risiko, Zusammenarbeit, Muss- und Ausschlusskriterien",
+        ),
       completedInterview: z.boolean().nullable().describe("true, sobald das Interview genug ergeben hat"),
     }),
     execute: async (input) => {
+      const current = loadUserContext() ?? DEFAULT_USER_CONTEXT;
       const patch: Partial<UserContext> = {};
       const set = <K extends keyof UserContext>(key: K, value: UserContext[K] | null | undefined) => {
         if (value !== null && value !== undefined) patch[key] = value;
@@ -306,32 +369,37 @@ export function createVoiceTools(ctx: VoiceToolsContext) {
       set("headline", input.headline?.trim() || null);
       set("linkedinUrl", input.linkedinUrl?.trim() || null);
       set("founderRole", input.founderRole);
-      set("lookingFor", input.lookingFor);
-      set("lookingForRoles", input.lookingForRoles);
+      set("lookingFor", mergeList(current.lookingFor, input.lookingFor));
+      set("lookingForRoles", mergeList(current.lookingForRoles, input.lookingForRoles));
       set(
         "verticals",
-        input.verticals ? input.verticals.map((v) => v.trim().toLowerCase()).filter(Boolean) : null,
+        mergeList(current.verticals, input.verticals ? input.verticals.map((v) => v.trim().toLowerCase()).filter(Boolean) : null),
       );
       set("stage", input.stage);
       set("idea", input.idea?.trim() || null);
       set("openToIdeas", input.openToIdeas);
-      set("strengths", input.strengths ? input.strengths.map((s) => s.trim()).filter(Boolean) : null);
-      set("notes", input.notes?.trim() || null);
+      set("strengths", mergeList(current.strengths, input.strengths ? input.strengths.map((s) => s.trim()).filter(Boolean) : null));
+      set("notes", mergeText(current.notes, input.notes));
+      set("constraints", mergeText(current.constraints, input.constraints));
       set("completedInterview", input.completedInterview);
 
       if (input.dims) {
-        const current = loadUserContext()?.dims ?? DEFAULT_USER_CONTEXT.dims;
+        const dims = current.dims ?? DEFAULT_USER_CONTEXT.dims;
         patch.dims = {
-          vision: input.dims.vision ?? current.vision,
-          design: input.dims.design ?? current.design,
-          tech: input.dims.tech ?? current.tech,
-          detail: input.dims.detail ?? current.detail,
-          execution: input.dims.execution ?? current.execution,
+          vision: input.dims.vision ?? dims.vision,
+          design: input.dims.design ?? dims.design,
+          tech: input.dims.tech ?? dims.tech,
+          detail: input.dims.detail ?? dims.detail,
+          execution: input.dims.execution ?? dims.execution,
         };
       }
 
       if (Object.keys(patch).length === 0) {
-        return asJson({ status: "nothing_to_save", hint: "Keine neuen Felder übergeben." });
+        return asJson({
+          status: "nothing_to_save",
+          hint: "Nichts Neues – das Suchprofil enthält diese Angaben schon.",
+          userContext: compactUserContext(current),
+        });
       }
 
       const next = patchUserContext(patch);
@@ -415,7 +483,117 @@ export function createVoiceTools(ctx: VoiceToolsContext) {
     },
   });
 
-  return [showCandidate, searchCandidates, saveUserContext, proposeCandidates, listEvents];
+  const prepareInterview = tool({
+    name: "prepare_interview",
+    description:
+      "Erstellt einen belegbaren 30-Minuten-Interviewleitfaden für ein Erstgespräch mit einer Person (vier Abschnitte, Fragen mit Bezug auf ihre erste berufliche Station, plus was sich nicht aus dem Profil ableiten lässt). Der Leitfaden erscheint im Dashboard und kann als Markdown heruntergeladen werden. Entweder profileId oder name übergeben, das andere null.",
+    parameters: z.object({
+      profileId: z.string().nullable().describe("Profil-ID (Slug), falls bekannt – sonst null"),
+      name: z.string().nullable().describe("Name der Person, falls keine ID bekannt ist – sonst null"),
+    }),
+    execute: async ({ profileId, name }) => {
+      const hits = resolveProfiles(profileId?.trim() || name?.trim() || "");
+      if (hits.length === 0) {
+        return asJson({
+          status: "not_found",
+          hint: "Niemand gefunden. Frag nach dem Nachnamen oder nutze search_candidates.",
+        });
+      }
+      if (hits.length > 1) {
+        const shortlist = hits.slice(0, 8);
+        ctx.emit({ type: "show_candidates", profileIds: shortlist.map((p) => p.id) });
+        return asJson({
+          status: "ambiguous",
+          hint: "Mehrere Treffer – frag kurz, wen genau.",
+          candidates: shortlist.map(compactListEntry),
+        });
+      }
+      const profile = hits[0];
+      const guide = buildInterviewGuide(profile, loadUserContext());
+      ctx.emit({ type: "show_interview_guide", profileId: profile.id, guide });
+      return asJson({
+        status: "ok",
+        profileId: profile.id,
+        name: profile.name,
+        summary: summarizeInterviewGuide(guide),
+        sections: guide.sections.map((s) => ({ title: s.title, minutes: s.minutes, questions: s.questions })),
+        unknowns: guide.unknowns,
+        hint: "Der Leitfaden steht jetzt im Dashboard. Fasse ihn in zwei, drei Sätzen zusammen (Abschnitte, erste Frage zur beruflichen Station) und nenne, was im Gespräch geklärt werden muss. Erfinde keine Verfügbarkeit oder Eignung.",
+      });
+    },
+  });
+
+  const shortlistCandidate = tool({
+    name: "shortlist_candidate",
+    description:
+      "Setzt eine Person auf die Merkliste der Nutzer:in („merk dir die Lisa“, „den will ich mir merken“). Entweder profileId oder name übergeben, das andere null.",
+    parameters: z.object({
+      profileId: z.string().nullable().describe("Profil-ID (Slug), falls bekannt – sonst null"),
+      name: z.string().nullable().describe("Name der Person, falls keine ID bekannt ist – sonst null"),
+    }),
+    execute: async ({ profileId, name }) => {
+      const hits = resolveProfiles(profileId?.trim() || name?.trim() || "");
+      if (hits.length === 0) {
+        return asJson({ status: "not_found", hint: "Niemand gefunden. Frag nach dem Nachnamen." });
+      }
+      if (hits.length > 1) {
+        return asJson({
+          status: "ambiguous",
+          hint: "Mehrere Treffer – frag kurz, wen genau.",
+          candidates: hits.slice(0, 8).map(compactListEntry),
+        });
+      }
+      const profile = hits[0];
+      const before = loadShortlist();
+      const already = before.includes(profile.id);
+      const ids = already ? before : addToShortlist(profile.id);
+      return asJson({
+        status: already ? "already_on_shortlist" : "added",
+        name: profile.name,
+        profileId: profile.id,
+        shortlistCount: ids.length,
+        hint: already
+          ? `${profile.name} steht schon auf der Merkliste. Sag das in einem Satz.`
+          : `Bestätige in einem Satz, dass ${profile.name} gemerkt ist (jetzt ${ids.length} auf der Liste).`,
+      });
+    },
+  });
+
+  const getShortlist = tool({
+    name: "get_shortlist",
+    description: "Liest die Merkliste der Nutzer:in (gemerkte Personen) und zeigt sie im Dashboard.",
+    parameters: z.object({}),
+    execute: async () => {
+      const ids = loadShortlist();
+      const profiles = ids.flatMap((id) => {
+        const p = getProfile(id);
+        return p ? [p] : [];
+      });
+      if (profiles.length > 0) {
+        ctx.emit({ type: "show_candidates", profileIds: profiles.slice(0, 10).map((p) => p.id) });
+      }
+      return asJson({
+        status: profiles.length > 0 ? "ok" : "empty",
+        count: profiles.length,
+        candidates: profiles.slice(0, 10).map(compactListEntry),
+        hint:
+          profiles.length === 0
+            ? "Die Merkliste ist leer. Sag das kurz und biete eine Suche an."
+            : "Nenne die Namen kurz (höchstens fünf) und frag, ob du jemanden genauer zeigen oder ein Gespräch vorbereiten sollst.",
+      });
+    },
+  });
+
+  return [
+    showCandidate,
+    searchCandidates,
+    saveUserContext,
+    proposeCandidates,
+    listEvents,
+    prepareInterview,
+    shortlistCandidate,
+    getShortlist,
+  ];
 }
 
 export type VoiceTool = ReturnType<typeof createVoiceTools>[number];
