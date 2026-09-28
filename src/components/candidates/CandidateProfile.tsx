@@ -366,8 +366,8 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
         </div>
       </Card>
 
-      {/* Sticky Aktionsleiste – klebt unter dem globalen Header (h-14); Vollbreite über die Shell-Gutter. */}
-      <div className="sticky top-14 z-20 -mx-4 mt-4 border-b border-[var(--border)] bg-[var(--background)]/85 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      {/* Sticky Aktionsleiste – klebt unter dem globalen Header (--header-height); Vollbreite über die Shell-Gutter (px-4 / md:px-8). */}
+      <div className="sticky top-[var(--header-height)] z-20 -mx-4 mt-4 border-b border-[var(--border)] bg-[var(--background)]/85 px-4 py-3 backdrop-blur md:-mx-8 md:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <div className="mr-auto hidden min-w-0 items-center gap-2.5 md:flex">
             <Avatar src={profile.photoUrl || undefined} name={profile.name} size={28} />

@@ -10,16 +10,16 @@ import { useMemo, type ReactNode } from "react";
 import { FOUNDER_DIM_KEYS, FOUNDER_DIM_LABELS, type Profile } from "@/lib/types";
 import { MATCH_TIER_LABELS, explainMatch, matchTier, scoreMatch, type MatchTier } from "@/lib/matching";
 import { useUserContext } from "@/lib/user-context";
-import { Badge, Button, Card, EmptyState, LinkButton, ScoreBar, Skeleton, cx } from "@/components/ui";
+import { Badge, Button, Card, EmptyState, LinkButton, ScoreBar, ScoreRing, Skeleton, cx } from "@/components/ui";
 
-type BadgeTone = "success" | "accent" | "warning" | "neutral";
+type Tone = "success" | "accent" | "warning" | "danger";
 
-/** Tier → Badge-Ton + CSS-Farbtoken (nur var(--…)). */
-const TIER_STYLE: Record<MatchTier, { badge: BadgeTone; color: string }> = {
-  top: { badge: "success", color: "var(--success)" },
-  gut: { badge: "accent", color: "var(--accent)" },
-  möglich: { badge: "warning", color: "var(--warning)" },
-  schwach: { badge: "neutral", color: "var(--muted)" },
+/** Tier → Ton für Badge/ScoreRing + CSS-Farbtoken für eigene Balken (nur var(--…)). */
+const TIER_STYLE: Record<MatchTier, { tone: Tone; color: string }> = {
+  top: { tone: "success", color: "var(--success)" },
+  gut: { tone: "accent", color: "var(--accent)" },
+  möglich: { tone: "warning", color: "var(--warning)" },
+  schwach: { tone: "danger", color: "var(--danger)" },
 };
 
 function firstName(name: string) {
@@ -40,26 +40,6 @@ function ThinBar({ pct, color, size = "md", className }: { pct: number; color: s
   return (
     <div className={cx(size === "sm" ? "h-1" : "h-1.5", "w-full overflow-hidden rounded-full bg-[var(--surface-3)]", className)}>
       <div className="h-full rounded-full transition-[width] duration-300" style={{ width: `${pct}%`, background: color }} />
-    </div>
-  );
-}
-
-/** Kreis-Score mit Tier-Farbe (conic-gradient aus Tokens). */
-function ScoreRing({ score, color }: { score: number; color: string }) {
-  const pct = clampPct(score, 100);
-  return (
-    <div
-      role="img"
-      aria-label={`Match-Score ${score} von 100`}
-      className="relative h-24 w-24 shrink-0 rounded-full"
-      style={{ background: `conic-gradient(${color} ${pct}%, var(--surface-3) 0)` }}
-    >
-      <div className="absolute inset-[7px] flex flex-col items-center justify-center rounded-full bg-[var(--surface)]">
-        <span className="text-[26px] font-semibold leading-none tabular-nums tracking-tight" style={{ color }}>
-          {score}
-        </span>
-        <span className="mt-1 text-[10px] font-medium text-[var(--muted)]">von 100</span>
-      </div>
     </div>
   );
 }
@@ -146,16 +126,16 @@ export default function MatchBreakdown({ profile }: { profile: Profile }) {
   }
 
   const tier = matchTier(match.score);
-  const { badge, color } = TIER_STYLE[tier];
+  const { tone, color } = TIER_STYLE[tier];
   const them = firstName(profile.name);
   const maxWeight = Math.max(1, ...match.reasons.map((r) => r.weight));
   const complementDims = FOUNDER_DIM_KEYS.filter((key) => (profile.dims?.[key] ?? 0) > (userContext.dims?.[key] ?? 0));
 
   return (
-    <Card title="Match" description="Passung zu deinem Gründer:innen-Profil" action={<Badge tone={badge}>{MATCH_TIER_LABELS[tier]}</Badge>}>
+    <Card title="Match" description="Passung zu deinem Gründer:innen-Profil" action={<Badge tone={tone}>{MATCH_TIER_LABELS[tier]}</Badge>}>
       {/* Score + Kurzfazit */}
       <div className="flex items-start gap-5">
-        <ScoreRing score={match.score} color={color} />
+        <ScoreRing value={match.score} size={96} tone={tone} label="von 100" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-[var(--foreground)]">{MATCH_TIER_LABELS[tier]}</p>
           {summary && <p className="mt-1 text-sm leading-relaxed text-[var(--muted)]">{summary}</p>}
