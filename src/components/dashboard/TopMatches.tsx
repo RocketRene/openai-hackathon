@@ -1,49 +1,22 @@
 "use client";
-
+/**
+ * Top-Matches für die Nutzer:in: 3–6 Karten mit Foto, Score, einem Match-Grund als Satz.
+ * Ohne Kontext: kurzer Hinweis + Demo-Button, nie eine leere Fläche.
+ */
 import Link from "next/link";
 import { useMemo } from "react";
 import { getProfiles } from "@/lib/data";
 import { rankCandidates } from "@/lib/matching";
 import { useUserContext } from "@/lib/user-context";
-import type { FounderRole, MatchResult, NetworkRole, Profile } from "@/lib/types";
-import { Avatar, Badge, Button, Card, LinkButton } from "@/components/ui";
+import type { MatchResult, Profile } from "@/lib/types";
+import { Avatar, Badge, Button, EmptyState, LinkButton, SectionTitle, Skeleton, cx } from "@/components/ui";
+import { FOUNDER_ROLE_LABELS, NETWORK_ROLE_LABELS } from "@/components/candidates/CandidateCard";
 
-const TOP_N = 5;
-
-const FOUNDER_ROLE_LABELS: Record<FounderRole, string> = {
-  tech: "Tech-Founder",
-  commercial: "Commercial-Founder",
-  product: "Product-Founder",
-  design: "Design-Founder",
-  operations: "Operations-Founder",
-  "domain-expert": "Domain-Expert:in",
-};
-
-const FOUNDER_ROLE_SHORT: Record<FounderRole, string> = {
-  tech: "Tech",
-  commercial: "Commercial",
-  product: "Product",
-  design: "Design",
-  operations: "Operations",
-  "domain-expert": "Domain-Expertise",
-};
-
-const NETWORK_ROLE_LABELS: Record<NetworkRole, string> = {
-  cofounder: "Co-Founder",
-  investor: "Investor:innen",
-  mentor: "Mentor:innen",
-  talent: "Talente",
-  expert: "Expert:innen",
-};
+const TOP_N = 6;
 
 interface RankedProfile {
   match: MatchResult;
   profile: Profile;
-}
-
-function joinDe(items: string[]): string {
-  if (items.length <= 1) return items[0] ?? "";
-  return `${items.slice(0, -1).join(", ")} und ${items[items.length - 1]}`;
 }
 
 function scoreTone(score: number): "success" | "accent" | "neutral" {
@@ -52,10 +25,55 @@ function scoreTone(score: number): "success" | "accent" | "neutral" {
   return "neutral";
 }
 
-const rowLinkCls =
-  "rounded-md border border-[var(--border)] px-2 py-1 text-xs font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-2)]";
+const scoreClasses: Record<ReturnType<typeof scoreTone>, string> = {
+  success: "bg-[var(--success-soft)] text-[var(--success)]",
+  accent: "bg-[var(--accent-soft)] text-[var(--accent)]",
+  neutral: "bg-[var(--surface-2)] text-[var(--muted)]",
+};
 
-/** Top-Matches für die eingeloggte Nutzer:in – ohne Kontext ein Einstiegs-Teaser. */
+function MatchCard({ match, profile, rank }: RankedProfile & { rank: number }) {
+  const reason = match.reasons[0];
+  const tone = scoreTone(match.score);
+  return (
+    <li className="min-w-0">
+      <Link
+        href={`/candidates/${encodeURIComponent(profile.id)}`}
+        prefetch={false}
+        className="group flex h-full flex-col gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[var(--accent)]/50 hover:shadow-[var(--shadow-md)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+      >
+        <div className="flex items-start gap-3">
+          <Avatar src={profile.photoUrl || undefined} name={profile.name} size={48} />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-[var(--foreground)] group-hover:text-[var(--accent)]">
+              {profile.name}
+            </p>
+            <p className="line-clamp-2 text-xs leading-snug text-[var(--muted)]">{profile.headline}</p>
+          </div>
+          <div
+            className={cx("flex shrink-0 flex-col items-center rounded-[var(--radius-sm)] px-2 py-1", scoreClasses[tone])}
+            title={`Match-Score ${match.score} von 100`}
+          >
+            <span className="text-lg font-semibold leading-none tabular-nums">{Math.round(match.score)}</span>
+            <span className="text-[10px] font-medium uppercase tracking-wide opacity-80">Match</span>
+          </div>
+        </div>
+
+        {reason ? (
+          <p className="text-sm leading-snug text-[var(--foreground)]">{reason.detail}</p>
+        ) : (
+          <p className="text-sm text-[var(--muted)]">Noch keine konkreten Anknüpfungspunkte.</p>
+        )}
+
+        <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1">
+          <span className="mr-auto text-[11px] tabular-nums text-[var(--muted)]">#{rank}</span>
+          <Badge tone="accent">{NETWORK_ROLE_LABELS[profile.networkRole]}</Badge>
+          {profile.founderRole && <Badge>{FOUNDER_ROLE_LABELS[profile.founderRole]}</Badge>}
+        </div>
+      </Link>
+    </li>
+  );
+}
+
 export default function TopMatches() {
   const { userContext, ready, loadDemo } = useUserContext();
 
@@ -71,103 +89,59 @@ export default function TopMatches() {
       });
   }, [userContext]);
 
-  if (!ready) {
-    return (
-      <Card title="Deine Top-Matches">
-        <p className="text-sm text-[var(--muted)]">Lade deinen Kontext …</p>
-      </Card>
-    );
-  }
-
-  if (!userContext) {
-    return (
-      <Card title="Deine Top-Matches">
-        <p className="text-sm text-[var(--muted)]">
-          Voya kennt dich noch nicht. Sag uns kurz, wer du bist und wen du suchst – dann priorisieren wir
-          die Kontakte aus IdeaLab 2026 und weiteren Events für dich: Co-Founder, Investor:innen, Mentor:innen oder
-          Talente.
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <LinkButton href="/onboarding">Onboarding starten</LinkButton>
-          <LinkButton href="/assistant" variant="secondary">
-            Agent-Interview
-          </LinkButton>
-          <Button variant="ghost" onClick={loadDemo}>
-            Demo-Kontext laden
-          </Button>
-        </div>
-      </Card>
-    );
-  }
-
-  const greetingName = userContext.name.trim() || "Founder";
-  const roleLabel = userContext.founderRole ? FOUNDER_ROLE_LABELS[userContext.founderRole] : "Gründer:in";
-  const lookingFor = joinDe(userContext.lookingFor.map((r) => NETWORK_ROLE_LABELS[r])) || "passende Kontakte";
-  const missingRoles = userContext.lookingForRoles.map((r) => FOUNDER_ROLE_SHORT[r]);
-
   return (
-    <Card
-      title="Deine Top-Matches"
-      action={
-        <div className="flex items-center gap-3 text-sm">
-          <Link href="/onboarding" className="text-[var(--muted)] hover:underline">
-            Kontext bearbeiten
-          </Link>
-          <Link href="/candidates" className="font-medium text-[var(--accent)] hover:underline">
+    <section aria-labelledby="top-matches">
+      <SectionTitle
+        action={
+          <Link href="/candidates" className="text-sm font-medium text-[var(--accent)] hover:underline">
             Alle Kandidaten →
           </Link>
-        </div>
-      }
-    >
-      <p className="text-sm text-[var(--muted)]">
-        Hi {greetingName}, du bist {roleLabel} und suchst {lookingFor}
-        {missingRoles.length > 0 ? ` – vor allem mit Fokus auf ${joinDe(missingRoles)}` : ""}.
-      </p>
+        }
+      >
+        <span id="top-matches">Deine Top-Matches</span>
+      </SectionTitle>
 
-      {matches.length === 0 ? (
-        <p className="mt-3 text-sm text-[var(--muted)]">Noch keine Kandidaten gefunden.</p>
+      {!ready ? (
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
+          {Array.from({ length: 3 }, (_, i) => (
+            <li key={i} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
+              <div className="flex gap-3">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
+              </div>
+              <Skeleton className="mt-4 h-3 w-5/6" />
+            </li>
+          ))}
+        </ul>
+      ) : !userContext ? (
+        <EmptyState
+          title="Voya kennt dich noch nicht"
+          body="Sobald du deinen Kontext gibst, erscheinen hier die Menschen, die dich am besten ergänzen – aus IdeaLab 2026 und weiteren Events."
+          action={
+            <>
+              <LinkButton href="/assistant">Agent-Interview starten</LinkButton>
+              <Button variant="secondary" onClick={loadDemo}>
+                Demo-Kontext laden
+              </Button>
+            </>
+          }
+        />
+      ) : matches.length === 0 ? (
+        <EmptyState
+          title="Noch keine Kandidaten gefunden"
+          body="Erweitere im Profil, wen du suchst, oder wähle weitere Verticals."
+          action={<LinkButton href="/onboarding" variant="secondary">Profil bearbeiten</LinkButton>}
+        />
       ) : (
-        <ul className="mt-3 divide-y divide-[var(--border)]">
-          {matches.map(({ match, profile }, index) => {
-            const topReason = match.reasons[0];
-            return (
-              <li key={profile.id} className="flex items-center gap-3 py-3">
-                <span className="w-4 shrink-0 text-xs tabular-nums text-[var(--muted)]">{index + 1}</span>
-                <Avatar src={profile.photoUrl} name={profile.name} size={36} />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Link
-                      href={`/candidates/${profile.id}`}
-                      className="truncate text-sm font-medium text-[var(--foreground)] hover:underline"
-                    >
-                      {profile.name}
-                    </Link>
-                    <Badge tone={scoreTone(match.score)}>{Math.round(match.score)} % Match</Badge>
-                    <Badge>{NETWORK_ROLE_LABELS[profile.networkRole]}</Badge>
-                  </div>
-                  <div className="truncate text-xs text-[var(--muted)]">{profile.headline}</div>
-                  {topReason && (
-                    <div className="truncate text-xs text-[var(--foreground)]">
-                      <span className="font-medium">{topReason.label}:</span> {topReason.detail}
-                    </div>
-                  )}
-                </div>
-                <div className="flex shrink-0 gap-1">
-                  <Link href={`/candidates/${profile.id}`} className={rowLinkCls}>
-                    Profil
-                  </Link>
-                  <Link href={`/outreach?profile=${encodeURIComponent(profile.id)}`} className={rowLinkCls}>
-                    Outreach
-                  </Link>
-                  <Link href={`/prep/${profile.id}`} className={rowLinkCls}>
-                    Prep
-                  </Link>
-                </div>
-              </li>
-            );
-          })}
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Top-Matches">
+          {matches.map((item, index) => (
+            <MatchCard key={item.profile.id} {...item} rank={index + 1} />
+          ))}
         </ul>
       )}
-    </Card>
+    </section>
   );
 }
