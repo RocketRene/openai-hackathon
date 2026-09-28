@@ -36,9 +36,9 @@ function SectionLabel({ children, className }: { children: ReactNode; className?
 }
 
 /** Dünner Balken; Farbe als Token-String, damit auch „Ich“ (muted) möglich ist. */
-function ThinBar({ pct, color, className }: { pct: number; color: string; className?: string }) {
+function ThinBar({ pct, color, size = "md", className }: { pct: number; color: string; size?: "sm" | "md"; className?: string }) {
   return (
-    <div className={cx("h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-3)]", className)}>
+    <div className={cx(size === "sm" ? "h-1" : "h-1.5", "w-full overflow-hidden rounded-full bg-[var(--surface-3)]", className)}>
       <div className="h-full rounded-full transition-[width] duration-300" style={{ width: `${pct}%`, background: color }} />
     </div>
   );
@@ -104,7 +104,9 @@ export default function MatchBreakdown({ profile }: { profile: Profile }) {
     return (
       <Card title="Match" description="Passung zu deinem Gründer:innen-Profil">
         <div className="flex items-center gap-5">
-          <Skeleton className="h-24 w-24 shrink-0 rounded-full" />
+          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full">
+            <Skeleton className="h-full w-full" />
+          </div>
           <div className="flex-1 space-y-2">
             <Skeleton className="h-4 w-1/2" />
             <Skeleton className="h-3 w-full" />
@@ -246,8 +248,8 @@ export default function MatchBreakdown({ profile }: { profile: Profile }) {
                   </span>
                 </div>
                 <div className="mt-1.5 flex flex-col gap-1">
-                  <ThinBar pct={clampPct(mine, 10)} color="var(--muted)" className="h-1" />
-                  <ThinBar pct={clampPct(theirs, 10)} color={color} className="h-1" />
+                  <ThinBar pct={clampPct(mine, 10)} color="var(--muted)" size="sm" />
+                  <ThinBar pct={clampPct(theirs, 10)} color={color} size="sm" />
                 </div>
               </li>
             );
