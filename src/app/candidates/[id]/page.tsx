@@ -9,7 +9,8 @@ type Props = { params: Promise<{ id: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const profile = getProfile(id);
-  if (!profile) return { title: "Kandidat:in nicht gefunden – Voya" };
+  // Metadata entsteht auf dem Server; die Sprache liegt nur im Client (localStorage) → Tab-Titel zweisprachig.
+  if (!profile) return { title: "Kandidat:in nicht gefunden / Candidate not found – Voya" };
   return {
     title: `${profile.name} – Voya`,
     description: profile.headline || profile.about?.slice(0, 160) || undefined,
