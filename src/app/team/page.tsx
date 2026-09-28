@@ -9,10 +9,11 @@ export const metadata: Metadata = {
 
 export default function TeamPage() {
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+    <div>
       <PageHeader
+        kicker="Team"
         title="Team-Radar"
-        subtitle="Vision · Design/Visuell · Technik · Detail · Umsetzung – wie gut kann dieses Business werden, und wer fehlt noch im Team?"
+        subtitle="Vision · Design/Visuell · Technik · Detail · Umsetzung – wie stark ist das Team heute, und wer fehlt noch?"
       />
       <TeamBuilder />
     </div>
