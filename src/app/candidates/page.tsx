@@ -9,12 +9,14 @@ export const metadata: Metadata = {
 };
 
 export default function CandidatesPage() {
-  const total = getProfiles().length;
+  const profiles = getProfiles();
+  const real = profiles.filter((p) => p.source?.type === "linkedin" || p.source?.type === "conference").length;
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+    <div>
       <PageHeader
-        title="Kandidaten"
-        subtitle={`${total.toLocaleString("de-DE")} Profile aus IdeaLab 2026 und Demo-Daten, priorisiert für dich`}
+        kicker="Kandidaten"
+        title="Wen willst du treffen?"
+        subtitle={`${profiles.length.toLocaleString("de-DE")} Profile – ${real.toLocaleString("de-DE")} davon von der IdeaLab 2026 – nach Rolle, Vertical, Event und Persönlichkeitstyp durchsuchbar und für dich priorisiert.`}
       />
       <CandidateList />
     </div>

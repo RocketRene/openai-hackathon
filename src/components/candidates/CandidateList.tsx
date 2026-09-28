@@ -12,15 +12,18 @@ import { getProfiles, searchProfiles } from "@/lib/data";
 import { rankCandidates } from "@/lib/matching";
 import type { MatchResult, Profile } from "@/lib/types";
 import { useUserContext } from "@/lib/user-context";
-import { Button, EmptyState, LinkButton, cx } from "@/components/ui";
+import { Button, EmptyState, LinkButton, Skeleton, cx } from "@/components/ui";
 import { CandidateCard, getProfileSource } from "./CandidateCard";
-import { CandidateFilters, filtersToSearchParams, parseFilters, type CandidateFilterState } from "./CandidateFilters";
+import { CandidateFilters, countActiveFilters, filtersToSearchParams, parseFilters, type CandidateFilterState } from "./CandidateFilters";
 
 const PAGE_SIZE = 30;
 
-type SortKey = "score" | "name";
+type SortKey = "score" | "name" | "source";
 
 const nameCollator = new Intl.Collator("de", { sensitivity: "base" });
+
+/** Reihenfolge bei Sortierung nach Quelle: echte Daten zuerst. */
+const SOURCE_ORDER: Record<string, number> = { idealab: 0, manual: 1, demo: 2 };
 
 interface ListState {
   filters: CandidateFilterState;
@@ -33,42 +36,55 @@ function formatCount(n: number): string {
   return n.toLocaleString("de-DE");
 }
 
+function CardSkeleton() {
+  return (
+    <div className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
+      <div className="flex gap-3">
+        <Skeleton className="h-14 w-14 rounded-full" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-1/2" />
+        </div>
+      </div>
+      <div className="mt-4 flex gap-1.5">
+        <Skeleton className="h-5 w-20 rounded-full" />
+        <Skeleton className="h-5 w-14 rounded-full" />
+      </div>
+      <Skeleton className="mt-4 h-3 w-5/6" />
+    </div>
+  );
+}
+
 function CandidateListFallback() {
   return (
     <div className="space-y-4" aria-busy="true" aria-live="polite">
-      <div className="h-40 animate-pulse rounded-lg border border-[var(--border)] bg-[var(--surface)]" />
-      <p className="text-sm text-[var(--muted)]">Kandidaten werden geladen …</p>
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-4 w-48" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 6 }, (_, i) => (
-          <div key={i} className="h-56 animate-pulse rounded-lg border border-[var(--border)] bg-[var(--surface)]" />
+          <CardSkeleton key={i} />
         ))}
       </div>
     </div>
   );
 }
 
-function SortToggle({
-  value,
-  scoreAvailable,
-  onChange,
-}: {
-  value: SortKey;
-  scoreAvailable: boolean;
-  onChange: (next: SortKey) => void;
-}) {
+function SortToggle({ value, scoreAvailable, onChange }: { value: SortKey; scoreAvailable: boolean; onChange: (next: SortKey) => void }) {
   const options: { key: SortKey; label: string; disabled?: boolean; title: string }[] = [
     {
       key: "score",
-      label: "Score",
+      label: "Match",
       disabled: !scoreAvailable,
       title: scoreAvailable ? "Nach Match-Score sortieren" : "Match-Scores brauchen deinen Nutzer-Kontext",
     },
     { key: "name", label: "Name", title: "Alphabetisch sortieren" },
+    { key: "source", label: "Quelle", title: "Echte IdeaLab-Profile zuerst" },
   ];
   return (
     <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
-      <span>Sortierung</span>
-      <div role="group" aria-label="Sortierung" className="inline-flex rounded-md border border-[var(--border)] bg-[var(--surface)] p-0.5">
+      <span className="hidden sm:inline">Sortieren nach</span>
+      <div role="group" aria-label="Sortierung" className="inline-flex rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] p-0.5">
         {options.map((option) => (
           <button
             key={option.key}
@@ -78,8 +94,8 @@ function SortToggle({
             aria-pressed={value === option.key}
             onClick={() => onChange(option.key)}
             className={cx(
-              "rounded px-2.5 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50",
-              value === option.key ? "bg-[var(--accent)] text-white" : "text-[var(--foreground)] hover:bg-[var(--surface-2)]",
+              "rounded-[6px] px-2.5 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50",
+              value === option.key ? "bg-[var(--accent)] text-[var(--accent-contrast)]" : "text-[var(--foreground)] hover:bg-[var(--surface-2)]",
             )}
           >
             {option.label}
@@ -124,19 +140,20 @@ function CandidateListInner() {
   }, [userContext, allProfiles]);
 
   const [sortChoice, setSortChoice] = useState<SortKey | null>(null);
-  const sort: SortKey = matches ? (sortChoice ?? "score") : "name";
+  const sort: SortKey = sortChoice && (sortChoice !== "score" || matches) ? sortChoice : matches ? "score" : "name";
 
   const results = useMemo(() => {
     const { source, ...gatewayFilters } = state.filters;
     const base = searchProfiles(gatewayFilters);
     const filtered = source ? base.filter((p) => getProfileSource(p) === source) : base;
     const byName = (a: Profile, b: Profile) => nameCollator.compare(a.name, b.name);
+    const byScore = (a: Profile, b: Profile) => (matches?.get(b.id)?.score ?? -1) - (matches?.get(a.id)?.score ?? -1);
+    const bySource = (a: Profile, b: Profile) =>
+      (SOURCE_ORDER[getProfileSource(a) ?? ""] ?? 9) - (SOURCE_ORDER[getProfileSource(b) ?? ""] ?? 9);
     const sorted = [...filtered];
-    if (sort === "score" && matches) {
-      sorted.sort((a, b) => (matches.get(b.id)?.score ?? -1) - (matches.get(a.id)?.score ?? -1) || byName(a, b));
-    } else {
-      sorted.sort(byName);
-    }
+    if (sort === "score" && matches) sorted.sort((a, b) => byScore(a, b) || byName(a, b));
+    else if (sort === "source") sorted.sort((a, b) => bySource(a, b) || (matches ? byScore(a, b) : 0) || byName(a, b));
+    else sorted.sort(byName);
     return sorted;
   }, [state.filters, sort, matches]);
 
@@ -145,6 +162,7 @@ function CandidateListInner() {
   const visibleProfiles = results.slice(0, state.visible);
   const hasMore = state.visible < results.length;
   const total = results.length;
+  const activeCount = countActiveFilters(state.filters);
 
   return (
     <div className="space-y-4">
@@ -153,14 +171,17 @@ function CandidateListInner() {
       {!userContext && (
         <div
           role="note"
-          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius)] border border-[var(--accent)]/30 bg-[var(--accent-soft)]/60 px-4 py-3"
         >
-          <p className="text-sm text-[var(--muted)]">Onboarding machen oder Demo-Kontext laden, um Match-Scores zu sehen.</p>
+          <p className="text-sm text-[var(--foreground)]">
+            <span className="font-medium">Ohne deinen Kontext keine Match-Scores.</span>{" "}
+            <span className="text-[var(--muted)]">Kurz Profil anlegen oder den Demo-Kontext laden.</span>
+          </p>
           <div className="flex flex-wrap gap-2">
-            <LinkButton href="/onboarding" variant="secondary">
-              Onboarding starten
+            <LinkButton href="/onboarding" variant="secondary" size="sm">
+              Profil anlegen
             </LinkButton>
-            <Button type="button" onClick={loadDemo}>
+            <Button type="button" size="sm" onClick={loadDemo}>
               Demo-Kontext laden
             </Button>
           </div>
@@ -169,9 +190,9 @@ function CandidateListInner() {
 
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-[var(--muted)]" aria-live="polite">
-          <span className="font-semibold text-[var(--foreground)]">{formatCount(total)}</span> Treffer
-          {total !== allProfiles.length && ` von ${formatCount(allProfiles.length)} Profilen`}
-          {matches && sort === "score" && " · nach Match-Score priorisiert"}
+          <span className="text-base font-semibold tabular-nums text-[var(--foreground)]">{formatCount(total)}</span>
+          {total !== allProfiles.length ? ` von ${formatCount(allProfiles.length)} Profilen` : " Profile"}
+          {matches && sort === "score" && <span className="hidden sm:inline"> · nach Match-Score priorisiert</span>}
         </p>
         <SortToggle value={sort} scoreAvailable={Boolean(matches)} onChange={setSortChoice} />
       </div>
@@ -185,11 +206,22 @@ function CandidateListInner() {
         ) : (
           <EmptyState
             title="Keine Treffer"
-            body="Passe die Filter an oder setze sie zurück."
+            body={
+              activeCount > 1
+                ? "Mehrere Filter greifen gleichzeitig. Lockere einen davon – meistens reicht es, Vertical oder Team-Rolle wegzulassen."
+                : "Versuche einen anderen Suchbegriff oder setze den Filter zurück."
+            }
             action={
-              <Button type="button" variant="secondary" onClick={() => setFilters({})}>
-                Filter zurücksetzen
-              </Button>
+              <>
+                {state.filters.query && activeCount > 1 && (
+                  <Button type="button" variant="secondary" onClick={() => setFilters({ query: state.filters.query })}>
+                    Nur Suchbegriff behalten
+                  </Button>
+                )}
+                <Button type="button" variant={state.filters.query && activeCount > 1 ? "ghost" : "secondary"} onClick={() => setFilters({})}>
+                  Alle Filter zurücksetzen
+                </Button>
+              </>
             }
           />
         )
