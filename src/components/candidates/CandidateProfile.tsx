@@ -7,48 +7,109 @@
  * Client-Komponente wegen ShortlistButton (localStorage) und MatchBreakdown (Nutzer-Kontext).
  * Event-Namen werden von der Server-Page aufgelöst und als Prop übergeben, damit hier kein
  * Profil-JSON ins Client-Bundle wandert. Layout/Shell (max-w, Padding) kommt global aus AppShell.
+ * Zweisprachig (DE/EN): nur UI-Beschriftungen werden übersetzt (lokales DICT + Label-Tabellen),
+ * Profildaten (about, experience, skills, personality-Texte) bleiben wie geliefert.
  */
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { PERSONALITY_LABELS, type Event as EventInfo, type FounderRole, type NetworkRole, type Profile, type Stage } from "@/lib/types";
+import type { Event as EventInfo, FounderRole, NetworkRole, PersonalityType, Profile, Stage } from "@/lib/types";
+import { useLocale, useT, type Dict, type Locale } from "@/lib/i18n";
 import { Avatar, Badge, Card, LinkButton, cx } from "@/components/ui";
 import MatchBreakdown from "./MatchBreakdown";
 import { ShortlistButton } from "./ShortlistButton";
 
 /* ------------------------------------------------------------------ */
-/* Labels (modul-lokal, deutsch)                                       */
+/* Labels (modul-lokal, zweisprachig)                                  */
 /* ------------------------------------------------------------------ */
 
-const NETWORK_ROLE_LABELS: Record<NetworkRole, string> = {
-  cofounder: "Co-Founder",
-  investor: "Investor:in",
-  mentor: "Mentor:in",
-  talent: "Talent",
-  expert: "Expert:in",
+type Bi = { de: string; en: string };
+
+const NETWORK_ROLE_LABELS: Record<NetworkRole, Bi> = {
+  cofounder: { de: "Co-Founder", en: "Co-founder" },
+  investor: { de: "Investor:in", en: "Investor" },
+  mentor: { de: "Mentor:in", en: "Mentor" },
+  talent: { de: "Talent", en: "Talent" },
+  expert: { de: "Expert:in", en: "Expert" },
 };
 
-const FOUNDER_ROLE_LABELS: Record<FounderRole, string> = {
-  tech: "Tech",
-  commercial: "Commercial",
-  product: "Produkt",
-  design: "Design",
-  operations: "Operations",
-  "domain-expert": "Domain-Expert:in",
+const FOUNDER_ROLE_LABELS: Record<FounderRole, Bi> = {
+  tech: { de: "Tech", en: "Tech" },
+  commercial: { de: "Commercial", en: "Commercial" },
+  product: { de: "Produkt", en: "Product" },
+  design: { de: "Design", en: "Design" },
+  operations: { de: "Operations", en: "Operations" },
+  "domain-expert": { de: "Domain-Expert:in", en: "Domain expert" },
 };
 
-const STAGE_LABELS: Record<Stage, string> = {
-  idea: "Idee",
-  "pre-seed": "Pre-Seed",
-  seed: "Seed",
-  "series-a": "Series A",
-  growth: "Growth",
+const STAGE_LABELS: Record<Stage, Bi> = {
+  idea: { de: "Idee", en: "Idea" },
+  "pre-seed": { de: "Pre-Seed", en: "Pre-seed" },
+  seed: { de: "Seed", en: "Seed" },
+  "series-a": { de: "Series A", en: "Series A" },
+  growth: { de: "Growth", en: "Growth" },
 };
 
-const SOURCE_LABELS: Record<NonNullable<Profile["source"]>["type"], string> = {
-  linkedin: "LinkedIn",
-  conference: "Konferenz-App",
-  manual: "Manuell erfasst",
-  mock: "Mock-Daten",
+const PERSONALITY_LABELS: Record<PersonalityType, Bi> = {
+  visionary: { de: "Visionär:in", en: "Visionary" },
+  builder: { de: "Builder", en: "Builder" },
+  operator: { de: "Operator", en: "Operator" },
+  connector: { de: "Connector", en: "Connector" },
+  analyst: { de: "Analyst:in", en: "Analyst" },
+};
+
+const SOURCE_LABELS: Record<NonNullable<Profile["source"]>["type"], Bi> = {
+  linkedin: { de: "LinkedIn", en: "LinkedIn" },
+  conference: { de: "Konferenz-App", en: "Conference app" },
+  manual: { de: "Manuell erfasst", en: "Entered manually" },
+  mock: { de: "Mock-Daten", en: "Mock data" },
+};
+
+/** Label aus einer Bi-Tabelle; unbekannte (gescrapte) Werte fallen auf den Rohwert zurück. */
+function label<K extends string>(table: Record<K, Bi>, key: K, locale: Locale): string {
+  return (table[key] as Bi | undefined)?.[locale] ?? key;
+}
+
+const DICT: Dict = {
+  back: { de: "Alle Kandidat:innen", en: "All candidates" },
+  meetAt: { de: "Trifft man auf", en: "Meet at" },
+  outreach: { de: "Outreach erzeugen", en: "Generate outreach" },
+  prep: { de: "Gespräch vorbereiten", en: "Prepare conversation" },
+  discuss: { de: "Im Agent besprechen", en: "Discuss with the agent" },
+  about: { de: "Über", en: "About" },
+  noAbout: { de: "Keine Beschreibung vorhanden.", en: "No description available." },
+  experience: { de: "Erfahrung", en: "Experience" },
+  positionOne: { de: "1 Station", en: "1 position" },
+  positionMany: { de: "{n} Stationen", en: "{n} positions" },
+  noExperience: { de: "Keine Berufserfahrung hinterlegt.", en: "No work experience on file." },
+  today: { de: "heute", en: "today" },
+  education: { de: "Ausbildung", en: "Education" },
+  noEducation: { de: "Keine Ausbildung hinterlegt.", en: "No education on file." },
+  skillsFocus: { de: "Skills & Fokus", en: "Skills & focus" },
+  skillsFocusDesc: {
+    de: "Fähigkeiten, Suche und Branchen – Grundlage für den Match.",
+    en: "Skills, what they're looking for and industries – the basis for the match.",
+  },
+  skills: { de: "Skills", en: "Skills" },
+  noSkills: { de: "Keine Skills hinterlegt.", en: "No skills on file." },
+  lookingFor: { de: "Sucht", en: "Looking for" },
+  noLookingFor: { de: "Keine Angabe, was gesucht wird.", en: "No information on what they're looking for." },
+  verticals: { de: "Verticals", en: "Verticals" },
+  noVerticals: { de: "Keine Branchen hinterlegt.", en: "No industries on file." },
+  languages: { de: "Sprachen", en: "Languages" },
+  tags: { de: "Tags", en: "Tags" },
+  noInfo: { de: "Keine Angaben.", en: "No information." },
+  personality: { de: "Persönlichkeit", en: "Personality" },
+  communicationStyle: { de: "Kommunikationsstil", en: "Communication style" },
+  outreachTips: { de: "So schreibst du an", en: "How to reach out" },
+  noTips: { de: "Keine Tipps hinterlegt.", en: "No tips on file." },
+  avoid: { de: "Vermeide", en: "Avoid" },
+  noAvoid: { de: "Keine No-Gos hinterlegt.", en: "No no-gos on file." },
+  noPersonality: { de: "Noch keine Persönlichkeitsanalyse vorhanden.", en: "No personality analysis yet." },
+  source: { de: "Quelle", en: "Source" },
+  sourceType: { de: "Typ", en: "Type" },
+  sourceDate: { de: "Stand", en: "As of" },
+  profileId: { de: "Profil-ID", en: "Profile ID" },
+  unknown: { de: "Unbekannt", en: "Unknown" },
 };
 
 /* ------------------------------------------------------------------ */
@@ -65,11 +126,18 @@ function formatRange(start: string | null | undefined, end: string | null | unde
   return `${s} – ${e}`;
 }
 
-/** ISO-Datum → "26.09.2026", deterministisch (kein toLocale → keine Hydration-Abweichung). */
-function formatDate(iso?: string) {
+const EN_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** ISO-Datum → "26.09.2026" (DE) bzw. "26 Sep 2026" (EN), deterministisch (kein toLocale → keine Hydration-Abweichung). */
+function formatDate(iso: string | undefined, locale: Locale) {
   if (!iso) return "";
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
-  return m ? `${m[3]}.${m[2]}.${m[1]}` : iso;
+  if (!m) return iso;
+  if (locale === "en") {
+    const month = EN_MONTHS[Number(m[2]) - 1];
+    return month ? `${Number(m[3])} ${month} ${m[1]}` : `${m[1]}-${m[2]}-${m[3]}`;
+  }
+  return `${m[3]}.${m[2]}.${m[1]}`;
 }
 
 function initials(text: string) {
@@ -92,7 +160,7 @@ function EmptyHint({ children }: { children: ReactNode }) {
   );
 }
 
-function Chips({ items, tone = "neutral", empty = "Keine Angaben." }: { items: string[]; tone?: "neutral" | "accent"; empty?: string }) {
+function Chips({ items, tone = "neutral", empty }: { items: string[]; tone?: "neutral" | "accent"; empty: string }) {
   if (items.length === 0) return <EmptyHint>{empty}</EmptyHint>;
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -199,12 +267,12 @@ function CalendarIcon() {
 /* ------------------------------------------------------------------ */
 
 /** Timeline-Eintrag mit Punkt auf der Linie; aktuelle Station (kein Ende) in Akzentfarbe. */
-function ExperienceTimeline({ items }: { items: Profile["experience"] }) {
+function ExperienceTimeline({ items, today }: { items: Profile["experience"]; today: string }) {
   return (
     <ol className="relative ml-[7px] border-l border-[var(--border)]">
       {items.map((exp, i) => {
         const current = !(exp.end ?? "").trim();
-        const range = formatRange(exp.start, exp.end, "heute");
+        const range = formatRange(exp.start, exp.end, today);
         return (
           <li key={`${exp.company}-${exp.title}-${i}`} className="relative pb-6 pl-6 last:pb-0">
             <span
@@ -275,6 +343,8 @@ function TipList({ items, tone, empty }: { items: string[]; tone: "success" | "d
 /* ------------------------------------------------------------------ */
 
 export default function CandidateProfile({ profile, events }: { profile: Profile; events?: EventInfo[] }) {
+  const [locale] = useLocale();
+  const t = useT(DICT);
   const personality = profile.personality;
   const eventItems = (profile.events ?? []).map((slug) => ({
     slug,
@@ -283,7 +353,8 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
   const languages = profile.languages ?? [];
   const tags = profile.tags ?? [];
   const source = profile.source;
-  const personalityLabel = personality?.type ? PERSONALITY_LABELS[personality.type] ?? personality.type : undefined;
+  const personalityLabel = personality?.type ? label(PERSONALITY_LABELS, personality.type, locale) : undefined;
+  const experienceCount = profile.experience?.length ?? 0;
 
   const outreachHref = `/outreach?profile=${encodeURIComponent(profile.id)}`;
   const prepHref = `/prep/${encodeURIComponent(profile.id)}`;
@@ -296,7 +367,7 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
         className="inline-flex items-center gap-1.5 text-sm text-[var(--muted)] transition hover:text-[var(--foreground)]"
       >
         <ArrowLeftIcon />
-        Alle Kandidat:innen
+        {t("back")}
       </Link>
 
       {/* Header-Card */}
@@ -308,9 +379,9 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
               <Avatar src={profile.photoUrl || undefined} name={profile.name} size={96} />
             </div>
             <div className="flex flex-wrap gap-1.5 sm:mb-1">
-              <Badge tone="accent">{NETWORK_ROLE_LABELS[profile.networkRole] ?? profile.networkRole}</Badge>
-              {profile.founderRole && <Badge>{FOUNDER_ROLE_LABELS[profile.founderRole] ?? profile.founderRole}</Badge>}
-              {profile.stage && <Badge>{STAGE_LABELS[profile.stage] ?? profile.stage}</Badge>}
+              <Badge tone="accent">{label(NETWORK_ROLE_LABELS, profile.networkRole, locale)}</Badge>
+              {profile.founderRole && <Badge>{label(FOUNDER_ROLE_LABELS, profile.founderRole, locale)}</Badge>}
+              {profile.stage && <Badge>{label(STAGE_LABELS, profile.stage, locale)}</Badge>}
               {personalityLabel && <Badge tone="success">{personalityLabel}</Badge>}
             </div>
           </div>
@@ -330,7 +401,7 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
                 <div className="mt-4 flex flex-wrap items-center gap-1.5">
                   <span className="mr-1 inline-flex items-center gap-1.5 text-xs font-medium text-[var(--muted)]">
                     <CalendarIcon />
-                    Trifft man auf
+                    {t("meetAt")}
                   </span>
                   {eventItems.map((ev) => (
                     <Link
@@ -374,13 +445,13 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
             <span className="truncate text-sm font-medium text-[var(--foreground)]">{profile.name}</span>
           </div>
           <LinkButton href={outreachHref} size="sm">
-            Outreach erzeugen
+            {t("outreach")}
           </LinkButton>
           <LinkButton href={prepHref} variant="secondary" size="sm">
-            Gespräch vorbereiten
+            {t("prep")}
           </LinkButton>
           <LinkButton href="/assistant" variant="secondary" size="sm">
-            Im Agent besprechen
+            {t("discuss")}
           </LinkButton>
           <ShortlistButton profileId={profile.id} size="sm" />
         </div>
@@ -390,50 +461,50 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
       <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,360px)] lg:items-start">
         {/* Hauptspalte */}
         <div className="flex min-w-0 flex-col gap-5">
-          <Card title="Über">
+          <Card title={t("about")}>
             {profile.about ? (
               <p className="whitespace-pre-line text-sm leading-relaxed text-[var(--foreground)]">{profile.about}</p>
             ) : (
-              <EmptyHint>Keine Beschreibung vorhanden.</EmptyHint>
+              <EmptyHint>{t("noAbout")}</EmptyHint>
             )}
           </Card>
 
           <Card
-            title="Erfahrung"
-            description={profile.experience?.length > 0 ? `${profile.experience.length} ${profile.experience.length === 1 ? "Station" : "Stationen"}` : undefined}
+            title={t("experience")}
+            description={experienceCount > 0 ? (experienceCount === 1 ? t("positionOne") : t("positionMany", { n: experienceCount })) : undefined}
           >
-            {profile.experience?.length > 0 ? <ExperienceTimeline items={profile.experience} /> : <EmptyHint>Keine Berufserfahrung hinterlegt.</EmptyHint>}
+            {experienceCount > 0 ? <ExperienceTimeline items={profile.experience} today={t("today")} /> : <EmptyHint>{t("noExperience")}</EmptyHint>}
           </Card>
 
-          <Card title="Ausbildung">
-            {profile.education?.length > 0 ? <EducationList items={profile.education} /> : <EmptyHint>Keine Ausbildung hinterlegt.</EmptyHint>}
+          <Card title={t("education")}>
+            {profile.education?.length > 0 ? <EducationList items={profile.education} /> : <EmptyHint>{t("noEducation")}</EmptyHint>}
           </Card>
 
-          <Card title="Skills & Fokus" description="Fähigkeiten, Suche und Branchen – Grundlage für den Match.">
+          <Card title={t("skillsFocus")} description={t("skillsFocusDesc")}>
             <div className="flex flex-col gap-5">
               <div>
-                <SectionLabel className="mb-2">Skills</SectionLabel>
-                <Chips items={profile.skills ?? []} empty="Keine Skills hinterlegt." />
+                <SectionLabel className="mb-2">{t("skills")}</SectionLabel>
+                <Chips items={profile.skills ?? []} empty={t("noSkills")} />
               </div>
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <SectionLabel className="mb-2">Sucht</SectionLabel>
-                  <Chips items={profile.lookingFor ?? []} tone="accent" empty="Keine Angabe, was gesucht wird." />
+                  <SectionLabel className="mb-2">{t("lookingFor")}</SectionLabel>
+                  <Chips items={profile.lookingFor ?? []} tone="accent" empty={t("noLookingFor")} />
                 </div>
                 <div>
-                  <SectionLabel className="mb-2">Verticals</SectionLabel>
-                  <Chips items={profile.verticals ?? []} empty="Keine Branchen hinterlegt." />
+                  <SectionLabel className="mb-2">{t("verticals")}</SectionLabel>
+                  <Chips items={profile.verticals ?? []} empty={t("noVerticals")} />
                 </div>
                 {languages.length > 0 && (
                   <div>
-                    <SectionLabel className="mb-2">Sprachen</SectionLabel>
-                    <Chips items={languages} />
+                    <SectionLabel className="mb-2">{t("languages")}</SectionLabel>
+                    <Chips items={languages} empty={t("noInfo")} />
                   </div>
                 )}
                 {tags.length > 0 && (
                   <div>
-                    <SectionLabel className="mb-2">Tags</SectionLabel>
-                    <Chips items={tags} />
+                    <SectionLabel className="mb-2">{t("tags")}</SectionLabel>
+                    <Chips items={tags} empty={t("noInfo")} />
                   </div>
                 )}
               </div>
@@ -445,7 +516,7 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
         <aside className="flex min-w-0 flex-col gap-5">
           <MatchBreakdown profile={profile} />
 
-          <Card title="Persönlichkeit" action={personalityLabel ? <Badge tone="success">{personalityLabel}</Badge> : undefined}>
+          <Card title={t("personality")} action={personalityLabel ? <Badge tone="success">{personalityLabel}</Badge> : undefined}>
             {personality ? (
               <div className="flex flex-col gap-5">
                 {personality.summary && <p className="text-sm leading-relaxed text-[var(--foreground)]">{personality.summary}</p>}
@@ -458,35 +529,35 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
                 )}
                 {personality.communicationStyle && (
                   <div className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-2)] p-3.5">
-                    <SectionLabel>Kommunikationsstil</SectionLabel>
+                    <SectionLabel>{t("communicationStyle")}</SectionLabel>
                     <p className="mt-1.5 text-sm leading-relaxed text-[var(--foreground)]">{personality.communicationStyle}</p>
                   </div>
                 )}
                 <div>
-                  <SectionLabel>So schreibst du an</SectionLabel>
-                  <TipList items={personality.outreachTips ?? []} tone="success" empty="Keine Tipps hinterlegt." />
+                  <SectionLabel>{t("outreachTips")}</SectionLabel>
+                  <TipList items={personality.outreachTips ?? []} tone="success" empty={t("noTips")} />
                 </div>
                 <div>
-                  <SectionLabel>Vermeide</SectionLabel>
-                  <TipList items={personality.avoid ?? []} tone="danger" empty="Keine No-Gos hinterlegt." />
+                  <SectionLabel>{t("avoid")}</SectionLabel>
+                  <TipList items={personality.avoid ?? []} tone="danger" empty={t("noAvoid")} />
                 </div>
               </div>
             ) : (
-              <EmptyHint>Noch keine Persönlichkeitsanalyse vorhanden.</EmptyHint>
+              <EmptyHint>{t("noPersonality")}</EmptyHint>
             )}
           </Card>
 
-          <Card title="Quelle">
+          <Card title={t("source")}>
             <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-5 gap-y-2 text-sm">
-              <dt className="text-[var(--muted)]">Typ</dt>
-              <dd className="text-[var(--foreground)]">{source ? SOURCE_LABELS[source.type] ?? source.type : "Unbekannt"}</dd>
+              <dt className="text-[var(--muted)]">{t("sourceType")}</dt>
+              <dd className="text-[var(--foreground)]">{source ? label(SOURCE_LABELS, source.type, locale) : t("unknown")}</dd>
               {source?.scrapedAt && (
                 <>
-                  <dt className="text-[var(--muted)]">Stand</dt>
-                  <dd className="tabular-nums text-[var(--foreground)]">{formatDate(source.scrapedAt)}</dd>
+                  <dt className="text-[var(--muted)]">{t("sourceDate")}</dt>
+                  <dd className="tabular-nums text-[var(--foreground)]">{formatDate(source.scrapedAt, locale)}</dd>
                 </>
               )}
-              <dt className="text-[var(--muted)]">Profil-ID</dt>
+              <dt className="text-[var(--muted)]">{t("profileId")}</dt>
               <dd className="truncate font-mono text-xs text-[var(--foreground)]" title={profile.id}>
                 {profile.id}
               </dd>
