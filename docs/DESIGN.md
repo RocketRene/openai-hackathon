@@ -4,7 +4,7 @@ Für Jolanda: Du übernimmst nach dem MVP das Design und sollst dafür niemanden
 Dieses Dokument sagt dir, **was** das Produkt sein soll, **wo** im Code Design entsteht und
 **wie** du sicher pivotierst, ohne die Funktionen zu brechen.
 
-Stand: 26.09.2026 (Hackathon-Tag). Live-Referenz aller Bausteine: `http://localhost:3000/styleguide`.
+Stand: 28.09.2026 (Design-System-Paket gemergt). Live-Referenz aller Bausteine: `http://localhost:3000/styleguide`.
 Technik-Hintergrund (Datenfluss, Agent, APIs): [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
@@ -61,90 +61,107 @@ Solange die vielen parallelen Agenten noch bauen, laufen Änderungen daran über
 
 Alle Farben sind CSS-Variablen auf `:root`. Der Dark-Mode überschreibt dieselben Variablen in
 `@media (prefers-color-scheme: dark)`. Komponenten benutzen **ausschließlich** `var(--…)`, nie
-Hex-Werte oder Tailwind-Palettenfarben.
+Hex-Werte oder Tailwind-Palettenfarben. Richtung: warm getönte Neutrals, Akzent Indigo.
 
 | Variable | Bedeutung | Light | Dark | Wo sie wirkt |
 |---|---|---|---|---|
-| `--background` | Seitenhintergrund | `#f6f7f9` | `#0b0f17` | `body` |
-| `--foreground` | Primärer Text | `#111827` | `#e5e7eb` | `body`, Titel, Button secondary/ghost |
-| `--muted` | Sekundärtext | `#6b7280` | `#9ca3af` | Untertitel, Labels, Hints, Badge neutral, Placeholder |
-| `--surface` | Flächen erster Ebene | `#ffffff` | `#111827` | Card, Input, Textarea, Select |
-| `--surface-2` | Flächen zweiter Ebene | `#f1f3f6` | `#1f2937` | Button secondary, Badge neutral, Ghost-Hover |
-| `--surface-3` | Flächen dritter Ebene / Hover | `#e5e8ee` | `#273446` | Secondary-Hover, ScoreBar-Track |
-| `--border` | Rahmenlinien | `#e2e5ea` | `#273446` | Card, Inputs, Badge neutral, EmptyState (gestrichelt) |
-| `--accent` | Markenfarbe, primäre Aktion | `#2563eb` | `#3b82f6` | Button primary, Fokus-Rahmen, ScoreBar-Füllung, Badge accent (Text), Avatar-Initialen |
-| `--accent-soft` | Sanfte Akzentfläche | `#dbeafe` | `#1e3a8a` | Badge accent (Fläche), Avatar-Fallback (Fläche) |
-| `--success` / `--success-soft` | Positiv (Text / Fläche) | `#15803d` / `#dcfce7` | `#4ade80` / `#14532d` | Badge success, hohe Scores |
-| `--warning` / `--warning-soft` | Hinweis (Text / Fläche) | `#b45309` / `#fef3c7` | `#fbbf24` / `#78350f` | Badge warning, Risiken |
-| `--danger` / `--danger-soft` | Fehler / destruktiv (Text / Fläche) | `#b91c1c` / `#fee2e2` | `#f87171` / `#7f1d1d` | Button danger, Badge danger, Red Flags |
-| `--sidebar-width` | Breite der Desktop-Sidebar | `240px` | – | Layout (`src/components/layout/*`) |
+| `--background` | Seitenhintergrund (warm) | `#f7f6f2` | `#131217` | `body`, `.fr-app-bg` |
+| `--foreground` | Primärer Text | `#1b1a17` | `#ece9e2` | Text, Titel, Button secondary/ghost |
+| `--muted` | Sekundärtext | `#6d6860` | `#a09b92` | Untertitel, Labels, Hints, Badge neutral, Placeholder |
+| `--surface` | Flächen erster Ebene | `#ffffff` | `#1b1a20` | Card, Input, Header, Avatar-Ring |
+| `--surface-2` | Flächen zweiter Ebene | `#f2f0ea` | `#232228` | Hover (secondary/ghost/Nav), Badge neutral, Skeleton |
+| `--surface-3` | Pressed / Track | `#e6e2d9` | `#2e2d34` | Active-Zustände, ScoreBar-/ScoreRing-Track, Scrollbar |
+| `--surface-elevated` | Schwebende Flächen | `#ffffff` | `#222127` | Popover, Drawer, Dialog (für spätere Bausteine) |
+| `--border` | Rahmenlinien | `#e5e1d8` | `#2c2b32` | Card, Inputs, Divider, Sidebar-Rand |
+| `--sidebar-bg` | Sidebar-Hintergrund | `#fcfbf8` | `#17161c` | Sidebar, Mobile-Drawer |
+| `--accent` | Markenfarbe, primäre Aktion | `#4338ca` | `#a5b4fc` | Button primary, Links, Nav aktiv, Score-Füllung, Logo |
+| `--accent-strong` | Akzent Hover / Pressed | `#3730a3` | `#c7d2fe` | Button primary hover/active |
+| `--accent-soft` | Sanfte Akzentfläche | `#e9e7fb` | `#2a2857` | Badge accent, Nav aktiv, Avatar-Fallback, Stat-Icon |
+| `--accent-contrast` | Text auf Akzent | `#ffffff` | `#131217` | Button primary/danger, Chip aktiv, `::selection` |
+| `--success` / `--success-soft` | Positiv (Text / Fläche) | `#1b7a47` / `#dcf3e4` | `#5ed394` / `#16402b` | Badge success, hohe Scores |
+| `--warning` / `--warning-soft` | Hinweis (Text / Fläche) | `#a2570b` / `#fbeed3` | `#f2b95a` / `#4a3110` | Badge warning, Risiken |
+| `--danger` / `--danger-soft` | Fehler / destruktiv (Text / Fläche) | `#b73333` / `#fce3e0` | `#f28b8b` / `#4e2020` | Button danger, Badge danger, Red Flags |
+| `--ring` | Fokusring | Akzent 40 % | Akzent 50 % | `focus-visible` auf allen interaktiven Bausteinen |
+| `--shadow-sm` / `--shadow` / `--shadow-lg` | Tiefe (weich; im Dark fast unsichtbar) | s. CSS | s. CSS | Cards/Buttons · Hover-Lift · Drawer |
+| `--shadow-md` | Alias für `--shadow` | – | – | ältere Aufrufe |
+| `--radius-sm` / `--radius` / `--radius-lg` | Radien | `8px` / `10px` / `14px` | – | Skeleton · Buttons/Inputs/Nav · Cards/Stat/EmptyState |
+| `--sidebar-width` | Breite der Desktop-Sidebar | `264px` | – | `AppShell` |
+| `--header-height` | Höhe des Headers | `56px`, ab `md:` `64px` | – | `AppShell` |
 
-Zusätzlich im `@theme inline`-Block (Anbindung an Tailwind v4):
+`@theme inline` bindet die wichtigsten Tokens an Tailwind an (`bg-surface`, `text-muted`,
+`border-border`, `text-accent` …) und mappt `--font-sans`/`--font-mono` auf Geist Sans/Mono.
 
-| Variable | Bedeutung |
-|---|---|
-| `--color-background`, `--color-foreground` | Machen `bg-background` / `text-foreground` als Tailwind-Klassen verfügbar |
-| `--font-sans` → `--font-geist-sans` | Fließtext (Geist Sans, geladen in `layout.tsx` über `next/font/google`) |
-| `--font-mono` → `--font-geist-mono` | Monospace (Geist Mono), z. B. für Zahlen und Code |
+**Achtung:** `--radius-sm/-lg` und `--shadow-sm/-lg` überschreiben bewusst die gleichnamigen
+Tailwind-Theme-Variablen. `rounded-lg` und `shadow-sm` in Feature-Komponenten nehmen dadurch die
+Token-Werte an – gewollt, damit der Restyle auch dort wirkt, wo noch keine Primitives benutzt werden.
+
+**Typo-Skala** (Utility-Klassen in `globals.css`, Body-Text ist 15 px / 1.5, Überschriften mit
+leicht negativem Letter-Spacing): `.text-display` (Seitentitel, 26–32 px) · `.text-title`
+(Abschnitte, 20 px) · `.text-body` (15 px) · `.text-caption` (12 px, gedämpft) · `.text-eyebrow`
+(11 px Versalien in Akzent).
+
+**Helfer-Klassen:** `.fr-app-bg` (dezenter Akzent-Verlauf für den Content-Bereich), `.fr-scroll`
+(schmale Scrollbars in Panels), `.fr-fade-in`, `.fr-skeleton`, `.fr-spin`, `.fr-avatar`
+(Fallback-Farbe mit `--avatar-hue`). `::selection`, Fokus-Outline und Scrollbars sind global gesetzt.
 
 **Regeln für Tokens**
 
 - Jede neue Farbvariable bekommt **beide** Werte: im `:root`-Block **und** im Dark-Block.
-- Benennung nach Zweck (`--accent`, `--surface-2`), nicht nach Farbe (`--blue-500`). So kannst du
-  die Farbwelt tauschen, ohne dass Namen lügen.
-- Text-/Flächen-Paare (`--x` + `--x-soft`) brauchen zusammen mindestens Kontrast 4.5:1 – so
-  funktionieren die Badges in beiden Modi.
-- Tokens, die es noch **nicht** gibt und die du vermutlich brauchst: `--radius` (aktuell hart als
-  `rounded-md`/`rounded-lg` in den Primitives), `--shadow`, `--ring` (Fokusring), `--accent-hover`,
-  `--accent-foreground` (statt `text-white` auf gefüllten Buttons), `--font-display` für Titel.
-  Lege sie an und ersetze die harten Werte in `index.tsx`.
+- Benennung nach Zweck (`--accent`, `--surface-2`), nicht nach Farbe (`--blue-500`).
+- Text-/Flächen-Paare (`--x` + `--x-soft`) brauchen zusammen mindestens Kontrast 4.5:1.
+- Bestehende Token-Namen nie umbenennen – Feature-Komponenten referenzieren sie direkt.
 
 ### 2.2 Ebene 2: UI-Primitives (`src/components/ui/index.tsx`)
 
 Eine Datei, bewusst klein, reines Tailwind. Alle Seiten importieren nur von hier:
 `import { Button, Card, Badge } from "@/components/ui"`. Die **Props sind Contract** – Namen und
-Varianten dürfen sich nicht ändern, das Aussehen dahinter komplett.
+Varianten dürfen sich nicht ändern, das Aussehen dahinter komplett. Optionale Props dürfen
+hinzukommen. Live: `/styleguide`.
 
 | Komponente | Props | Varianten / Verhalten |
 |---|---|---|
-| `cx(...parts)` | Strings, `false`, `null`, `undefined` | Hilfsfunktion: fügt Klassen zusammen, filtert leere Werte |
-| `Button` | alle `<button>`-Attribute + `variant`, `size`, `className` | `variant`: `primary` (Standard) · `secondary` · `ghost` · `danger`; `size`: `sm` · `md` (Standard) · `lg`; `disabled` → 50 % Deckkraft |
-| `LinkButton` | `href`, `variant`, `className`, `children` | Gleiche Optik wie `Button`, rendert `next/link`; nur Größe `md` |
-| `Card` | `title?`, `action?`, `className`, `children` | `<section>` mit Rahmen + `--surface`; Header erscheint nur, wenn `title` oder `action` gesetzt |
-| `Badge` | `tone`, `className`, `children` | `tone`: `neutral` (Standard) · `accent` · `success` · `warning` · `danger`; Pille, `text-xs` |
-| `Input` | alle `<input>`-Attribute + `className` | Volle Breite, Rahmen `--border`, Fokus `--accent` |
-| `Textarea` | alle `<textarea>`-Attribute + `className` | wie `Input` |
-| `Select` | alle `<select>`-Attribute + `className`, `children` | wie `Input`; `<option>`s als Kinder |
-| `Label` | `htmlFor?`, `children` | `text-xs`, `--muted`, Abstand unten |
-| `Field` | `label`, `hint?`, `children` | Kombiniert `Label` + Eingabefeld + optionalen Hint-Text |
-| `PageHeader` | `title`, `subtitle?`, `action?` | `<h1>` (2xl, semibold, tracking-tight), Untertitel `--muted`, Aktion rechts; bricht auf Mobile um |
-| `EmptyState` | `title`, `body?`, `action?` | Gestrichelter Rahmen, zentriert, für leere Listen |
-| `Avatar` | `src?`, `name`, `size` (Standard 40) | Mit `src`: rundes Bild; ohne: Initialen (max. 2) auf `--accent-soft` |
-| `ScoreBar` | `value`, `max` (Standard 100), `label?` | Balken 8 px hoch, Track `--surface-3`, Füllung `--accent`; mit `label` erscheint die Zeile „Label … Wert" |
+| `cx(...parts)` | Strings, `false`, `null`, `undefined` | Klassen zusammenfügen, leere Werte filtern |
+| `Button` | `<button>`-Attribute + `variant`, `size`, `loading?`, `className` | `variant`: `primary` (Akzent + Schatten) · `secondary` (Outline) · `ghost` · `outline` (Akzent-Rahmen) · `danger`; `size`: `sm` 36 px · `md` 40 px · `lg` 48 px; `loading` → Spinner + disabled + `aria-busy` |
+| `LinkButton` | `href`, `variant?`, `size?`, `target?`, `className?`, `children` | Gleiche Optik wie `Button`, rendert `next/link` |
+| `Card` | `title?`, `description?`, `action?`, `padding?`, `interactive?`, `className?`, `children` | `<section>` mit `--radius-lg` + `--shadow-sm`; Header nur bei `title`/`description`/`action`; `padding`: `none` · `sm` · `md` (Standard) · `lg`; `interactive` → Hover-Lift |
+| `SectionTitle` | `children`, `action?`, `className?` | `<h2>` in `.text-title`, Aktion rechts |
+| `Kicker` | `children` | Kleiner Versalien-Text in Akzent (`.text-eyebrow`) |
+| `Divider` | `label?`, `className?` | Trennlinie, optional mit mittigem Label |
+| `Badge` | `tone?`, `dot?`, `className?`, `children` | `tone`: `neutral` (Standard) · `accent` · `success` · `warning` · `danger`; Pille 11 px; `dot` → Statuspunkt in Textfarbe |
+| `Chip` | `active?`, `onClick?`, `className?`, `children` | Filter-Chip 36 px, `aria-pressed`; aktiv = Akzent gefüllt |
+| `Input` / `Textarea` / `Select` | native Attribute + `className` | 40 px, `--radius`, Fokus Rahmen `--accent` + Ring `--ring`, `disabled` gedämpft |
+| `Label` | `htmlFor?`, `children` | `text-xs`, `--muted` |
+| `Field` | `label`, `hint?`, `children` | `Label` + Feld + optionaler Hint |
+| `PageHeader` | `title`, `subtitle?`, `action?`, `eyebrow?` (`kicker?` als Alias) | `<h1>` in `.text-display`, Eyebrow darüber, Untertitel `--muted`, Aktion rechts; `mb-8` |
+| `EmptyState` | `title`, `body?`, `action?`, `icon?` | Gestrichelter Rahmen, zentriert, optionales Icon in Akzent-Kreis |
+| `Avatar` | `src?`, `name`, `size?` (40), `className?` | Rund mit Ring; ohne `src` Initialen (max. 2) mit deterministischem Farbton aus dem Namen (`oklch(from …)`, Fallback `--accent-soft`) |
+| `ScoreBar` | `value`, `max?` (100), `label?`, `tone?` | Balken 8 px mit Verlauf, Label links, Wert rechts (`/max` bei `max ≠ 100`), `role="progressbar"` |
+| `ScoreRing` | `value`, `size?` (64), `label?`, `tone?`, `className?` | SVG-Kreis 0–100, Wert in der Mitte, Label darunter |
+| `Stat` | `label`, `value`, `hint?`, `icon?`, `href?`, `className?` | KPI-Kachel; mit `href` klickbar mit Hover-Lift |
+| `Skeleton` | `className?` | Shimmer-Platzhalter (Standard `h-4 w-full`) |
 
 **Regeln für Primitives**
 
-- Neue Bausteine kommen **in dieselbe Datei** und werden von dort exportiert.
-- Zustände nicht vergessen: `hover`, `focus-visible`, `disabled`, `aria-*`. Aktuell haben nur die
-  Eingabefelder einen Fokus-Stil (`focus:border-accent`); Buttons brauchen noch einen sichtbaren
-  Fokusring für Tastatur-Nutzer:innen.
-- Bausteine, die es noch nicht gibt und die Feature-Teams lokal improvisiert haben könnten
-  (beim Pivot einsammeln und vereinheitlichen): Tabs, Dialog/Drawer, Toast, Skeleton/Loading,
-  Tabelle, Tooltip, Radar-Chart (Team-Seite), Chat-Bubble, Mikrofon-Button (Voice).
+- Neue Bausteine kommen **in dieselbe Datei** und werden von dort exportiert. Icons als Inline-SVG
+  (keine Icon-Library).
+- Jeder interaktive Baustein hat `hover`, `active`, `focus-visible` (Ring in `--ring`) und `disabled`.
+- Noch nicht vorhanden (beim Pivot einsammeln, falls Feature-Teams improvisiert haben): Tabs,
+  Dialog/Drawer, Toast, Tabelle, Tooltip, Chat-Bubble, Mikrofon-Button (Voice).
 
 ### 2.3 Ebene 3: Layout & Navigation (`src/app/layout.tsx`, `src/components/layout/*`)
 
-- `src/app/layout.tsx` ist das Root-Layout: lädt Geist Sans/Mono, setzt `<html lang>` und
-  `<body class="min-h-full flex flex-col">`, rendert die App-Shell (Sidebar + Inhalt).
-- `src/components/layout/` enthält die Shell-Bausteine (Sidebar, mobile Navigation/Topbar).
-  Stand beim Schreiben dieses Dokuments war das Verzeichnis im Design-Worktree noch nicht
-  vorhanden – es kommt mit dem Fundament-Merge; die Sidebar-Breite ist über `--sidebar-width`
-  bereits als Token vorbereitet.
-- Zielstruktur: Desktop (`lg:`) feste Sidebar links mit Wortmarke, Navigation (Seiten aus
-  Abschnitt 3), unten Nutzer:in/Einstellungen; Inhalt rechts mit `max-w-6xl`, Innenabstand
-  24–32 px. Mobile: Topbar mit Titel + Menü-Button oder Bottom-Navigation mit den vier wichtigsten
-  Zielen (Start, Agent, Kandidaten, Team).
-- Seitentitel setzen die Seiten selbst über `PageHeader`. Das Layout rendert keine Überschrift.
+- `src/app/layout.tsx`: Root-Layout, lädt Geist Sans/Mono, setzt `<html lang="de">`,
+  `color-scheme: light dark` und `theme-color` (Light/Dark) über `viewport`, rendert `AppShell`.
+- `Sidebar.tsx`: Wortmarke mit `LogoMark` (Inline-SVG, Radar-Kreise), Navigation in drei Gruppen
+  („Finden" · „Vorbereiten" · „Kontext") mit Inline-SVG-Icons (`NavIcon`), Active-State mit
+  Akzent-Balken links + `--accent-soft`, `title`-Attribut statt Zweitzeile. Unten Statusblock +
+  Link `/styleguide`. Exportiert `NAV_GROUPS` und `getPageTitle(pathname)`.
+- `AppShell.tsx`: Desktop-Sidebar (`--sidebar-width`, ab `md:`), Mobile-Drawer (Burger, Escape,
+  schließt bei Routenwechsel), Header mit `--header-height` (Seitentitel aus der Route, rechts
+  Nutzer-Chip → `/onboarding` bzw. „Profil anlegen"), Content-Bereich mit `.fr-app-bg`,
+  `<main>` in `max-w-7xl` mit 16 px (mobil) / 32 px (ab `md:`) Innenabstand.
+- Seitentitel setzen die Seiten selbst über `PageHeader`; der Header zeigt zusätzlich den
+  Navigations-Titel (kurz), damit man auf Mobile immer weiß, wo man ist.
 
 ---
 
