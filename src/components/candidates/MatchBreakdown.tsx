@@ -4,14 +4,14 @@
  * Gewicht-Balken, Risiken als Warn-Badges, Komplementarität und die fünf Team-Dimensionen
  * „Ich vs. Person“. Rechnet deterministisch mit scoreMatch() aus dem Nutzer-Kontext (localStorage).
  * Ohne Kontext: EmptyState + „Demo-Kontext laden“, damit die Demo nie leer ist.
- * Zweisprachig (DE/EN): UI-Beschriftungen über lokales DICT; Tier-/Dimensions-Labels als lokale
- * {de,en}-Tabellen. explainMatch() liefert nur Deutsch – auf EN steht stattdessen ein kurzes
- * englisches Fazit (Einstufung + Empfehlung), die Details stehen in der Gründe-Liste.
+ * Zweisprachig (DE/EN): UI-Beschriftungen über lokales DICT; Dimensions-Labels als lokale
+ * {de,en}-Tabelle. Gründe, Risiken, Tier-Label und Kurzfazit kommen in der aktiven Sprache aus der
+ * Matching-Engine (scoreMatch/explainMatch/matchTierLabel mit `locale`).
  */
 import Link from "next/link";
 import { useMemo, type ReactNode } from "react";
 import { FOUNDER_DIM_KEYS, type FounderDimKey, type Profile } from "@/lib/types";
-import { MATCH_TIER_LABELS, explainMatch, matchTier, scoreMatch, type MatchTier } from "@/lib/matching";
+import { explainMatch, matchTier, matchTierLabel, scoreMatch, type MatchTier } from "@/lib/matching";
 import { useUserContext } from "@/lib/user-context";
 import { useLocale, useT, type Dict } from "@/lib/i18n";
 import { Badge, Button, Card, EmptyState, LinkButton, ScoreBar, ScoreRing, Skeleton, cx } from "@/components/ui";
@@ -27,14 +27,6 @@ const TIER_STYLE: Record<MatchTier, { tone: Tone; color: string }> = {
   schwach: { tone: "danger", color: "var(--danger)" },
 };
 
-/** Tier-Labels: DE direkt aus matching.ts (bleibt synchron), EN lokal. */
-const TIER_LABELS: Record<MatchTier, Bi> = {
-  top: { de: MATCH_TIER_LABELS.top, en: "Top match" },
-  gut: { de: MATCH_TIER_LABELS.gut, en: "Good match" },
-  möglich: { de: MATCH_TIER_LABELS.möglich, en: "Possible match" },
-  schwach: { de: MATCH_TIER_LABELS.schwach, en: "Weak match" },
-};
-
 const DIM_LABELS: Record<FounderDimKey, Bi> = {
   vision: { de: "Vision", en: "Vision" },
   design: { de: "Design / Visuell", en: "Design / Visual" },
@@ -42,25 +34,6 @@ const DIM_LABELS: Record<FounderDimKey, Bi> = {
   detail: { de: "Detail", en: "Detail" },
   execution: { de: "Umsetzung", en: "Execution" },
 };
-
-/** Englisches Pendant zu explainMatch() – nur Einstufung und Empfehlung (Grund-/Risiko-Texte kommen deutsch aus matching.ts). */
-const EN_TIER_PHRASE: Record<MatchTier, string> = {
-  top: "a top match",
-  gut: "a good match",
-  möglich: "a possible match",
-  schwach: "rather a weak match",
-};
-
-const EN_TIER_ADVICE: Record<MatchTier, (first: string) => string> = {
-  top: (first) => `Reach out to ${first} directly – ideally right at the event.`,
-  gut: () => "A conversation is worth it – clarify the open points early.",
-  möglich: () => "Second priority – reach out if time allows.",
-  schwach: () => "Probably not the right contact for your current goal.",
-};
-
-function explainMatchEn(name: string, score: number, tier: MatchTier) {
-  return `${name} is ${EN_TIER_PHRASE[tier]} for you (${score}/100). ${EN_TIER_ADVICE[tier](firstName(name))}`;
-}
 
 const DICT: Dict = {
   title: { de: "Match", en: "Match" },
@@ -154,12 +127,11 @@ export default function MatchBreakdown({ profile }: { profile: Profile }) {
   const [locale] = useLocale();
   const t = useT(DICT);
   const { userContext, ready, loadDemo } = useUserContext();
-  const match = useMemo(() => (userContext ? scoreMatch(userContext, profile) : null), [userContext, profile]);
-  const summary = useMemo(() => {
-    if (!userContext || !match) return "";
-    if (locale === "en") return explainMatchEn(profile.name, match.score, matchTier(match.score));
-    return explainMatch(match, userContext, profile);
-  }, [userContext, match, profile, locale]);
+  const match = useMemo(() => (userContext ? scoreMatch(userContext, profile, { locale }) : null), [userContext, profile, locale]);
+  const summary = useMemo(
+    () => (userContext && match ? explainMatch(match, userContext, profile, locale) : ""),
+    [userContext, match, profile, locale],
+  );
 
   if (!ready) {
     return (
@@ -208,7 +180,7 @@ export default function MatchBreakdown({ profile }: { profile: Profile }) {
 
   const tier = matchTier(match.score);
   const { tone, color } = TIER_STYLE[tier];
-  const tierLabel = TIER_LABELS[tier][locale];
+  const tierLabel = matchTierLabel(tier, locale);
   const them = firstName(profile.name);
   const maxWeight = Math.max(1, ...match.reasons.map((r) => r.weight));
   const complementDims = FOUNDER_DIM_KEYS.filter((key) => (profile.dims?.[key] ?? 0) > (userContext.dims?.[key] ?? 0));

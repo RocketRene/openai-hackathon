@@ -3,15 +3,15 @@
  * Shortlist-Vergleich: je gemerktes Profil eine Karten-Spalte (Avatar, Score-Pill mit Tier-Farbe,
  * Top-Grund/-Risiko, fünf Gründer-Dimensionen als Mini-Balken mit Best-Markierung, Verticals, „Sucht“, Events).
  * Ab drei Profilen liegen die Karten in einem horizontal scrollbaren Container – die Seite selbst scrollt nie seitwärts.
- * Daten nur über src/lib/data.ts; Match-Score über scoreMatch (ohne Nutzer-Kontext: Hinweis aufs Onboarding).
+ * Daten nur über src/lib/data.ts; Match-Score über scoreMatch in der aktiven Sprache (ohne Nutzer-Kontext: Hinweis aufs Onboarding).
  */
 import Link from "next/link";
 import { useMemo, type ReactNode } from "react";
 import { formatVertical } from "@/components/candidates/CandidateCard";
 import { Avatar, Badge, Button, Card, EmptyState, LinkButton, PageHeader, Skeleton, Stat, cx } from "@/components/ui";
 import { getEvent, getProfile } from "@/lib/data";
-import { COMMON, useT, type Dict } from "@/lib/i18n";
-import { matchTier, scoreMatch, type MatchTier } from "@/lib/matching";
+import { COMMON, useLocale, useT, type Dict } from "@/lib/i18n";
+import { matchTier, matchTierLabel, scoreMatch, type MatchTier } from "@/lib/matching";
 import { useShortlist } from "@/lib/shortlist";
 import { FOUNDER_DIM_KEYS, type FounderDimKey, type MatchResult, type Profile } from "@/lib/types";
 import { useUserContext } from "@/lib/user-context";
@@ -59,10 +59,6 @@ const DICT: Dict = {
   pers_operator: { de: "Operator", en: "Operator" },
   pers_connector: { de: "Connector", en: "Connector" },
   pers_analyst: { de: "Analyst:in", en: "Analyst" },
-  tierTop: { de: "Top-Match", en: "Top match" },
-  tierGood: { de: "Guter Match", en: "Good match" },
-  tierPossible: { de: "Möglicher Match", en: "Possible match" },
-  tierWeak: { de: "Schwacher Match", en: "Weak match" },
   verticals: { de: "Verticals", en: "Verticals" },
   lookingFor: { de: "Sucht", en: "Looking for" },
   events: { de: "Events", en: "Events" },
@@ -71,13 +67,6 @@ const DICT: Dict = {
 };
 
 type Translate = ReturnType<typeof useT<Dict>>;
-
-const TIER_KEY: Record<MatchTier, string> = {
-  top: "tierTop",
-  gut: "tierGood",
-  möglich: "tierPossible",
-  schwach: "tierWeak",
-};
 
 const TIER_STYLE: Record<MatchTier, string> = {
   top: "bg-[var(--success-soft)] text-[var(--success)]",
@@ -168,6 +157,7 @@ function ScoreBlock({
   bestComp: number;
   t: Translate;
 }) {
+  const [locale] = useLocale();
   if (!match) {
     return (
       <div>
@@ -201,7 +191,7 @@ function ScoreBlock({
           <span className="text-xl font-semibold leading-none tabular-nums">{match.score}</span>
           <span className="text-[11px] font-medium opacity-70">/100</span>
         </span>
-        <span className="text-xs font-medium text-[var(--foreground)]">{t(TIER_KEY[tier])}</span>
+        <span className="text-xs font-medium text-[var(--foreground)]">{matchTierLabel(tier, locale)}</span>
       </div>
 
       <ul className="mt-3 space-y-1.5 text-xs">
@@ -413,6 +403,7 @@ export function ShortlistHeader() {
 export function ShortlistCompare() {
   const { ids, ready, remove, clear } = useShortlist();
   const { userContext } = useUserContext();
+  const [locale] = useLocale();
   const t = useT(DICT);
   const tc = useT(COMMON);
 
@@ -422,9 +413,9 @@ export function ShortlistCompare() {
   const scores = useMemo(() => {
     const map = new Map<string, MatchResult>();
     if (!userContext) return map;
-    for (const p of profiles) map.set(p.id, scoreMatch(userContext, p));
+    for (const p of profiles) map.set(p.id, scoreMatch(userContext, p, { locale }));
     return map;
-  }, [profiles, userContext]);
+  }, [profiles, userContext, locale]);
 
   const bestScore = useMemo(() => Math.max(-1, ...Array.from(scores.values(), (s) => s.score)), [scores]);
   const bestComp = useMemo(() => Math.max(-1, ...Array.from(scores.values(), (s) => s.complementarity)), [scores]);
