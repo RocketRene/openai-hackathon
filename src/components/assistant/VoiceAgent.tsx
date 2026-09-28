@@ -41,15 +41,18 @@ const STATUS_META: Record<Status, { label: string; tone: "neutral" | "accent" | 
   speaking: { label: "Spricht", tone: "accent", dot: "bg-[var(--accent)] animate-pulse" },
 };
 
-const TOOL_LABELS: Record<string, string> = {
-  show_candidate: "Profil wird geladen …",
-  search_candidates: "Suche Kandidat:innen …",
-  save_user_context: "Aktualisiere dein Suchprofil …",
-  propose_candidates: "Berechne Matches …",
-  list_events: "Lade Events …",
-  prepare_interview: "Erstelle Interviewleitfaden …",
-  shortlist_candidate: "Setze auf die Merkliste …",
-  get_shortlist: "Lese Merkliste …",
+/** Laufende Tool-Aktivität (Präsens) und erledigte (Perfekt) – als Badges im UI. */
+const TOOL_LABELS: Record<string, { running: string; done: string }> = {
+  show_candidate: { running: "Lade Profil …", done: "Profil geladen" },
+  get_candidate: { running: "Lade Lebenslauf …", done: "Lebenslauf geladen" },
+  search_candidates: { running: "Durchsuche Profile …", done: "Profile durchsucht" },
+  update_brief: { running: "Aktualisiere Suchprofil …", done: "Suchprofil aktualisiert" },
+  save_user_context: { running: "Speichere dein Profil …", done: "Profil gespeichert" },
+  propose_candidates: { running: "Berechne Matches …", done: "Matches berechnet" },
+  list_events: { running: "Lade Events …", done: "Events geladen" },
+  prepare_interview: { running: "Erstelle Interview-Leitfaden …", done: "Leitfaden erstellt" },
+  shortlist_candidate: { running: "Setze auf die Merkliste …", done: "Gemerkt" },
+  get_shortlist: { running: "Lese Merkliste …", done: "Merkliste gelesen" },
 };
 
 const SESSION_ENDPOINT = "/api/realtime/session";
@@ -156,6 +159,7 @@ export default function VoiceAgent({
   const [error, setError] = useState<string | null>(null);
   const [transcript, setTranscript] = useState<TranscriptItem[]>([]);
   const [toolActivity, setToolActivity] = useState<string | null>(null);
+  const [recentTools, setRecentTools] = useState<{ id: number; label: string }[]>([]);
   const [textInput, setTextInput] = useState("");
 
   const sessionRef = useRef<RealtimeSession | null>(null);
@@ -165,6 +169,9 @@ export default function VoiceAgent({
   const lastTranscriptJson = useRef("");
   const injectedItemIds = useRef<Set<string>>(new Set());
   const lastVisibleKey = useRef<string>("");
+  /** Zuletzt gezeigte Person („Gerade im Gespräch“) – für „diese Person“ und prepare_interview ohne ID. */
+  const currentCandidateRef = useRef<string | undefined>(candidate?.id ?? visibleCandidateIds?.[0]);
+  const toolSeq = useRef(0);
   const listRef = useRef<HTMLDivElement>(null);
 
   // Immer die aktuellsten Callbacks/Props benutzen, ohne die Session neu aufzubauen.
@@ -173,6 +180,11 @@ export default function VoiceAgent({
     onTranscriptRef.current = onTranscript;
     initialMessagesRef.current = initialMessages;
   }, [onUiAction, onTranscript, initialMessages]);
+
+  useEffect(() => {
+    const first = candidate?.id ?? visibleCandidateIds?.[0];
+    if (first) currentCandidateRef.current = first;
+  }, [candidate?.id, visibleCandidateIds]);
 
   // Transkript automatisch ans Ende scrollen.
   useEffect(() => {
@@ -256,6 +268,7 @@ export default function VoiceAgent({
     setError(null);
     setToolActivity(null);
     setStatus("connecting");
+    setRecentTools([]);
     lastTranscriptJson.current = "";
     onTranscriptRef.current?.([]);
 
@@ -286,11 +299,22 @@ export default function VoiceAgent({
       const data = (await res.json()) as { value?: string; model?: string };
       if (!data.value) throw new Error("Kein Ephemeral-Key in der Antwort von /api/realtime/session.");
 
-      // 2) Agent + Session aufbauen.
+      // 2) Agent + Session aufbauen – mit der zuletzt gezeigten Person als Kontext („Gerade im Gespräch“).
+      const currentCandidate = candidate ?? (currentCandidateRef.current ? getProfile(currentCandidateRef.current) : undefined);
       const agent = new RealtimeAgent({
         name: "Voya",
-        instructions: buildVoiceInstructions(mode, userContext, candidate),
-        tools: createVoiceTools({ emit: (action) => onUiActionRef.current(action) }),
+        instructions: buildVoiceInstructions(mode, userContext, candidate, { currentCandidate: currentCandidate ?? null }),
+        tools: createVoiceTools({
+          emit: (action) => {
+            if (action.type === "show_candidate" || action.type === "show_interview_guide") {
+              currentCandidateRef.current = action.profileId;
+            } else if (action.type === "show_candidates" && action.profileIds[0]) {
+              currentCandidateRef.current = action.profileIds[0];
+            }
+            onUiActionRef.current(action);
+          },
+          getCurrentCandidateId: () => currentCandidateRef.current,
+        }),
       });
 
       const session = new RealtimeSession(agent, {
@@ -323,9 +347,14 @@ export default function VoiceAgent({
       session.on("audio_stopped", () => setStatus("connected"));
       session.on("audio_interrupted", () => setStatus("connected"));
       session.on("agent_tool_start", (_context, _agent, tool) => {
-        setToolActivity(TOOL_LABELS[tool.name] ?? `Führe ${tool.name} aus …`);
+        setToolActivity(TOOL_LABELS[tool.name]?.running ?? `Führe ${tool.name} aus …`);
       });
-      session.on("agent_tool_end", () => setToolActivity(null));
+      session.on("agent_tool_end", (_context, _agent, tool) => {
+        setToolActivity(null);
+        toolSeq.current += 1;
+        const label = TOOL_LABELS[tool.name]?.done ?? tool.name;
+        setRecentTools((prev) => [{ id: toolSeq.current, label }, ...prev].slice(0, 3));
+      });
 
       sessionRef.current = session;
 
@@ -423,14 +452,15 @@ export default function VoiceAgent({
   const statusLabel = connected && muted ? "Mikro stumm" : meta.label;
   const statusTone = connected && muted ? "warning" : meta.tone;
 
+  const isSimulation = mode === "prep-simulation";
   const modeLabel =
-    mode === "interview" ? "Interview-Coach" : mode === "prep-simulation" ? `Simulation: ${candidate?.name ?? "Kandidat:in"}` : "Dashboard-Assistent";
+    mode === "interview" ? "Suchprofil schärfen" : isSimulation ? `Simulation: ${candidate?.name ?? "Kandidat:in"}` : "Freies Gespräch";
   const hint =
     mode === "interview"
-      ? "Der Coach klärt Idee, Stärken, gesuchte Ergänzung und Rahmenbedingungen und schlägt dann passende Kontakte vor. Sag z. B. „Guck dir mal den Max an“ oder „Bereite mich auf das Gespräch mit Lena vor“."
-      : mode === "prep-simulation"
-        ? `Der Agent spielt ${candidate?.name ?? "die Kandidat:in"} in einem Erstgespräch. Sag „Feedback“, um aus der Rolle zu treten.`
-        : "Frag nach Kandidat:innen, Events, deiner Merkliste oder wer zu dir passt.";
+      ? "Voya klärt mit dir Schritt für Schritt Idee, Stärken, gesuchte Ergänzung und Rahmenbedingungen und findet dann passende Menschen in den echten Profilen. Sag z. B. „Guck dir mal den Max an“ oder „Bereite ein Interview mit Lena vor“."
+      : isSimulation
+        ? `Voya spielt ${candidate?.name ?? "die Kandidat:in"} in einem simulierten Erstgespräch – keine echten Aussagen der Person. Sag „Feedback“, um aus der Rolle zu treten.`
+        : "Frag nach Menschen, Events, deiner Merkliste oder wer zu dir passt – oder sag „Bereite ein Interview mit … vor“.";
   const assistantName = mode === "prep-simulation" && candidate ? candidate.name.split(" ")[0] : "Voya";
 
   const exportTranscript = () => {
@@ -457,8 +487,8 @@ export default function VoiceAgent({
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <span className={cx("inline-block h-2.5 w-2.5 rounded-full", meta.dot)} aria-hidden="true" />
-          <h3 className="text-sm font-semibold text-[var(--foreground)]">Voice-Agent</h3>
-          <Badge tone="neutral">{modeLabel}</Badge>
+          <h3 className="text-sm font-semibold text-[var(--foreground)]">Mit Voya sprechen</h3>
+          <Badge tone={isSimulation ? "warning" : "neutral"}>{modeLabel}</Badge>
         </div>
         <Badge tone={statusTone}>{statusLabel}</Badge>
       </header>
@@ -530,8 +560,21 @@ export default function VoiceAgent({
                 </Button>
               </>
             )}
-            {toolActivity && <span className="animate-pulse text-xs text-[var(--muted)]">{toolActivity}</span>}
           </div>
+          {(toolActivity || recentTools.length > 0) && (
+            <div className="flex flex-wrap items-center gap-1.5" aria-live="polite" aria-label="Aktivität des Agenten">
+              {toolActivity && (
+                <Badge tone="accent" className="animate-pulse">
+                  {toolActivity}
+                </Badge>
+              )}
+              {recentTools.map((t) => (
+                <Badge key={t.id} tone="neutral">
+                  ✓ {t.label}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -567,6 +610,7 @@ export default function VoiceAgent({
               >
                 <span className="block text-[10px] font-medium uppercase tracking-wide opacity-70">
                   {item.role === "user" ? "Du" : assistantName}
+                  {isSimulation && item.role === "assistant" ? " · Simulation" : ""}
                 </span>
                 {item.text}
               </div>
@@ -574,7 +618,11 @@ export default function VoiceAgent({
           ))
         )}
       </div>
-      <p className="mt-1.5 text-[11px] text-[var(--muted)]">KI kann sich irren. Prüfe wichtige Angaben im Profil.</p>
+      <p className="mt-1.5 text-[11px] text-[var(--muted)]">
+        {isSimulation
+          ? "Simulation auf Basis des Profils – keine echten Aussagen der Person. KI kann sich irren."
+          : "KI kann sich irren. Prüfe wichtige Angaben im Profil – Verfügbarkeit und Gründungsinteresse klärt ihr im Gespräch."}
+      </p>
 
       {connected && (
         <form

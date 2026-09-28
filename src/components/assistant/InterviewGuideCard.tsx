@@ -5,7 +5,7 @@
  */
 import type { InterviewGuide } from "@/lib/types";
 import { interviewGuideToMarkdown } from "@/lib/interview-guide";
-import { Badge, Button, Card } from "@/components/ui";
+import { Badge, Button, Card, LinkButton } from "@/components/ui";
 
 /** Löst im Browser einen Datei-Download aus (Blob + temporärer Link). */
 export function downloadTextFile(filename: string, content: string, type = "text/markdown;charset=utf-8"): void {
@@ -94,6 +94,9 @@ export default function InterviewGuideCard({ guide, onClose, className }: Interv
         <Button variant="secondary" size="sm" onClick={download}>
           Als Markdown herunterladen
         </Button>
+        <LinkButton href={`/prep/${encodeURIComponent(guide.profileId)}`} variant="ghost" size="sm">
+          Vorbereitung öffnen
+        </LinkButton>
         <span className="text-xs text-[var(--muted)]">Fragen beziehen sich nur auf Angaben aus dem Profil.</span>
       </div>
     </Card>
