@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * FounderRadar – Smoke-Test gegen die laufende App.
+ * Voya – Smoke-Test gegen die laufende App.
  * ---------------------------------------------------------------
  * Wofür: Vor der Demo (und nach jedem Merge) in 10 Sekunden prüfen, ob alle API-Routen aus
  * docs/PARALLEL-WORK.md ("Contracts zwischen Paketen") und alle Seiten antworten und die
@@ -216,7 +216,7 @@ const shapeHtml = (body, res) => {
 /* ------------------------------------------------------------------ */
 
 async function main() {
-  console.log(`FounderRadar Smoke-Test → ${BASE_URL}  (Timeout ${TIMEOUT_MS / 1000} s pro Request)\n`);
+  console.log(`Voya Smoke-Test → ${BASE_URL}  (Timeout ${TIMEOUT_MS / 1000} s pro Request)\n`);
 
   // --- GET APIs ---
   await check({
