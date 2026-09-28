@@ -19,10 +19,15 @@ export default async function PrepPage({ params }: { params: Params }) {
   const profile = getProfile(id);
   if (!profile) notFound();
 
+  // Layout/Shell (main, max-w, Padding) kommt global aus AppShell.
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">
-      <PageHeader title={`Gespräch vorbereiten: ${profile.name}`} subtitle={profile.headline} />
+    <>
+      <PageHeader
+        kicker="Vorbereitung & Simulation"
+        title="Gespräch vorbereiten"
+        subtitle={`Wahrscheinliche Fragen, Talking Points und eine Gesprächssimulation – zugeschnitten auf ${profile.name}.`}
+      />
       <PrepWorkspace profile={profile} />
-    </main>
+    </>
   );
 }
