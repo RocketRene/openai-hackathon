@@ -97,7 +97,7 @@ function Chips({ items, tone = "neutral", empty = "Keine Angaben." }: { items: s
   return (
     <div className="flex flex-wrap gap-1.5">
       {items.map((item) => (
-        <Badge key={item} tone={tone} className="px-2.5 py-1 text-xs">
+        <Badge key={item} tone={tone}>
           {item}
         </Badge>
       ))}
@@ -357,7 +357,7 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
                 {profile.email && (
                   <LinkButton href={`mailto:${profile.email}`} variant="secondary" size="sm" className="max-w-full">
                     <MailIcon />
-                    <span className="truncate">{profile.email}</span>
+                    <span className="min-w-0 truncate">{profile.email}</span>
                   </LinkButton>
                 )}
               </div>
@@ -366,8 +366,8 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
         </div>
       </Card>
 
-      {/* Sticky Aktionsleiste – klebt unter dem globalen Header (h-14); Vollbreite über die Shell-Gutter. */}
-      <div className="sticky top-14 z-20 -mx-4 mt-4 border-b border-[var(--border)] bg-[var(--background)]/85 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+      {/* Sticky Aktionsleiste – klebt unter dem globalen Header (--header-height); Vollbreite über die Shell-Gutter (px-4 / md:px-8). */}
+      <div className="sticky top-[var(--header-height)] z-20 -mx-4 mt-4 border-b border-[var(--border)] bg-[var(--background)]/85 px-4 py-3 backdrop-blur md:-mx-8 md:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <div className="mr-auto hidden min-w-0 items-center gap-2.5 md:flex">
             <Avatar src={profile.photoUrl || undefined} name={profile.name} size={28} />
@@ -387,7 +387,7 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
       </div>
 
       {/* Zwei Spalten ab lg */}
-      <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] lg:items-start">
+      <div className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(300px,360px)] lg:items-start">
         {/* Hauptspalte */}
         <div className="flex min-w-0 flex-col gap-5">
           <Card title="Über">
@@ -452,9 +452,7 @@ export default function CandidateProfile({ profile, events }: { profile: Profile
                 {personality.traits?.length > 0 && (
                   <div className="flex flex-wrap gap-1.5">
                     {personality.traits.map((trait) => (
-                      <Badge key={trait} className="px-2.5 py-1 text-xs">
-                        {trait}
-                      </Badge>
+                      <Badge key={trait}>{trait}</Badge>
                     ))}
                   </div>
                 )}
