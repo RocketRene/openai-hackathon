@@ -155,25 +155,23 @@ function ChannelChips({
 }) {
   return (
     <div
-      role="radiogroup"
-      aria-label="Kanal"
+      role="group"
+      aria-label={`Kanal – gewählt: ${CHANNEL_LABELS[value]}`}
       className={cx("flex items-center gap-1.5", disabled && "pointer-events-none opacity-50")}
       aria-disabled={disabled || undefined}
     >
       {CHANNELS.map((channel) => {
+        const active = value === channel;
         const available = channel === "email" ? Boolean(profile.email) : Boolean(profile.linkedinUrl);
+        const hint = available ? undefined : channel === "email" ? "Keine E-Mail-Adresse hinterlegt" : "Kein LinkedIn-Profil hinterlegt";
         return (
-          <Chip
-            key={channel}
-            active={value === channel}
-            onClick={() => onChange(channel)}
-            className={cx(!available && value !== channel && "text-[var(--muted)]")}
-          >
-            <span role="radio" aria-checked={value === channel} className="inline-flex items-center gap-1.5">
-              {CHANNEL_LABELS[channel]}
-              {!available && <span className="text-[10px] font-normal opacity-70">(kein Kontakt)</span>}
-            </span>
-          </Chip>
+          <span key={channel} title={hint} className="inline-flex">
+            <Chip active={active} onClick={() => onChange(channel)}>
+              <span className={cx(!available && !active && "opacity-60")}>{CHANNEL_LABELS[channel]}</span>
+              {!available && <span aria-hidden className="ml-1 text-[10px] font-normal opacity-60">∅</span>}
+              <span className="sr-only">{active ? ", gewählt" : ""}{!available ? `, ${hint}` : ""}</span>
+            </Chip>
+          </span>
         );
       })}
     </div>
@@ -514,7 +512,7 @@ export default function OutreachWorkspace() {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2 px-5 pt-4 fr-scroll" role="group" aria-label="Nach Rolle filtern">
+        <div className="flex flex-wrap gap-2 px-5 pt-4" role="group" aria-label="Nach Rolle filtern">
           <Chip active={roleFilter === "all"} onClick={() => setRoleFilter("all")}>
             Alle
             <span className="ml-1.5 tabular-nums opacity-70">{ranked.length}</span>
@@ -573,7 +571,11 @@ export default function OutreachWorkspace() {
       {/* ------------------------------------------------------------ */}
       {/* Rechts: Composer                                              */}
       {/* ------------------------------------------------------------ */}
-      <div ref={composerRef} className="min-w-0 scroll-mt-20 lg:sticky lg:top-20 lg:self-start">
+      {/* Ab lg sticky; wird der Composer höher als der Viewport, scrollt er intern statt abgeschnitten zu werden. */}
+      <div
+        ref={composerRef}
+        className="min-w-0 scroll-mt-20 fr-scroll lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto lg:pb-4"
+      >
         {!selectedProfile ? (
           <EmptyState
             icon={<IconInbox />}
