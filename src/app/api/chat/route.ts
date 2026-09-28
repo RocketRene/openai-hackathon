@@ -1,6 +1,7 @@
 /**
  * POST /api/chat – Body `ChatRequest` → `ChatResponse` (Contract: docs/PARALLEL-WORK.md).
  * Ohne OPENAI_API_KEY antwortet der regelbasierte Fallback (kein 500).
+ * `locale` ("de" | "en", Default "de") bestimmt die Antwortsprache des Agenten.
  */
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -22,6 +23,7 @@ const BodySchema = z.object({
   mode: z.enum(["interview", "prep-simulation", "general"]).default("interview"),
   userContext: z.record(z.string(), z.unknown()).nullable().optional(),
   candidateId: z.string().optional(),
+  locale: z.enum(["de", "en"]).optional(),
 });
 
 export async function POST(request: Request) {
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       {
-        error: "Ungültiger Body: erwartet { messages: ChatMessage[], mode: AgentMode, userContext?, candidateId? }.",
+        error: "Ungültiger Body: erwartet { messages: ChatMessage[], mode: AgentMode, userContext?, candidateId?, locale? }.",
         issues: parsed.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`),
       },
       { status: 400 },
@@ -48,6 +50,7 @@ export async function POST(request: Request) {
     mode: parsed.data.mode,
     userContext: (parsed.data.userContext as unknown as UserContext | null | undefined) ?? null,
     candidateId: parsed.data.candidateId,
+    locale: parsed.data.locale ?? "de",
   };
 
   try {
