@@ -1,7 +1,7 @@
 /**
  * POST /api/outreach
- * Body: { profileId: string, userContext: UserContext | null, channel: "email" | "linkedin" }
- * → OutreachDraft
+ * Body: { profileId: string, userContext: UserContext | null, channel: "email" | "linkedin", locale?: "de" | "en" }
+ * → OutreachDraft (Sprache der Nachricht und der personalityNotes gemäß `locale`, Default "de")
  *
  * Mit OPENAI_API_KEY: LLM-Entwurf (Responses API, Structured Outputs), generatedBy "llm".
  * Ohne Key oder bei Fehlern: regelbasiertes Template, generatedBy "template" – nie 500.
@@ -18,6 +18,7 @@ import {
   outreachSystemPrompt,
   outreachUserPrompt,
   type OutreachChannel,
+  type OutreachLocale,
 } from "@/lib/outreach";
 import type { FounderDims, FounderRole, NetworkRole, Stage, UserContext } from "@/lib/types";
 
@@ -104,6 +105,17 @@ function parseChannel(value: unknown): OutreachChannel | null {
   return value === "email" || value === "linkedin" ? value : null;
 }
 
+/** Unbekannte oder fehlende Sprache → "de" (nie 400, damit ältere Clients weiter funktionieren). */
+function parseLocale(value: unknown): OutreachLocale {
+  return value === "en" ? "en" : "de";
+}
+
+const ERRORS = {
+  profileIdMissing: { de: "profileId fehlt.", en: "profileId is missing." },
+  channelInvalid: { de: 'channel muss "email" oder "linkedin" sein.', en: 'channel must be "email" or "linkedin".' },
+  profileNotFound: { de: (id: string) => `Profil "${id}" nicht gefunden.`, en: (id: string) => `Profile "${id}" not found.` },
+} as const;
+
 export async function POST(request: Request) {
   let body: unknown;
   try {
@@ -115,23 +127,25 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Request-Body muss ein JSON-Objekt sein." }, { status: 400 });
   }
 
+  const locale = parseLocale(body.locale);
+
   const profileId = typeof body.profileId === "string" ? body.profileId.trim() : "";
   if (!profileId) {
-    return NextResponse.json({ error: "profileId fehlt." }, { status: 400 });
+    return NextResponse.json({ error: ERRORS.profileIdMissing[locale] }, { status: 400 });
   }
 
   const channel = parseChannel(body.channel);
   if (!channel) {
-    return NextResponse.json({ error: 'channel muss "email" oder "linkedin" sein.' }, { status: 400 });
+    return NextResponse.json({ error: ERRORS.channelInvalid[locale] }, { status: 400 });
   }
 
   const profile = getProfile(profileId);
   if (!profile) {
-    return NextResponse.json({ error: `Profil "${profileId}" nicht gefunden.` }, { status: 404 });
+    return NextResponse.json({ error: ERRORS.profileNotFound[locale](profileId) }, { status: 404 });
   }
 
   const user = normalizeUserContext(body.userContext);
-  const template = buildOutreachTemplate(user, profile, channel);
+  const template = buildOutreachTemplate(user, profile, channel, locale);
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -145,8 +159,8 @@ export async function POST(request: Request) {
 
     const response = await client.responses.create({
       model,
-      instructions: outreachSystemPrompt(),
-      input: outreachUserPrompt(user, profile, channel),
+      instructions: outreachSystemPrompt(locale),
+      input: outreachUserPrompt(user, profile, channel, locale),
       ...(isReasoningModel ? { reasoning: { effort: "low" as const } } : {}),
       text: {
         format: {
