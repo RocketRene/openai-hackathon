@@ -1,147 +1,187 @@
 "use client";
-/**
- * Top-Matches für die Nutzer:in: 3–6 Karten mit Foto, Score, einem Match-Grund als Satz.
- * Ohne Kontext: kurzer Hinweis + Demo-Button, nie eine leere Fläche.
- */
+
 import Link from "next/link";
 import { useMemo } from "react";
 import { getProfiles } from "@/lib/data";
-import { rankCandidates } from "@/lib/matching";
+import { MATCH_TIER_LABELS, matchTier, rankCandidates, type MatchTier } from "@/lib/matching";
 import { useUserContext } from "@/lib/user-context";
 import type { MatchResult, Profile } from "@/lib/types";
-import { Avatar, Badge, Button, EmptyState, LinkButton, SectionTitle, Skeleton, cx } from "@/components/ui";
-import { FOUNDER_ROLE_LABELS, NETWORK_ROLE_LABELS } from "@/components/candidates/CandidateCard";
+import { Avatar, Badge, Button, Card, EmptyState, LinkButton, Skeleton } from "@/components/ui";
+import { NETWORK_ROLE_SINGULAR, SECTION_LINK_CLS } from "./shared";
 
-const TOP_N = 6;
+const TOP_N = 5;
 
 interface RankedProfile {
   match: MatchResult;
   profile: Profile;
 }
 
-function scoreTone(score: number): "success" | "accent" | "neutral" {
-  if (score >= 70) return "success";
-  if (score >= 45) return "accent";
-  return "neutral";
-}
-
-const scoreClasses: Record<ReturnType<typeof scoreTone>, string> = {
-  success: "bg-[var(--success-soft)] text-[var(--success)]",
-  accent: "bg-[var(--accent-soft)] text-[var(--accent)]",
-  neutral: "bg-[var(--surface-2)] text-[var(--muted)]",
+const TIER_TONE: Record<MatchTier, "success" | "accent" | "neutral"> = {
+  top: "success",
+  gut: "accent",
+  möglich: "neutral",
+  schwach: "neutral",
 };
 
-function MatchCard({ match, profile, rank }: RankedProfile & { rank: number }) {
-  const reason = match.reasons[0];
-  const tone = scoreTone(match.score);
+function ScorePill({ score }: { score: number }) {
+  const tier = matchTier(score);
   return (
-    <li className="min-w-0">
-      <Link
-        href={`/candidates/${encodeURIComponent(profile.id)}`}
-        prefetch={false}
-        className="group flex h-full flex-col gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)] transition hover:-translate-y-0.5 hover:border-[var(--accent)]/50 hover:shadow-[var(--shadow-md)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-      >
-        <div className="flex items-start gap-3">
-          <Avatar src={profile.photoUrl || undefined} name={profile.name} size={48} />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-[var(--foreground)] group-hover:text-[var(--accent)]">
-              {profile.name}
-            </p>
-            <p className="line-clamp-2 text-xs leading-snug text-[var(--muted)]">{profile.headline}</p>
-          </div>
-          <div
-            className={cx("flex shrink-0 flex-col items-center rounded-[var(--radius-sm)] px-2 py-1", scoreClasses[tone])}
-            title={`Match-Score ${match.score} von 100`}
-          >
-            <span className="text-lg font-semibold leading-none tabular-nums">{Math.round(match.score)}</span>
-            <span className="text-[10px] font-medium uppercase tracking-wide opacity-80">Match</span>
-          </div>
-        </div>
-
-        {reason ? (
-          <p className="text-sm leading-snug text-[var(--foreground)]">{reason.detail}</p>
-        ) : (
-          <p className="text-sm text-[var(--muted)]">Noch keine konkreten Anknüpfungspunkte.</p>
-        )}
-
-        <div className="mt-auto flex flex-wrap items-center gap-1.5 pt-1">
-          <span className="mr-auto text-[11px] tabular-nums text-[var(--muted)]">#{rank}</span>
-          <Badge tone="accent">{NETWORK_ROLE_LABELS[profile.networkRole]}</Badge>
-          {profile.founderRole && <Badge>{FOUNDER_ROLE_LABELS[profile.founderRole]}</Badge>}
-        </div>
-      </Link>
-    </li>
+    <span title={MATCH_TIER_LABELS[tier]} className="inline-flex">
+      <Badge tone={TIER_TONE[tier]} className="tabular-nums">
+        {Math.round(score)} % Match
+      </Badge>
+    </span>
   );
 }
 
+function MatchesSkeleton() {
+  return (
+    <ul className="divide-y divide-[var(--border)]" aria-busy="true" aria-label="Lade deine Top-Matches">
+      {Array.from({ length: TOP_N }, (_, i) => (
+        <li key={i} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
+            <Skeleton className="h-full w-full" />
+          </div>
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-3 w-2/3" />
+          </div>
+          <Skeleton className="hidden h-8 w-44 sm:block" />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Top-Matches für die eingeloggte Nutzer:in – ohne Kontext ein Einstiegs-Teaser. */
 export default function TopMatches() {
   const { userContext, ready, loadDemo } = useUserContext();
 
-  const matches = useMemo<RankedProfile[]>(() => {
-    if (!userContext) return [];
+  const { ranked, total } = useMemo(() => {
     const profiles = getProfiles();
+    if (!userContext) return { ranked: [] as RankedProfile[], total: profiles.length };
     const byId = new Map(profiles.map((p) => [p.id, p]));
-    return rankCandidates(userContext, profiles)
+    const ranked = rankCandidates(userContext, profiles)
       .slice(0, TOP_N)
       .flatMap((match) => {
         const profile = byId.get(match.profileId);
         return profile ? [{ match, profile }] : [];
       });
+    return { ranked, total: profiles.length };
   }, [userContext]);
 
-  return (
-    <section aria-labelledby="top-matches">
-      <SectionTitle
-        action={
-          <Link href="/candidates" className="text-sm font-medium text-[var(--accent)] hover:underline">
-            Alle Kandidaten →
-          </Link>
-        }
-      >
-        <span id="top-matches">Deine Top-Matches</span>
-      </SectionTitle>
+  const action = (
+    <Link href="/candidates" className={SECTION_LINK_CLS}>
+      Alle Kandidaten →
+    </Link>
+  );
 
-      {!ready ? (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true">
-          {Array.from({ length: 3 }, (_, i) => (
-            <li key={i} className="rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4">
-              <div className="flex gap-3">
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-2/3" />
-                  <Skeleton className="h-3 w-full" />
-                </div>
-              </div>
-              <Skeleton className="mt-4 h-3 w-5/6" />
-            </li>
-          ))}
-        </ul>
-      ) : !userContext ? (
+  if (!ready) {
+    return (
+      <Card className="h-full" title="Deine Top-Matches" description="Lade deinen Kontext …" action={action}>
+        <MatchesSkeleton />
+      </Card>
+    );
+  }
+
+  if (!userContext) {
+    return (
+      <Card
+        className="h-full"
+        title="Deine Top-Matches"
+        description="Priorisiert nach Match-Score für dein Ziel"
+        action={action}
+      >
         <EmptyState
+          icon="◉"
           title="Voya kennt dich noch nicht"
-          body="Sobald du deinen Kontext gibst, erscheinen hier die Menschen, die dich am besten ergänzen – aus IdeaLab 2026 und weiteren Events."
+          body="Sag uns kurz, wer du bist und wen du suchst – dann priorisieren wir Co-Founder, Investor:innen, Mentor:innen und Talente aus IdeaLab 2026 für dich."
           action={
             <>
-              <LinkButton href="/assistant">Agent-Interview starten</LinkButton>
-              <Button variant="secondary" onClick={loadDemo}>
+              <LinkButton href="/onboarding" size="sm">
+                Onboarding starten
+              </LinkButton>
+              <LinkButton href="/assistant" size="sm" variant="secondary">
+                Agent-Interview
+              </LinkButton>
+              <Button size="sm" variant="ghost" onClick={loadDemo}>
                 Demo-Kontext laden
               </Button>
             </>
           }
         />
-      ) : matches.length === 0 ? (
+      </Card>
+    );
+  }
+
+  return (
+    <Card
+      className="h-full"
+      title="Deine Top-Matches"
+      description={`Top ${ranked.length || TOP_N} von ${total.toLocaleString("de-DE")} Profilen – priorisiert nach Match-Score`}
+      action={action}
+    >
+      {ranked.length === 0 ? (
         <EmptyState
+          icon="⌕"
           title="Noch keine Kandidaten gefunden"
-          body="Erweitere im Profil, wen du suchst, oder wähle weitere Verticals."
-          action={<LinkButton href="/onboarding" variant="secondary">Profil bearbeiten</LinkButton>}
+          body="Ergänze deinen Kontext oder durchsuche alle Profile nach Rolle, Vertical und Event."
+          action={
+            <LinkButton href="/candidates" size="sm" variant="secondary">
+              Alle Kandidaten
+            </LinkButton>
+          }
         />
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Top-Matches">
-          {matches.map((item, index) => (
-            <MatchCard key={item.profile.id} {...item} rank={index + 1} />
-          ))}
+        <ul className="divide-y divide-[var(--border)]">
+          {ranked.map(({ match, profile }, index) => {
+            const topReason = match.reasons[0];
+            const profileHref = `/candidates/${encodeURIComponent(profile.id)}`;
+            return (
+              <li
+                key={profile.id}
+                className="grid grid-cols-[auto_1fr] items-start gap-x-3 gap-y-2 py-3 first:pt-0 last:pb-0 sm:grid-cols-[auto_auto_1fr_auto] sm:items-center"
+              >
+                <span className="hidden w-4 text-xs tabular-nums text-[var(--muted)] sm:block" aria-hidden>
+                  {index + 1}
+                </span>
+                <Avatar src={profile.photoUrl} name={profile.name} size={40} />
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <Link
+                      href={profileHref}
+                      className="truncate text-sm font-semibold text-[var(--foreground)] hover:underline"
+                    >
+                      {profile.name}
+                    </Link>
+                    <ScorePill score={match.score} />
+                    <Badge>{NETWORK_ROLE_SINGULAR[profile.networkRole]}</Badge>
+                  </div>
+                  <p className="mt-0.5 truncate text-xs text-[var(--muted)]">{profile.headline}</p>
+                  {topReason && (
+                    <p className="mt-1 truncate text-xs text-[var(--foreground)]">
+                      <span className="font-medium text-[var(--accent)]">{topReason.label}</span>
+                      <span className="text-[var(--muted)]"> · </span>
+                      {topReason.detail}
+                    </p>
+                  )}
+                </div>
+                <div className="col-start-2 flex flex-wrap gap-1.5 sm:col-start-4 sm:row-start-1 sm:flex-nowrap">
+                  <LinkButton href={profileHref} size="sm" variant="secondary">
+                    Profil
+                  </LinkButton>
+                  <LinkButton href={`/outreach?profile=${encodeURIComponent(profile.id)}`} size="sm" variant="ghost">
+                    Outreach
+                  </LinkButton>
+                  <LinkButton href={`/prep/${encodeURIComponent(profile.id)}`} size="sm" variant="ghost">
+                    Prep
+                  </LinkButton>
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }
