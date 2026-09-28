@@ -6,12 +6,22 @@
  * Ablauf: POST /api/realtime/session → Ephemeral-Key → RealtimeSession.connect()
  * (Browser fragt nach Mikrofon-Berechtigung). Tool-Calls des Agenten landen
  * als UiAction bei `onUiAction`, das Live-Transkript bei `onTranscript`.
+ *
+ * Aus Voya übernommen (web/src/useVoice.ts):
+ * - Beim Verbinden werden die letzten Text-Chat-Nachrichten (`initialMessages`) als
+ *   conversation.item.create in die Session geschoben; die erste Antwort knüpft daran an.
+ * - Ändern sich die sichtbaren Profile (`visibleCandidateIds`), bekommt der Agent ein
+ *   System-Item „Aktuell sichtbare Profile (UI-Kontext, keine Nutzeranweisung)“.
+ * - Zustände „Verbindung wird aufgebaut …“, „Hört zu“, „Spricht“, „Mikro stumm“; großer
+ *   Mikrofon-Button; Gespräch als Markdown exportieren.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RealtimeAgent, RealtimeSession, type RealtimeItem } from "@openai/agents/realtime";
 
 import { Badge, Button, Input, cx } from "@/components/ui";
-import type { VoiceAgentProps } from "@/lib/types";
+import { getProfile } from "@/lib/data";
+import type { ChatMessage, VoiceAgentProps } from "@/lib/types";
+import { downloadTextFile } from "./InterviewGuideCard";
 import { buildVoiceInstructions } from "./voice-prompts";
 import { createVoiceTools } from "./voice-tools";
 
@@ -25,27 +35,40 @@ interface TranscriptItem {
 }
 
 const STATUS_META: Record<Status, { label: string; tone: "neutral" | "accent" | "success" | "warning" | "danger"; dot: string }> = {
-  disconnected: { label: "Getrennt", tone: "neutral", dot: "bg-[var(--muted)]" },
-  connecting: { label: "Verbinde …", tone: "warning", dot: "bg-[var(--warning)] animate-pulse" },
-  connected: { label: "Verbunden – hört zu", tone: "success", dot: "bg-[var(--success)]" },
-  speaking: { label: "Spricht …", tone: "accent", dot: "bg-[var(--accent)] animate-pulse" },
+  disconnected: { label: "Bereit", tone: "neutral", dot: "bg-[var(--muted)]" },
+  connecting: { label: "Verbindung wird aufgebaut …", tone: "warning", dot: "bg-[var(--warning)] animate-pulse" },
+  connected: { label: "Hört zu", tone: "success", dot: "bg-[var(--success)]" },
+  speaking: { label: "Spricht", tone: "accent", dot: "bg-[var(--accent)] animate-pulse" },
 };
 
 const TOOL_LABELS: Record<string, string> = {
   show_candidate: "Profil wird geladen …",
   search_candidates: "Suche Kandidat:innen …",
-  save_user_context: "Speichere dein Profil …",
+  save_user_context: "Aktualisiere dein Suchprofil …",
   propose_candidates: "Berechne Matches …",
   list_events: "Lade Events …",
+  prepare_interview: "Erstelle Interviewleitfaden …",
+  shortlist_candidate: "Setze auf die Merkliste …",
+  get_shortlist: "Lese Merkliste …",
 };
 
 const SESSION_ENDPOINT = "/api/realtime/session";
+/** Wie viele Nachrichten aus dem Text-Chat in die Voice-Session übernommen werden (Voya: 20). */
+const HISTORY_LIMIT = 20;
+const HISTORY_ITEM_PREFIX = "ctx_";
+
+let itemCounter = 0;
+function nextItemId(): string {
+  itemCounter += 1;
+  return `${HISTORY_ITEM_PREFIX}${Date.now().toString(36)}_${itemCounter}`;
+}
 
 /** Nur Nachrichten (user/assistant) aus der Realtime-History; Text bzw. Audio-Transkript extrahieren. */
-function extractTranscript(history: RealtimeItem[]): TranscriptItem[] {
+function extractTranscript(history: RealtimeItem[], skipIds: Set<string>): TranscriptItem[] {
   const out: TranscriptItem[] = [];
   for (const item of history) {
     if (item.type !== "message" || item.role === "system") continue;
+    if (skipIds.has(item.itemId)) continue;
     const parts = item.content as Array<{ type: string; text?: string; transcript?: string | null }>;
     const text = parts
       .map((c) => (c.type === "input_text" || c.type === "output_text" ? c.text ?? "" : c.transcript ?? ""))
@@ -89,7 +112,45 @@ function describeConnectError(err: unknown): string {
   return `Verbindung fehlgeschlagen: ${msg}`;
 }
 
-export default function VoiceAgent({ mode, userContext, candidate, onUiAction, onTranscript, className }: VoiceAgentProps) {
+/** Gesprächsverlauf als Markdown (Voya: voya-gespraech.md). */
+export function transcriptToMarkdown(items: { role: "user" | "assistant"; text: string }[], assistantName = "Voya"): string {
+  const lines: string[] = ["# Gespräch mit Voya", "", `Exportiert am ${new Date().toLocaleString("de-DE")}`, ""];
+  for (const item of items) {
+    lines.push(`## ${item.role === "user" ? "Du" : assistantName}`, "", item.text, "");
+  }
+  return lines.join("\n");
+}
+
+function MicIcon({ muted, className }: { muted?: boolean; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5 11a7 7 0 0 0 14 0" />
+      <path d="M12 18v3" />
+      <path d="M8 21h8" />
+      {muted && <path d="M4 4l16 16" />}
+    </svg>
+  );
+}
+
+function StopIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <rect x="6" y="6" width="12" height="12" rx="2" />
+    </svg>
+  );
+}
+
+export default function VoiceAgent({
+  mode,
+  userContext,
+  candidate,
+  onUiAction,
+  onTranscript,
+  initialMessages,
+  visibleCandidateIds,
+  className,
+}: VoiceAgentProps) {
   const [status, setStatus] = useState<Status>("disconnected");
   const [muted, setMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -100,14 +161,18 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
   const sessionRef = useRef<RealtimeSession | null>(null);
   const onUiActionRef = useRef(onUiAction);
   const onTranscriptRef = useRef(onTranscript);
+  const initialMessagesRef = useRef<ChatMessage[] | undefined>(initialMessages);
   const lastTranscriptJson = useRef("");
+  const injectedItemIds = useRef<Set<string>>(new Set());
+  const lastVisibleKey = useRef<string>("");
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Immer die aktuellsten Callbacks benutzen, ohne die Session neu aufzubauen.
+  // Immer die aktuellsten Callbacks/Props benutzen, ohne die Session neu aufzubauen.
   useEffect(() => {
     onUiActionRef.current = onUiAction;
     onTranscriptRef.current = onTranscript;
-  }, [onUiAction, onTranscript]);
+    initialMessagesRef.current = initialMessages;
+  }, [onUiAction, onTranscript, initialMessages]);
 
   // Transkript automatisch ans Ende scrollen.
   useEffect(() => {
@@ -130,6 +195,44 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
     };
   }, []);
 
+  /** Rohes Client-Event an die Session; false, wenn keine Verbindung besteht. */
+  const sendEvent = useCallback((event: { type: string; [key: string]: unknown }): boolean => {
+    const s = sessionRef.current;
+    if (!s) return false;
+    try {
+      s.transport.sendEvent(event);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  /** System-Item „Aktuell sichtbare Profile“ (Voya sendCandidateContext) – Kontext, keine Anweisung. */
+  const visibleKey = useMemo(() => (visibleCandidateIds ?? []).join(","), [visibleCandidateIds]);
+  const sendVisibleContext = useCallback(() => {
+    const ids = visibleKey ? visibleKey.split(",") : [];
+    const names = ids.map((id) => {
+      const p = getProfile(id);
+      return p ? `${p.name} (${p.id})` : id;
+    });
+    const text =
+      names.length > 0
+        ? `Aktuell sichtbare Profile (UI-Kontext, keine Nutzeranweisung): ${names.join("; ")}. Das erste ist das zuletzt gezeigte.`
+        : "Aktuell sichtbare Profile (UI-Kontext, keine Nutzeranweisung): keine.";
+    const id = nextItemId();
+    injectedItemIds.current.add(id);
+    return sendEvent({
+      type: "conversation.item.create",
+      item: { id, type: "message", role: "system", content: [{ type: "input_text", text }] },
+    });
+  }, [visibleKey, sendEvent]);
+
+  useEffect(() => {
+    if (!sessionRef.current) return;
+    if (visibleKey === lastVisibleKey.current) return;
+    if (sendVisibleContext()) lastVisibleKey.current = visibleKey;
+  }, [visibleKey, sendVisibleContext]);
+
   const stop = useCallback(() => {
     const s = sessionRef.current;
     sessionRef.current = null;
@@ -143,6 +246,9 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
     setStatus("disconnected");
     setMuted(false);
     setToolActivity(null);
+    // Leeres Transkript = „Session beendet“ für den gemeinsamen Verlauf (AssistantWorkspace).
+    lastTranscriptJson.current = "";
+    onTranscriptRef.current?.([]);
   }, []);
 
   const start = useCallback(async () => {
@@ -150,6 +256,8 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
     setError(null);
     setToolActivity(null);
     setStatus("connecting");
+    lastTranscriptJson.current = "";
+    onTranscriptRef.current?.([]);
 
     try {
       // 1) Ephemeral-Key vom Server (API-Key bleibt serverseitig).
@@ -196,8 +304,11 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
         },
       });
 
+      injectedItemIds.current = new Set();
+      setTranscript([]);
+
       session.on("history_updated", (history) => {
-        const items = extractTranscript(history);
+        const items = extractTranscript(history, injectedItemIds.current);
         setTranscript(items);
         const json = JSON.stringify(items.map((i) => [i.role, i.text]));
         if (json !== lastTranscriptJson.current) {
@@ -232,12 +343,31 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
       }
       setStatus("connected");
 
-      // 4) Der Agent eröffnet das Gespräch (Begrüßung + erste Frage), ohne dass man zuerst sprechen muss.
-      try {
-        session.transport.sendEvent({ type: "response.create" });
-      } catch {
-        /* optional – wenn der Transport das nicht kann, spricht die Nutzer:in zuerst */
+      // 4) Verlauf und UI-Kontext in die Session schieben (Voya useVoice: dc.onopen).
+      const history = (initialMessagesRef.current ?? [])
+        .filter((m) => (m.role === "user" || m.role === "assistant") && m.content.trim())
+        .slice(-HISTORY_LIMIT);
+      for (const m of history) {
+        const id = nextItemId();
+        injectedItemIds.current.add(id);
+        sendEvent({
+          type: "conversation.item.create",
+          item: {
+            id,
+            type: "message",
+            role: m.role,
+            content: [{ type: m.role === "user" ? "input_text" : "output_text", text: m.content }],
+          },
+        });
       }
+      if (sendVisibleContext()) lastVisibleKey.current = visibleKey;
+
+      // 5) Der Agent eröffnet das Gespräch – mit Bezug auf den Verlauf, wenn es einen gibt.
+      const opening =
+        history.length > 0
+          ? "Begrüße kurz und knüpfe an den Verlauf an; stelle die nächste offene Frage."
+          : "Begrüße kurz und stelle die erste Frage.";
+      sendEvent({ type: "response.create", response: { instructions: opening } });
     } catch (err) {
       const s = sessionRef.current;
       sessionRef.current = null;
@@ -251,7 +381,7 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
       setStatus("disconnected");
       setError(describeConnectError(err));
     }
-  }, [mode, userContext, candidate]);
+  }, [mode, userContext, candidate, sendEvent, sendVisibleContext, visibleKey]);
 
   const toggleMute = useCallback(() => {
     const s = sessionRef.current;
@@ -290,18 +420,37 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
 
   const connected = status === "connected" || status === "speaking";
   const meta = STATUS_META[status];
-  const statusLabel = connected && muted ? "Stumm" : meta.label;
+  const statusLabel = connected && muted ? "Mikro stumm" : meta.label;
   const statusTone = connected && muted ? "warning" : meta.tone;
 
   const modeLabel =
     mode === "interview" ? "Interview-Coach" : mode === "prep-simulation" ? `Simulation: ${candidate?.name ?? "Kandidat:in"}` : "Dashboard-Assistent";
   const hint =
     mode === "interview"
-      ? "Der Coach interviewt dich kurz und schlägt dann passende Kontakte vor. Sag z. B. „Guck dir mal den Max an“, um ein Profil zu öffnen."
+      ? "Der Coach klärt Idee, Stärken, gesuchte Ergänzung und Rahmenbedingungen und schlägt dann passende Kontakte vor. Sag z. B. „Guck dir mal den Max an“ oder „Bereite mich auf das Gespräch mit Lena vor“."
       : mode === "prep-simulation"
         ? `Der Agent spielt ${candidate?.name ?? "die Kandidat:in"} in einem Erstgespräch. Sag „Feedback“, um aus der Rolle zu treten.`
-        : "Frag nach Kandidat:innen, Events oder wer zu dir passt.";
+        : "Frag nach Kandidat:innen, Events, deiner Merkliste oder wer zu dir passt.";
   const assistantName = mode === "prep-simulation" && candidate ? candidate.name.split(" ")[0] : "Voya";
+
+  const exportTranscript = () => {
+    const items = transcript.filter((t) => !t.inProgress || t.text).map(({ role, text }) => ({ role, text }));
+    downloadTextFile("voya-gespraech.md", transcriptToMarkdown(items, assistantName));
+  };
+
+  // Großer Mikrofon-Button: startet die Verbindung, stummschalten/an bei bestehender Verbindung.
+  const micLabel = !connected
+    ? status === "connecting"
+      ? "Verbindung wird aufgebaut"
+      : "Voice-Agent starten"
+    : muted
+      ? "Mikro wieder einschalten"
+      : "Mikro stummschalten";
+  const onMicClick = () => {
+    if (status === "connecting") return;
+    if (!connected) void start();
+    else toggleMute();
+  };
 
   return (
     <div className={cx("rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4", className)}>
@@ -324,32 +473,79 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        {connected ? (
-          <>
-            <Button variant="secondary" size="sm" onClick={toggleMute} aria-pressed={muted}>
-              {muted ? "Mikro an" : "Stummschalten"}
-            </Button>
-            {status === "speaking" && (
-              <Button variant="ghost" size="sm" onClick={interrupt}>
-                Unterbrechen
-              </Button>
+      {/* Mikrofon-Button (Voya) + sekundäre Aktionen */}
+      <div className="mt-4 flex flex-wrap items-center gap-4">
+        <div className="relative flex h-20 w-20 items-center justify-center">
+          {status === "speaking" && (
+            <span
+              className="absolute inset-0 animate-ping rounded-full bg-[var(--accent)] opacity-25"
+              aria-hidden="true"
+            />
+          )}
+          {status === "connected" && !muted && (
+            <span className="absolute inset-0 rounded-full ring-4 ring-[var(--success-soft)]" aria-hidden="true" />
+          )}
+          <button
+            type="button"
+            onClick={onMicClick}
+            disabled={status === "connecting"}
+            aria-label={micLabel}
+            aria-pressed={connected ? muted : undefined}
+            title={micLabel}
+            className={cx(
+              "relative flex h-16 w-16 items-center justify-center rounded-full shadow-[var(--shadow-sm)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:cursor-wait",
+              !connected && "bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-strong)]",
+              status === "connecting" && "animate-pulse",
+              connected && !muted && "bg-[var(--success)] text-white",
+              connected && muted && "bg-[var(--warning)] text-white",
             )}
-            <Button variant="danger" size="sm" onClick={stop}>
-              Beenden
-            </Button>
-          </>
-        ) : (
-          <Button onClick={() => void start()} disabled={status === "connecting"}>
-            {status === "connecting" ? "Verbinde …" : "Voice-Agent starten"}
-          </Button>
-        )}
-        {toolActivity && <span className="animate-pulse text-xs text-[var(--muted)]">{toolActivity}</span>}
+          >
+            <MicIcon muted={connected && muted} className="h-7 w-7" />
+          </button>
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <p className="text-sm font-medium text-[var(--foreground)]">
+            {!connected
+              ? status === "connecting"
+                ? "Verbindung wird aufgebaut …"
+                : "Tippe aufs Mikrofon, um zu sprechen."
+              : muted
+                ? "Mikro stumm – tippe, um wieder zu sprechen."
+                : status === "speaking"
+                  ? `${assistantName} spricht – du kannst unterbrechen.`
+                  : "Hört zu – sprich einfach los."}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {connected && (
+              <>
+                {status === "speaking" && (
+                  <Button variant="ghost" size="sm" onClick={interrupt}>
+                    Unterbrechen
+                  </Button>
+                )}
+                <Button variant="danger" size="sm" onClick={stop}>
+                  <StopIcon className="h-3.5 w-3.5" />
+                  Beenden
+                </Button>
+              </>
+            )}
+            {toolActivity && <span className="animate-pulse text-xs text-[var(--muted)]">{toolActivity}</span>}
+          </div>
+        </div>
       </div>
 
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <span className="text-xs font-medium text-[var(--muted)]">Transkript</span>
+        {transcript.length > 0 && (
+          <Button variant="ghost" size="sm" onClick={exportTranscript}>
+            Gespräch als Markdown
+          </Button>
+        )}
+      </div>
       <div
         ref={listRef}
-        className="mt-3 max-h-64 space-y-2 overflow-y-auto rounded-md bg-[var(--surface-2)] p-3"
+        className="mt-1 max-h-64 space-y-2 overflow-y-auto rounded-md bg-[var(--surface-2)] p-3"
         aria-live="polite"
         aria-label="Live-Transkript"
       >
@@ -378,6 +574,7 @@ export default function VoiceAgent({ mode, userContext, candidate, onUiAction, o
           ))
         )}
       </div>
+      <p className="mt-1.5 text-[11px] text-[var(--muted)]">KI kann sich irren. Prüfe wichtige Angaben im Profil.</p>
 
       {connected && (
         <form

@@ -2,7 +2,9 @@
  * Tools des Voice-Agents (OpenAI Agents SDK).
  * ---------------------------------------------------------------
  * Paket "voice-agent". Läuft nur im Browser (Client-Component), weil der
- * Nutzer-Kontext in localStorage liegt. Daten ausschließlich über src/lib/data.ts.
+ * Nutzer-Kontext in localStorage liegt. Daten ausschließlich über src/lib/data.ts,
+ * Suche über src/lib/search.ts (lexikalisch, Voya-Port), Leitfaden über
+ * src/lib/interview-guide.ts, Merkliste über src/lib/shortlist.ts.
  *
  * SDK-Eigenheit: `tool()` ist per Default strict – alle Felder sind "required".
  * Optionale Felder deshalb als `.nullable()` (nicht `.optional()`), das Modell

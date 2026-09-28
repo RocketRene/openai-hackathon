@@ -4,11 +4,13 @@
  * (Vorbereitung = PrepPack aus POST /api/prep, Simulation = Voice + Text-Chat).
  */
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Personality, PrepPack, Profile, UserContext } from "@/lib/types";
 import { PERSONALITY_LABELS } from "@/lib/types";
+import { buildInterviewGuide } from "@/lib/interview-guide";
 import { useUserContext } from "@/lib/user-context";
 import { Avatar, Badge, Button, Card, EmptyState, LinkButton, cx } from "@/components/ui";
+import InterviewGuideCard from "@/components/assistant/InterviewGuideCard";
 import PrepPackView from "./PrepPackView";
 import SimulationPanel from "./SimulationPanel";
 
@@ -102,6 +104,9 @@ export default function PrepWorkspace({ profile }: { profile: Profile }) {
 
   const regenerate = useCallback(() => setReloadKey((k) => k + 1), []);
 
+  // Deterministischer 30-Minuten-Leitfaden (Voya prepare_interview) – ohne API, sofort da.
+  const guide = useMemo(() => buildInterviewGuide(profile, ready ? userContext : null), [profile, ready, userContext]);
+
   const personality = profile.personality as Personality | undefined;
 
   return (
@@ -178,7 +183,8 @@ export default function PrepWorkspace({ profile }: { profile: Profile }) {
       </div>
 
       {/* Vorbereitung */}
-      <div role="tabpanel" hidden={section !== "prep"}>
+      <div role="tabpanel" hidden={section !== "prep"} className="space-y-5">
+        <InterviewGuideCard guide={guide} />
         {loading && !pack && <LoadingSkeleton />}
         {!loading && error && !pack && (
           <EmptyState

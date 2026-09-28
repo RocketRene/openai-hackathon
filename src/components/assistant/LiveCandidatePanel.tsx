@@ -39,6 +39,29 @@ const STAGE_LABELS: Record<Stage, string> = {
   growth: "Growth",
 };
 
+/** Quellen-Transparenz (Voya): woher die Daten stammen und wie alt sie sind. */
+function sourceLabel(source: Profile["source"]): { label: string; tone: "neutral" | "accent" | "success" | "warning" } {
+  switch (source?.type) {
+    case "linkedin":
+      return { label: "LinkedIn + IdeaLab", tone: "accent" };
+    case "conference":
+      return { label: "IdeaLab", tone: "success" };
+    case "mock":
+      return { label: "Demo", tone: "warning" };
+    case "manual":
+      return { label: "Manuell", tone: "neutral" };
+    default:
+      return { label: "Quelle unbekannt", tone: "neutral" };
+  }
+}
+
+function formatScrapedAt(iso?: string): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
 const ABOUT_PREVIEW_CHARS = 220;
 const EXPERIENCE_PREVIEW = 4;
 const SKILLS_PREVIEW = 12;
@@ -95,6 +118,8 @@ function CandidateDetailCard({ profile: p, highlight }: { profile: Profile; high
   const experience = allExperience ? p.experience : p.experience.slice(0, EXPERIENCE_PREVIEW);
   const skills = allSkills ? p.skills : p.skills.slice(0, SKILLS_PREVIEW);
   const events = p.events.map((slug) => getEvent(slug)?.name ?? slug);
+  const source = sourceLabel(p.source);
+  const scrapedAt = formatScrapedAt(p.source?.scrapedAt);
 
   return (
     <Card className={cx(highlight && "ring-2 ring-[var(--accent)]")}>
@@ -110,6 +135,11 @@ function CandidateDetailCard({ profile: p, highlight }: { profile: Profile; high
           </div>
           {p.headline && <p className="mt-0.5 text-sm text-[var(--foreground)]">{p.headline}</p>}
           {p.location && <p className="mt-0.5 text-xs text-[var(--muted)]">{p.location}</p>}
+
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <Badge tone={source.tone}>{source.label}</Badge>
+            {scrapedAt && <span className="text-[11px] text-[var(--muted)]">Stand: {scrapedAt}</span>}
+          </div>
 
           <div className="mt-2 flex flex-wrap gap-1.5">
             <Badge tone="accent">{NETWORK_ROLE_LABELS[p.networkRole] ?? p.networkRole}</Badge>

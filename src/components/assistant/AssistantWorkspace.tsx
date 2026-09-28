@@ -1,15 +1,23 @@
 "use client";
 /**
- * Arbeitsfläche des Agenten: links Voice + Text-Chat, rechts das Live-Kandidaten-Panel.
- * Alle UI-Aktionen des Agenten (Voice und Text) laufen über `handleUiAction`.
+ * Arbeitsfläche des Agenten: links Voice + Text-Chat, rechts Suchprofil (Brief), Interviewleitfaden
+ * und das Live-Kandidaten-Panel. Alle UI-Aktionen des Agenten (Voice und Text) laufen über
+ * `handleUiAction`.
+ *
+ * Gemeinsamer Verlauf (Voya): Text-Chat und Voice teilen sich `messages`. Der Text-Chat meldet
+ * seinen Verlauf hoch, der Voice-Agent bekommt ihn beim Verbinden als `initialMessages` und
+ * schreibt sein Transkript als zusammenhängenden Block zurück – so weiß der Text-Chat, was
+ * gesprochen wurde, und umgekehrt.
  */
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { AgentMode, UiAction } from "@/lib/types";
+import type { AgentMode, ChatMessage, InterviewGuide, UiAction } from "@/lib/types";
 import { useUserContext } from "@/lib/user-context";
 import { Badge, Button, Card, LinkButton, cx } from "@/components/ui";
 import VoiceAgent from "@/components/assistant/VoiceAgent";
-import ChatPanel from "./ChatPanel";
+import BriefEditor from "./BriefEditor";
+import ChatPanel, { DEFAULT_GREETING } from "./ChatPanel";
+import InterviewGuideCard from "./InterviewGuideCard";
 import LiveCandidatePanel from "./LiveCandidatePanel";
 
 /** Wie viele Profile gleichzeitig im Live-Panel stehen (neueste zuerst). */
@@ -33,11 +41,23 @@ function isInternalHref(href: string): boolean {
   return href.startsWith("/") && !href.startsWith("//");
 }
 
+type VoiceItem = { role: "user" | "assistant"; text: string };
+
+/** Position des Voice-Blocks im gemeinsamen Verlauf (eine Voice-Session = ein Block). */
+interface VoiceBlock {
+  start: number;
+  count: number;
+}
+
 export default function AssistantWorkspace() {
   const router = useRouter();
   const { userContext, ready, update, loadDemo } = useUserContext();
   const [mode, setMode] = useState<AgentMode>("interview");
   const [shownProfileIds, setShownProfileIds] = useState<string[]>([]);
+  const [guide, setGuide] = useState<InterviewGuide | null>(null);
+  const [agentUpdatedAt, setAgentUpdatedAt] = useState<number | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([{ role: "assistant", content: DEFAULT_GREETING }]);
+  const voiceBlock = useRef<VoiceBlock | null>(null);
 
   const handleUiAction = useCallback(
     (action: UiAction) => {
@@ -52,6 +72,13 @@ export default function AssistantWorkspace() {
           break;
         case "update_user_context":
           update(action.patch);
+          setAgentUpdatedAt(Date.now());
+          break;
+        case "show_interview_guide":
+          setGuide(action.guide);
+          setShownProfileIds((prev) =>
+            [action.profileId, ...prev.filter((id) => id !== action.profileId)].slice(0, MAX_SHOWN_PROFILES),
+          );
           break;
         case "navigate":
           if (isInternalHref(action.href)) router.push(action.href);
@@ -60,6 +87,36 @@ export default function AssistantWorkspace() {
     },
     [router, update],
   );
+
+  /**
+   * Voice-Transkript (immer der komplette Stand der laufenden Session) in den gemeinsamen Verlauf
+   * mischen: Der Block der aktuellen Session wird ersetzt; eine neue Session hängt einen neuen Block an.
+   * Ein leeres Array bedeutet „Session beendet“ (VoiceAgent schickt es bei Stop/Neustart).
+   */
+  const handleTranscript = useCallback((items: VoiceItem[]) => {
+    if (items.length === 0) {
+      voiceBlock.current = null;
+      return;
+    }
+    const incoming: ChatMessage[] = items.map((i) => ({ role: i.role, content: i.text }));
+    setMessages((prev) => {
+      const block = voiceBlock.current;
+      if (block && block.start + block.count <= prev.length) {
+        voiceBlock.current = { start: block.start, count: incoming.length };
+        return [...prev.slice(0, block.start), ...incoming, ...prev.slice(block.start + block.count)];
+      }
+      voiceBlock.current = { start: prev.length, count: incoming.length };
+      return [...prev, ...incoming];
+    });
+  }, []);
+
+  /** Text-Chat schreibt den Verlauf; danach beginnt ein eventueller Voice-Block neu. */
+  const handleMessagesChange = useCallback((next: ChatMessage[]) => {
+    setMessages(next);
+    const block = voiceBlock.current;
+    // Text-Nachrichten hängen hinten an – der Voice-Block bleibt an seiner Position gültig.
+    if (block && block.start + block.count > next.length) voiceBlock.current = null;
+  }, []);
 
   const activeMode = MODES.find((m) => m.value === mode) ?? MODES[0];
 
@@ -132,29 +189,42 @@ export default function AssistantWorkspace() {
             </div>
           </Card>
 
-          <VoiceAgent mode={mode} userContext={userContext} onUiAction={handleUiAction} />
+          <VoiceAgent
+            mode={mode}
+            userContext={userContext}
+            onUiAction={handleUiAction}
+            onTranscript={handleTranscript}
+            initialMessages={messages}
+            visibleCandidateIds={shownProfileIds}
+          />
 
-          <ChatPanel mode={mode} onUiAction={handleUiAction} />
+          <ChatPanel mode={mode} onUiAction={handleUiAction} messages={messages} onMessagesChange={handleMessagesChange} />
         </div>
 
-        {/* Rechte Spalte: Live-Kandidaten */}
-        <div className="min-w-0 space-y-3">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-[var(--foreground)]">
-              Live-Kandidaten{" "}
+        {/* Rechte Spalte: Suchprofil, Interviewleitfaden, Live-Kandidaten */}
+        <div className="min-w-0 space-y-4">
+          <BriefEditor agentUpdatedAt={agentUpdatedAt} />
+
+          {guide && <InterviewGuideCard guide={guide} onClose={() => setGuide(null)} />}
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-[var(--foreground)]">
+                Live-Kandidaten{" "}
+                {shownProfileIds.length > 0 && (
+                  <span className="ml-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
+                    {shownProfileIds.length}
+                  </span>
+                )}
+              </h2>
               {shownProfileIds.length > 0 && (
-                <span className="ml-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
-                  {shownProfileIds.length}
-                </span>
+                <Button variant="ghost" size="sm" onClick={() => setShownProfileIds([])}>
+                  Leeren
+                </Button>
               )}
-            </h2>
-            {shownProfileIds.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={() => setShownProfileIds([])}>
-                Leeren
-              </Button>
-            )}
+            </div>
+            <LiveCandidatePanel profileIds={shownProfileIds} />
           </div>
-          <LiveCandidatePanel profileIds={shownProfileIds} />
         </div>
       </div>
     </div>
