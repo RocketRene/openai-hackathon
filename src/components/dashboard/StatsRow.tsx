@@ -1,40 +1,32 @@
-import Link from "next/link";
 import { getEvents, getProfiles } from "@/lib/data";
 import type { NetworkRole } from "@/lib/types";
+import { Stat } from "@/components/ui";
 
-interface Stat {
+interface StatItem {
   label: string;
   value: number;
   href: string;
   hint: string;
 }
 
-/** KPI-Kacheln über den gesamten Datenbestand (Server-Component). */
+/** KPI-Reihe über den gesamten Datenbestand (Server-Component) – jede Kachel verlinkt. */
 export default function StatsRow() {
   const profiles = getProfiles();
   const countByRole = (role: NetworkRole) => profiles.filter((p) => p.networkRole === role).length;
 
-  const stats: Stat[] = [
+  const stats: StatItem[] = [
     { label: "Kontakte gesamt", value: profiles.length, href: "/candidates", hint: "alle Profile" },
     { label: "Co-Founder", value: countByRole("cofounder"), href: "/candidates?networkRole=cofounder", hint: "suchen ein Team" },
-    { label: "Investoren", value: countByRole("investor"), href: "/candidates?networkRole=investor", hint: "Angels & VCs" },
+    { label: "Investor:innen", value: countByRole("investor"), href: "/candidates?networkRole=investor", hint: "Angels & VCs" },
     { label: "Mentor:innen", value: countByRole("mentor"), href: "/candidates?networkRole=mentor", hint: "Rat & Erfahrung" },
     { label: "Talente", value: countByRole("talent"), href: "/candidates?networkRole=talent", hint: "erste Hires" },
     { label: "Events", value: getEvents().length, href: "/events", hint: "Konferenzen & Meetups" },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
       {stats.map((s) => (
-        <Link
-          key={s.label}
-          href={s.href}
-          className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:border-[var(--accent)]"
-        >
-          <div className="text-2xl font-semibold text-[var(--foreground)]">{s.value}</div>
-          <div className="text-sm font-medium text-[var(--foreground)]">{s.label}</div>
-          <div className="text-xs text-[var(--muted)]">{s.hint}</div>
-        </Link>
+        <Stat key={s.label} label={s.label} value={s.value.toLocaleString("de-DE")} hint={s.hint} href={s.href} />
       ))}
     </div>
   );
