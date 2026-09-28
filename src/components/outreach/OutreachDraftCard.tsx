@@ -1,59 +1,223 @@
 "use client";
 /**
- * Zeigt einen erzeugten Outreach-Entwurf: editierbarer Text, Zeichen-Zähler,
- * Kopieren / als E-Mail bzw. LinkedIn öffnen, plus "Warum so formuliert".
+ * Composer: zeigt den ausgewählten Outreach-Entwurf – Betreff, großer editierbarer Text mit
+ * Zeichen-Zähler, Kopieren / als E-Mail bzw. LinkedIn öffnen, Badge KI/Vorlage und ein
+ * aufklappbares "Warum so formuliert".
  *
- * Der Eltern-Component sollte bei einem neuen Entwurf einen neuen `key` vergeben,
- * damit der editierte Text zurückgesetzt wird.
+ * Der Eltern-Component sollte bei einem neuen Entwurf einen neuen `key` vergeben, damit der
+ * editierte Text zurückgesetzt wird. `ComposerHeader` und `ComposerSkeleton` nutzt der
+ * Workspace auch für Lade-, Fehler- und Leerzustände, damit die rechte Spalte ruhig bleibt.
  */
-import { useState } from "react";
+import Link from "next/link";
+import { useId, useState, type ReactNode } from "react";
 import type { OutreachDraft, Profile } from "@/lib/types";
 import { PERSONALITY_LABELS } from "@/lib/types";
-import { Badge, Button, Card, Input, Textarea, cx } from "@/components/ui";
+import { Avatar, Badge, Button, Card, Input, Label, Skeleton, Textarea, cx } from "@/components/ui";
 
 const LINKEDIN_MAX_CHARS = 300;
 
-const linkClasses =
-  "inline-flex items-center justify-center gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-2)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] transition hover:bg-[var(--surface-3)]";
+export type OutreachChannel = OutreachDraft["channel"];
 
-export interface OutreachDraftCardProps {
-  draft: OutreachDraft;
-  profile: Profile;
-}
+export const CHANNEL_LABELS: Record<OutreachChannel, string> = {
+  email: "E-Mail",
+  linkedin: "LinkedIn",
+};
 
-function personalityLabel(profile: Profile): string {
+export function personalityLabel(profile: Profile): string {
   const type = profile.personality?.type;
   return (type && PERSONALITY_LABELS[type]) || "Unbekannt";
 }
 
-export default function OutreachDraftCard({ draft, profile }: OutreachDraftCardProps) {
+/* ------------------------------------------------------------------ */
+/* Kleine Icons (inline, keine Dependency)                             */
+/* ------------------------------------------------------------------ */
+
+function IconMail({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" className={cx("h-4 w-4", className)} aria-hidden>
+      <rect x="2.5" y="4.5" width="15" height="11" rx="2" />
+      <path d="m3 6 7 5 7-5" />
+    </svg>
+  );
+}
+
+function IconLinkedIn({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className={cx("h-4 w-4", className)} aria-hidden>
+      <path d="M4.5 7.5h2.6V16H4.5V7.5Zm1.3-4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM8.7 7.5h2.5v1.2h.04c.35-.66 1.2-1.36 2.47-1.36 2.64 0 3.13 1.74 3.13 4V16h-2.6v-4.1c0-.98-.02-2.24-1.37-2.24-1.37 0-1.58 1.07-1.58 2.17V16H8.7V7.5Z" />
+    </svg>
+  );
+}
+
+function IconCopy({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" className={cx("h-4 w-4", className)} aria-hidden>
+      <rect x="7" y="7" width="9" height="9" rx="1.5" />
+      <path d="M13 7V5.5A1.5 1.5 0 0 0 11.5 4h-6A1.5 1.5 0 0 0 4 5.5v6A1.5 1.5 0 0 0 5.5 13H7" />
+    </svg>
+  );
+}
+
+function IconCheck({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className={cx("h-4 w-4", className)} aria-hidden>
+      <path d="m4.5 10.5 3.5 3.5 7.5-8" />
+    </svg>
+  );
+}
+
+function IconChevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className={cx("h-4 w-4 transition-transform", open && "rotate-180")}
+      aria-hidden
+    >
+      <path d="m5 7.5 5 5 5-5" />
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Header + Skeleton (wiederverwendet vom Workspace)                   */
+/* ------------------------------------------------------------------ */
+
+export function ComposerHeader({
+  profile,
+  badges,
+  action,
+}: {
+  profile: Profile;
+  badges?: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 border-b border-[var(--border)] px-5 py-4">
+      <Avatar src={profile.photoUrl} name={profile.name} size={44} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/candidates/${profile.id}`}
+            className="truncate text-sm font-semibold tracking-tight text-[var(--foreground)] hover:underline"
+          >
+            {profile.name}
+          </Link>
+          <Badge tone="accent">{personalityLabel(profile)}</Badge>
+          {badges}
+        </div>
+        <p className="mt-0.5 truncate text-xs text-[var(--muted)]" title={profile.headline}>
+          {profile.headline}
+        </p>
+      </div>
+      {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}
+    </div>
+  );
+}
+
+export function ComposerSkeleton({ channel = "email" }: { channel?: OutreachChannel }) {
+  return (
+    <div className="space-y-5 p-5" aria-busy="true" aria-live="polite">
+      {channel === "email" && (
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-14" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      )}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+        <Skeleton className={channel === "email" ? "h-64 w-full" : "h-44 w-full"} />
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Skeleton className="h-8 w-28" />
+        <Skeleton className="h-8 w-36" />
+        <Skeleton className="h-8 w-32" />
+      </div>
+      <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
+        <span
+          className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--accent)]"
+          aria-hidden
+        />
+        Entwurf wird erzeugt …
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Composer                                                            */
+/* ------------------------------------------------------------------ */
+
+const actionLinkBase =
+  "inline-flex h-8 items-center justify-center gap-2 rounded-[var(--radius-sm)] px-3 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]";
+const actionLinkPrimary =
+  "bg-[var(--accent)] text-[var(--accent-contrast)] shadow-[var(--shadow-sm)] hover:bg-[var(--accent-strong)]";
+const actionLinkSecondary =
+  "border border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] shadow-[var(--shadow-sm)] hover:bg-[var(--surface-2)]";
+
+function ActionLink({
+  href,
+  primary,
+  external,
+  title,
+  children,
+}: {
+  href: string;
+  primary?: boolean;
+  external?: boolean;
+  title?: string;
+  children: ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      title={title}
+      className={cx(actionLinkBase, primary ? actionLinkPrimary : actionLinkSecondary)}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
+      {children}
+    </a>
+  );
+}
+
+export interface OutreachDraftCardProps {
+  draft: OutreachDraft;
+  profile: Profile;
+  /** Fehler einer erneuten Generierung – wird inline über dem bestehenden Entwurf gezeigt. */
+  error?: string;
+  onRegenerate?: () => void;
+  /** Deaktiviert "Neu erzeugen" (z. B. während der Top-5-Stapel läuft). */
+  busy?: boolean;
+}
+
+export default function OutreachDraftCard({ draft, profile, error, onRegenerate, busy }: OutreachDraftCardProps) {
   const isEmail = draft.channel === "email";
+  const uid = useId();
   const [subject, setSubject] = useState(draft.subject ?? "");
   const [body, setBody] = useState(draft.body);
   const [copyState, setCopyState] = useState<"idle" | "ok" | "fail">("idle");
+  const [whyOpen, setWhyOpen] = useState(false);
 
   const length = body.length;
   const overLimit = !isEmail && length > LINKEDIN_MAX_CHARS;
+  const nearLimit = !isEmail && !overLimit && length > LINKEDIN_MAX_CHARS * 0.85;
+  const limitPct = Math.min(100, Math.round((length / LINKEDIN_MAX_CHARS) * 100));
 
   const mailtoHref = profile.email
     ? `mailto:${profile.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     : null;
   const linkedinHref = profile.linkedinUrl || null;
 
-  // Primäre Aktion passend zum Kanal, Fallback auf das, was vorhanden ist.
-  const primaryAction: { href: string; label: string; external: boolean } | null =
-    isEmail && mailtoHref
-      ? { href: mailtoHref, label: "Als E-Mail öffnen", external: false }
-      : linkedinHref
-        ? { href: linkedinHref, label: "Auf LinkedIn öffnen", external: true }
-        : mailtoHref
-          ? { href: mailtoHref, label: "Als E-Mail öffnen", external: false }
-          : null;
-
   async function copyToClipboard() {
     try {
       if (!navigator.clipboard) throw new Error("Clipboard nicht verfügbar");
-      await navigator.clipboard.writeText(body);
+      const text = isEmail && subject.trim() ? `Betreff: ${subject.trim()}\n\n${body}` : body;
+      await navigator.clipboard.writeText(text);
       setCopyState("ok");
     } catch {
       setCopyState("fail");
@@ -72,106 +236,182 @@ export default function OutreachDraftCard({ draft, profile }: OutreachDraftCardP
     ? draft.personalityNotes
     : [profile.personality?.communicationStyle].filter((n): n is string => Boolean(n));
 
-  return (
-    <Card
-      title={
-        <span className="flex flex-wrap items-center gap-2">
-          <span>Entwurf für {profile.name}</span>
-          <Badge tone="neutral">{isEmail ? "E-Mail" : "LinkedIn"}</Badge>
-          <Badge tone={draft.generatedBy === "llm" ? "accent" : "neutral"}>
-            {draft.generatedBy === "llm" ? "KI" : "Vorlage"}
-          </Badge>
-        </span>
-      }
-    >
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="space-y-3">
-          {isEmail && (
-            <div>
-              <label htmlFor={`subject-${profile.id}`} className="mb-1 block text-xs font-medium text-[var(--muted)]">
-                Betreff
-              </label>
-              <Input
-                id={`subject-${profile.id}`}
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
-                placeholder="Betreff"
-              />
-            </div>
-          )}
+  const whyId = `${uid}-why`;
 
+  return (
+    <Card padding="none" className="overflow-hidden fr-fade-in">
+      <ComposerHeader
+        profile={profile}
+        badges={
+          <>
+            <Badge tone="neutral">{CHANNEL_LABELS[draft.channel]}</Badge>
+            <Badge tone={draft.generatedBy === "llm" ? "accent" : "neutral"}>
+              {draft.generatedBy === "llm" ? "KI" : "Vorlage"}
+            </Badge>
+          </>
+        }
+        action={
+          onRegenerate && (
+            <Button size="sm" variant="ghost" onClick={onRegenerate} disabled={busy} type="button" title="Entwurf neu erzeugen">
+              Neu erzeugen
+            </Button>
+          )
+        }
+      />
+
+      <div className="space-y-5 p-5">
+        {error && (
+          <p role="alert" className="rounded-[var(--radius-sm)] border border-[var(--danger)]/30 bg-[var(--danger-soft)] px-3 py-2 text-sm text-[var(--danger)]">
+            {error}
+          </p>
+        )}
+
+        {isEmail && (
           <div>
-            <label htmlFor={`body-${profile.id}`} className="mb-1 block text-xs font-medium text-[var(--muted)]">
+            <Label htmlFor={`${uid}-subject`}>Betreff</Label>
+            <Input
+              id={`${uid}-subject`}
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Betreff"
+              className="font-medium"
+            />
+          </div>
+        )}
+
+        <div>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <label htmlFor={`${uid}-body`} className="block text-xs font-medium text-[var(--muted)]">
               Nachricht
             </label>
-            <Textarea
-              id={`body-${profile.id}`}
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              rows={isEmail ? 10 : 6}
-              className={cx("font-sans leading-relaxed", overLimit && "border-[var(--warning)]")}
-            />
-            <div className="mt-1 flex flex-wrap items-center justify-between gap-2 text-xs">
-              <span className={overLimit ? "font-medium text-[var(--warning)]" : "text-[var(--muted)]"}>
-                {isEmail ? `${length} Zeichen` : `${length} / ${LINKEDIN_MAX_CHARS} Zeichen`}
-              </span>
-              {!isEmail && (
-                <span className={overLimit ? "text-[var(--warning)]" : "text-[var(--muted)]"}>
-                  {overLimit
-                    ? `Zu lang: LinkedIn-Kontaktanfragen erlauben max. ${LINKEDIN_MAX_CHARS} Zeichen.`
-                    : `Hinweis: LinkedIn-Kontaktanfragen sind auf ${LINKEDIN_MAX_CHARS} Zeichen begrenzt.`}
-                </span>
+            <span
+              className={cx(
+                "text-xs tabular-nums",
+                overLimit ? "font-medium text-[var(--danger)]" : nearLimit ? "font-medium text-[var(--warning)]" : "text-[var(--muted)]",
               )}
+              aria-live="polite"
+            >
+              {isEmail ? `${length.toLocaleString("de-DE")} Zeichen` : `${length} / ${LINKEDIN_MAX_CHARS} Zeichen`}
+            </span>
+          </div>
+          <Textarea
+            id={`${uid}-body`}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={isEmail ? 12 : 7}
+            spellCheck
+            className={cx(
+              "resize-y font-sans text-[15px] leading-relaxed",
+              isEmail ? "min-h-64" : "min-h-44",
+              overLimit && "border-[var(--danger)] focus:border-[var(--danger)]",
+            )}
+          />
+          {!isEmail && (
+            <div className="mt-2">
+              <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--surface-3)]">
+                <div
+                  className="h-full rounded-full transition-[width]"
+                  style={{
+                    width: `${limitPct}%`,
+                    background: overLimit ? "var(--danger)" : nearLimit ? "var(--warning)" : "var(--accent)",
+                  }}
+                />
+              </div>
+              <p className={cx("mt-1.5 text-xs", overLimit ? "text-[var(--danger)]" : "text-[var(--muted)]")}>
+                {overLimit
+                  ? `Zu lang – LinkedIn-Kontaktanfragen erlauben maximal ${LINKEDIN_MAX_CHARS} Zeichen.`
+                  : `LinkedIn-Kontaktanfragen sind auf ${LINKEDIN_MAX_CHARS} Zeichen begrenzt.`}
+              </p>
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" variant="secondary" onClick={copyToClipboard} type="button">
-              {copyState === "ok" ? "Kopiert!" : copyState === "fail" ? "Kopieren fehlgeschlagen" : "Kopieren"}
-            </Button>
-            {edited && (
-              <Button size="sm" variant="ghost" onClick={resetToDraft} type="button" title="Auf den erzeugten Entwurf zurücksetzen">
-                Zurücksetzen
-              </Button>
-            )}
-            {primaryAction && (
-              <a
-                href={primaryAction.href}
-                className={linkClasses}
-                {...(primaryAction.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              >
-                {primaryAction.label}
-              </a>
-            )}
-            {isEmail && !mailtoHref && linkedinHref && (
-              <span className="text-xs text-[var(--muted)]">Keine E-Mail-Adresse hinterlegt – LinkedIn als Alternative.</span>
-            )}
-            {!primaryAction && (
-              <span className="text-xs text-[var(--muted)]">Weder E-Mail noch LinkedIn-Profil hinterlegt.</span>
-            )}
-          </div>
+          )}
         </div>
 
-        <aside className="rounded-md border border-[var(--border)] bg-[var(--surface-2)] p-3">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">Warum so formuliert</h4>
-          <p className="mt-1 text-sm text-[var(--foreground)]">
-            Persönlichkeitstyp: <Badge tone="accent">{personalityLabel(profile)}</Badge>
-          </p>
-          {notes.length > 0 ? (
-            <ul className="mt-2 space-y-1.5 text-sm text-[var(--foreground)]">
-              {notes.map((note, i) => (
-                <li key={i} className="flex gap-2">
-                  <span aria-hidden className="text-[var(--accent)]">
-                    •
-                  </span>
-                  <span>{note}</span>
-                </li>
-              ))}
-            </ul>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button size="sm" variant="secondary" onClick={copyToClipboard} type="button" aria-live="polite">
+            {copyState === "ok" ? <IconCheck className="text-[var(--success)]" /> : <IconCopy />}
+            {copyState === "ok" ? "Kopiert" : copyState === "fail" ? "Kopieren fehlgeschlagen" : "Kopieren"}
+          </Button>
+
+          {mailtoHref ? (
+            <ActionLink href={mailtoHref} primary={isEmail} title={profile.email}>
+              <IconMail />
+              Als E-Mail öffnen
+            </ActionLink>
           ) : (
-            <p className="mt-2 text-sm text-[var(--muted)]">Keine Hinweise vorhanden.</p>
+            <Button size="sm" variant="secondary" disabled type="button" title="Keine E-Mail-Adresse hinterlegt">
+              <IconMail />
+              Als E-Mail öffnen
+            </Button>
           )}
-        </aside>
+
+          {linkedinHref ? (
+            <ActionLink href={linkedinHref} primary={!isEmail} external title={linkedinHref}>
+              <IconLinkedIn />
+              LinkedIn öffnen
+            </ActionLink>
+          ) : (
+            <Button size="sm" variant="secondary" disabled type="button" title="Kein LinkedIn-Profil hinterlegt">
+              <IconLinkedIn />
+              LinkedIn öffnen
+            </Button>
+          )}
+
+          {edited && (
+            <Button size="sm" variant="ghost" onClick={resetToDraft} type="button" title="Auf den erzeugten Entwurf zurücksetzen">
+              Zurücksetzen
+            </Button>
+          )}
+        </div>
+
+        {isEmail && !mailtoHref && (
+          <p className="text-xs text-[var(--muted)]">
+            Keine E-Mail-Adresse hinterlegt –{" "}
+            {linkedinHref ? "LinkedIn als Alternative oder Text kopieren." : "Text kopieren und über einen anderen Kanal senden."}
+          </p>
+        )}
+        {!isEmail && !linkedinHref && (
+          <p className="text-xs text-[var(--muted)]">
+            Kein LinkedIn-Profil hinterlegt –{" "}
+            {mailtoHref ? "E-Mail als Alternative oder Text kopieren." : "Text kopieren und über einen anderen Kanal senden."}
+          </p>
+        )}
+
+        <div className="rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-2)]">
+          <button
+            type="button"
+            onClick={() => setWhyOpen((v) => !v)}
+            aria-expanded={whyOpen}
+            aria-controls={whyId}
+            className="flex w-full items-center justify-between gap-3 rounded-[var(--radius-sm)] px-3 py-2.5 text-left transition hover:bg-[var(--surface-3)]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+          >
+            <span className="flex min-w-0 flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--muted)]">Warum so formuliert</span>
+              <Badge tone="accent">{personalityLabel(profile)}</Badge>
+            </span>
+            <span className="text-[var(--muted)]">
+              <IconChevron open={whyOpen} />
+            </span>
+          </button>
+          {whyOpen && (
+            <div id={whyId} className="border-t border-[var(--border)] px-3 py-3 fr-fade-in">
+              {profile.personality?.summary && (
+                <p className="mb-2 text-sm text-[var(--muted)]">{profile.personality.summary}</p>
+              )}
+              {notes.length > 0 ? (
+                <ul className="space-y-1.5 text-sm text-[var(--foreground)]">
+                  {notes.map((note, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span aria-hidden className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" />
+                      <span>{note}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-[var(--muted)]">Keine Hinweise vorhanden.</p>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </Card>
   );
