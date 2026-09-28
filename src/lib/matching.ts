@@ -339,12 +339,20 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   const tx = (de: string, en: string) => (locale === "en" ? en : de);
   const lbl = <K extends string>(labels: Record<K, Bi>, k: K) => labels[k]?.[locale] ?? k;
   const join = <K extends string>(keys: K[], labels: Record<K, Bi>) => joinLabels(keys, labels, locale);
+  /** Reason-Label nach Sprache; merkt sich den deutschen Schlüssel, damit die Sortierung in beiden Sprachen gleich ist. */
+  const labelKey = new Map<string, string>();
+  const lab = (de: string, en: string) => {
+    const l = tx(de, en);
+    labelKey.set(l, de);
+    return l;
+  };
 
   const reasons: MatchReason[] = [];
   const risks: string[] = [];
   let penalty = 0;
-  const add = (label: string, detail: string, weight: number) => {
+  const add = (label: string, detail: string, weight: number, key?: string) => {
     const w = Math.round(weight);
+    if (key) labelKey.set(label, key);
     if (w > 0) reasons.push({ label, detail, weight: w });
   };
   const risk = (text: string, minus = 0) => {
@@ -373,14 +381,14 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   const related = !wanted && isMentorLike(role) && lookingFor.some(isMentorLike);
   if (wanted) {
     add(
-      tx("Gesuchte Rolle", "Role you're looking for"),
+      lab("Gesuchte Rolle", "Role you're looking for"),
       tx(`${first} ist ${roleLabel} – genau die Art Kontakt, die du suchst.`, `${first} is ${roleEn} – exactly the kind of contact you're looking for.`),
       20,
     );
   } else if (related) {
     const near = join(lookingFor.filter(isMentorLike), NETWORK_ROLE_LABELS);
     add(
-      tx("Gesuchte Rolle", "Role you're looking for"),
+      lab("Gesuchte Rolle", "Role you're looking for"),
       tx(`${first} ist ${roleLabel} – nah an dem, was du suchst (${near}).`, `${first} is ${roleEn} – close to what you're looking for (${near}).`),
       12,
     );
@@ -401,7 +409,7 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     const fr = profile.founderRole;
     if (fr && lookingForRoles.includes(fr)) {
       const r = lbl(FOUNDER_ROLE_LABELS, fr);
-      add(tx("Fehlende Team-Rolle", "Missing team role"), tx(`Deckt die Rolle ${r} ab, die dir im Team fehlt.`, `Covers the ${r} role your team is missing.`), 20);
+      add(lab("Fehlende Team-Rolle", "Missing team role"), tx(`Deckt die Rolle ${r} ab, die dir im Team fehlt.`, `Covers the ${r} role your team is missing.`), 20);
     } else if (fr && fr === user.founderRole) {
       const r = lbl(FOUNDER_ROLE_LABELS, fr);
       risk(tx(`Gleiche Rolle wie du (${r}) – Überschneidung statt Ergänzung.`, `Same role as you (${r}) – overlap rather than complement.`), 10);
@@ -411,13 +419,13 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
       if (lookingForRoles.length) {
         const wantedRoles = join(lookingForRoles, FOUNDER_ROLE_LABELS);
         add(
-          tx("Andere Perspektive", "Different perspective"),
+          lab("Andere Perspektive", "Different perspective"),
           tx(`Nicht deine gesuchte Rolle (${wantedRoles}), aber als ${r} eine Ergänzung zu ${mine}.`, `Not the role you're looking for (${wantedRoles}), but ${r} still complements ${mine}.`),
           6,
         );
       } else {
         add(
-          tx("Andere Perspektive", "Different perspective"),
+          lab("Andere Perspektive", "Different perspective"),
           tx(`Bringt als ${r} eine andere Perspektive als ${mine} ein.`, `As ${r}, brings a different perspective than ${mine}.`),
           10,
         );
@@ -436,10 +444,10 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     // Sucht das Profil umgekehrt jemanden wie die Nutzer:in?
     const words = user.founderRole ? ROLE_WORDS[user.founderRole] : [];
     if (profileLookingFor.some((lf) => words.some((w) => lf.includes(w)))) {
-      add(tx("Sucht jemanden wie dich", "Looking for someone like you"), tx(`Sucht: ${profileLookingFor.join(", ")}.`, `Looking for: ${profileLookingFor.join(", ")}.`), 8);
+      add(lab("Sucht jemanden wie dich", "Looking for someone like you"), tx(`Sucht: ${profileLookingFor.join(", ")}.`, `Looking for: ${profileLookingFor.join(", ")}.`), 8);
     } else if (profileLookingFor.some((lf) => /co-?founder|mitgründer/.test(lf))) {
       add(
-        tx("Sucht Co-Founder", "Looking for a co-founder"),
+        lab("Sucht Co-Founder", "Looking for a co-founder"),
         tx(`Sucht Mitgründer:innen, Rolle offen (${profileLookingFor.join(", ")}).`, `Looking for co-founders, role open (${profileLookingFor.join(", ")}).`),
         4,
       );
@@ -450,8 +458,8 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     if (user.stage && profile.stage) {
       const ps = lbl(STAGE_LABELS, profile.stage);
       const us = lbl(STAGE_LABELS, user.stage);
-      if (d === 0) add(tx("Gleiche Phase", "Same stage"), tx(`Beide in Phase ${ps}.`, `You're both at the ${ps} stage.`), 4);
-      else if (d === 1) add(tx("Ähnliche Phase", "Similar stage"), tx(`Phasen liegen nah beieinander (${ps} vs. ${us}).`, `Stages are close together (${ps} vs. ${us}).`), 2);
+      if (d === 0) add(lab("Gleiche Phase", "Same stage"), tx(`Beide in Phase ${ps}.`, `You're both at the ${ps} stage.`), 4);
+      else if (d === 1) add(lab("Ähnliche Phase", "Similar stage"), tx(`Phasen liegen nah beieinander (${ps} vs. ${us}).`, `Stages are close together (${ps} vs. ${us}).`), 2);
     }
 
     // Eigene Idee im Gepäck?
@@ -466,20 +474,20 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
       );
     }
 
-    if (titles.length >= 3) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 2);
+    if (titles.length >= 3) add(lab("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 2);
   } else if (path === "investor") {
     const us = user.stage;
     const ps = profile.stage;
     if (!us || !ps) {
-      add(tx("Phase offen", "Stage open"), tx("Investitionsphase ist nicht hinterlegt – kein Ausschlusskriterium.", "Investment stage not specified – not a deal-breaker."), 8);
+      add(lab("Phase offen", "Stage open"), tx("Investitionsphase ist nicht hinterlegt – kein Ausschlusskriterium.", "Investment stage not specified – not a deal-breaker."), 8);
     } else {
       const d = stageIndex(ps) - stageIndex(us); // > 0: investiert später, als du bist
       const psL = lbl(STAGE_LABELS, ps);
       const usL = lbl(STAGE_LABELS, us);
-      if (d === 0) add(tx("Passende Phase", "Matching stage"), tx(`Investiert in ${psL} – genau deine Phase.`, `Invests at ${psL} – exactly your stage.`), 20);
+      if (d === 0) add(lab("Passende Phase", "Matching stage"), tx(`Investiert in ${psL} – genau deine Phase.`, `Invests at ${psL} – exactly your stage.`), 20);
       else if (Math.abs(d) === 1) {
         add(
-          tx("Passende Phase", "Matching stage"),
+          lab("Passende Phase", "Matching stage"),
           tx(`Investiert in ${psL}, du bist bei ${usL} – nah genug für ein erstes Gespräch.`, `Invests at ${psL}, you're at ${usL} – close enough for a first conversation.`),
           14,
         );
@@ -500,7 +508,7 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
 
     if (profileLookingFor.some((lf) => /invest|dealflow|deal flow|startups/.test(lf))) {
       add(
-        tx("Sucht Dealflow", "Looking for deal flow"),
+        lab("Sucht Dealflow", "Looking for deal flow"),
         tx(`Ist aktiv auf der Suche nach Startups (${profileLookingFor.join(", ")}).`, `Actively looking for startups (${profileLookingFor.join(", ")}).`),
         8,
       );
@@ -509,21 +517,21 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     const investTitles = titles.filter((t) => INVEST_TITLE_RE.test(t));
     if (investTitles.length) {
       const shown = investTitles.slice(0, 2).join(", ");
-      add(tx("Investment-Erfahrung", "Investment experience"), tx(`Investment-Hintergrund im Lebenslauf (${shown}).`, `Investment background on the CV (${shown}).`), 6);
-    } else if (titles.length >= 4) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 3);
+      add(lab("Investment-Erfahrung", "Investment experience"), tx(`Investment-Hintergrund im Lebenslauf (${shown}).`, `Investment background on the CV (${shown}).`), 6);
+    } else if (titles.length >= 4) add(lab("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 3);
   } else if (path === "mentor" || path === "expert") {
     const founderTitles = titles.filter((t) => FOUNDER_TITLE_RE.test(t));
     const leadTitles = titles.filter((t) => LEAD_TITLE_RE.test(t));
     if (founderTitles.length) {
       const shown = founderTitles.slice(0, 2).join(", ");
       add(
-        tx("Gründungserfahrung", "Founding experience"),
+        lab("Gründungserfahrung", "Founding experience"),
         tx(`Hat selbst gegründet oder geführt (${shown}) – weiß, wo du stehst.`, `Has founded or led a company themselves (${shown}) – knows where you stand.`),
         12,
       );
     } else if (leadTitles.length) {
       add(
-        tx("Führungserfahrung", "Leadership experience"),
+        lab("Führungserfahrung", "Leadership experience"),
         tx(`Führungserfahrung (${leadTitles[0]}) – kann auf Augenhöhe Feedback geben.`, `Leadership experience (${leadTitles[0]}) – can give feedback as a peer.`),
         8,
       );
@@ -534,20 +542,20 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     const covered = FOUNDER_DIM_KEYS.filter((k) => userDims[k] <= 5 && profileDims[k] >= 7);
     if (covered.length) {
       const dims = join(covered, DIM_LABELS);
-      add(tx("Deckt deine Lücken", "Covers your gaps"), tx(`Stark in ${dims} – da schätzt du dich selbst schwächer ein.`, `Strong in ${dims} – where you rate yourself weaker.`), 8);
+      add(lab("Deckt deine Lücken", "Covers your gaps"), tx(`Stark in ${dims} – da schätzt du dich selbst schwächer ein.`, `Strong in ${dims} – where you rate yourself weaker.`), 8);
     }
 
     addComplementarity(add, comp, userDims, profileDims, 0.1, locale);
 
     if (profileLookingFor.some((lf) => /mentee|advisor|beirat|mentoring/.test(lf))) {
       add(
-        tx("Bietet Mentoring an", "Offers mentoring"),
+        lab("Bietet Mentoring an", "Offers mentoring"),
         tx(`Sucht aktiv Mentees bzw. eine Advisor-Rolle (${profileLookingFor.join(", ")}).`, `Actively looking for mentees or an advisor role (${profileLookingFor.join(", ")}).`),
         8,
       );
     }
 
-    if (titles.length >= 4) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 4);
+    if (titles.length >= 4) add(lab("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 4);
   } else if (path === "talent") {
     const fr = profile.founderRole;
     const jobRoles = jobRolesOf(profileLookingFor);
@@ -555,11 +563,11 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     const sameArea = !!user.founderRole && (fr === user.founderRole || jobRoles.includes(user.founderRole));
     if (hit) {
       const r = lbl(FOUNDER_ROLE_LABELS, hit);
-      add(tx("Passende Position", "Matching position"), tx(`Als ${r} passt ${first} auf eine Rolle, die du besetzen willst.`, `As ${r}, ${first} fits a position you want to fill.`), 20);
+      add(lab("Passende Position", "Matching position"), tx(`Als ${r} passt ${first} auf eine Rolle, die du besetzen willst.`, `As ${r}, ${first} fits a position you want to fill.`), 20);
     } else if (sameArea && user.founderRole) {
       const r = lbl(FOUNDER_ROLE_LABELS, user.founderRole);
       add(
-        tx("Verstärkt deinen Bereich", "Strengthens your area"),
+        lab("Verstärkt deinen Bereich", "Strengthens your area"),
         tx(`Würde deinen Bereich (${r}) verstärken – eine typische erste Einstellung.`, `Would strengthen your area (${r}) – a typical first hire.`),
         12,
       );
@@ -572,11 +580,11 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     addComplementarity(add, comp, userDims, profileDims, 0.08, locale);
 
     if (profileLookingFor.some((lf) => /job|stelle|position|hire/.test(lf))) {
-      add(tx("Sucht einen Job", "Looking for a job"), tx(`Ist offen für eine Stelle (${profileLookingFor.join(", ")}).`, `Open to a position (${profileLookingFor.join(", ")}).`), 8);
+      add(lab("Sucht einen Job", "Looking for a job"), tx(`Ist offen für eine Stelle (${profileLookingFor.join(", ")}).`, `Open to a position (${profileLookingFor.join(", ")}).`), 8);
     }
 
-    if (titles.length >= 4) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 6);
-    else if (titles.length >= 2) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 3);
+    if (titles.length >= 4) add(lab("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 6);
+    else if (titles.length >= 2) add(lab("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 3);
   }
 
   // 3) Vertical – für Investor:innen (Thesen-Fokus) stärker gewichtet
@@ -586,7 +594,7 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     const w = investorPath ? (sharedVerticals.length > 1 ? 23 : 14) : sharedVerticals.length > 1 ? 15 : 10;
     const shared = sharedVerticals.join(", ");
     add(
-      tx("Gleiches Vertical", "Same vertical"),
+      lab("Gleiches Vertical", "Same vertical"),
       investorPath ? tx(`Investiert in dein Vertical (${shared}).`, `Invests in your vertical (${shared}).`) : tx(`Gemeinsam: ${shared}.`, `In common: ${shared}.`),
       w,
     );
@@ -608,7 +616,7 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     if (terms.length) {
       const w = Math.min(8, Math.round(2 * terms.length + 3 * (terms.length / ideaTokens.size)));
       const shown = terms.slice(0, 4).join(", ");
-      add(tx("Thematische Nähe", "Thematic overlap"), tx(`Deine Idee und das Profil teilen Begriffe: ${shown}.`, `Your idea and the profile share terms: ${shown}.`), w);
+      add(lab("Thematische Nähe", "Thematic overlap"), tx(`Deine Idee und das Profil teilen Begriffe: ${shown}.`, `Your idea and the profile share terms: ${shown}.`), w);
     }
   }
 
@@ -616,7 +624,7 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   const skills = skillOverlap(list(user.strengths), list(profile.skills), locale);
   if (skills.length) {
     const shown = skills.slice(0, 3).join(", ");
-    add(tx("Gemeinsame Skills", "Shared skills"), tx(`Ihr teilt: ${shown}.`, `You share: ${shown}.`), Math.min(6, 2 * skills.length));
+    add(lab("Gemeinsame Skills", "Shared skills"), tx(`Ihr teilt: ${shown}.`, `You share: ${shown}.`), Math.min(6, 2 * skills.length));
   }
 
   // 6) Gemeinsames Event – man kann sich tatsächlich treffen
@@ -624,7 +632,7 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   const sharedEvents = profileEvents.filter((e) => userEvents.includes(e));
   if (sharedEvents.length) {
     const where = sharedEvents.map(humanizeSlug).join(", ");
-    add(tx("Gleiches Event", "Same event"), tx(`Ihr seid beide bei ${where} – ihr könnt euch direkt treffen.`, `You're both at ${where} – you can meet in person.`), 5);
+    add(lab("Gleiches Event", "Same event"), tx(`Ihr seid beide bei ${where} – ihr könnt euch direkt treffen.`, `You're both at ${where} – you can meet in person.`), 5);
   } else if (userEvents.length && profileEvents.length) {
     risk(tx("Kein gemeinsames Event – ein Treffen müsstet ihr separat organisieren.", "No shared event – you'd need to arrange a meeting separately."));
   }
@@ -635,10 +643,12 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   }
 
   const raw = reasons.reduce((sum, r) => sum + r.weight, 0) - penalty;
+  // Tie-Break über den deutschen Label-Schlüssel: identische Reihenfolge in DE und EN, DE wie bisher.
+  const keyOf = (r: MatchReason) => labelKey.get(r.label) ?? r.label;
   return {
     profileId: profile.id,
     score: clamp(Math.round(raw)),
-    reasons: reasons.sort((a, b) => b.weight - a.weight || a.label.localeCompare(b.label)),
+    reasons: reasons.sort((a, b) => b.weight - a.weight || keyOf(a).localeCompare(keyOf(b))),
     risks,
     complementarity: comp,
   };
@@ -651,7 +661,7 @@ function experienceDetail(count: number, locale: MatchLocale) {
 
 /** Komplementaritäts-Reason mit pfadabhängigem Faktor; nennt die zwei größten Zugewinne. */
 function addComplementarity(
-  add: (label: string, detail: string, weight: number) => void,
+  add: (label: string, detail: string, weight: number, key?: string) => void,
   comp: number,
   userDims: FounderDims,
   profileDims: FounderDims,
@@ -664,8 +674,9 @@ function addComplementarity(
     .sort((a, b) => profileDims[b] - userDims[b] - (profileDims[a] - userDims[a]))
     .slice(0, 2);
   const where = gains.length ? ` (${joinLabels(gains, DIM_LABELS, locale)})` : "";
-  if (locale === "en") add("Complementary strengths", `Covers ${comp}% of your weaker dimensions${where}.`, w);
-  else add("Komplementäre Stärken", `Ergänzt deine schwächeren Dimensionen zu ${comp} %${where}.`, w);
+  const key = "Komplementäre Stärken";
+  if (locale === "en") add("Complementary strengths", `Covers ${comp}% of your weaker dimensions${where}.`, w, key);
+  else add(key, `Ergänzt deine schwächeren Dimensionen zu ${comp} %${where}.`, w, key);
 }
 
 /** Reicht `options` (inkl. `locale`) unverändert an scoreMatch durch. */
