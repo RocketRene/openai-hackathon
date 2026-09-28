@@ -10,7 +10,11 @@ export const metadata: Metadata = {
 export default function OnboardingPage() {
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <PageHeader title="Dein Profil" subtitle="Damit der Agent und das Matching wissen, wen du suchst" />
+      <PageHeader
+        kicker="Onboarding"
+        title="Dein Profil"
+        subtitle="Fünf kurze Abschnitte – damit Agent und Matching wissen, wer du bist und wen du suchst. Alles lässt sich später ändern."
+      />
       <OnboardingForm />
     </div>
   );
