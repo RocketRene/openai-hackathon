@@ -186,7 +186,7 @@ function CodeBlock({ code, className, label }: { code: string; className?: strin
   const t = useT(DICT);
   const { copied, copy } = useCopy();
   return (
-    <div className={cx("relative rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-2)]", className)}>
+    <div className={cx("relative rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-2)]", className)}>
       {label && (
         <span className="pointer-events-none absolute left-3 top-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
           {label}
@@ -238,7 +238,7 @@ function MiniStat({ label, value, loading, accent }: { label: ReactNode; value: 
   return (
     <div
       className={cx(
-        "rounded-[var(--radius-sm)] border px-3 py-2.5 transition",
+        "rounded-[var(--radius)] border px-3 py-2.5 transition",
         accent ? "border-transparent bg-[var(--accent-soft)]" : "border-[var(--border)] bg-[var(--surface-2)]",
       )}
     >
@@ -259,7 +259,7 @@ function Note({ tone, children }: { tone: "success" | "danger"; children: ReactN
     <p
       role="status"
       className={cx(
-        "rounded-[var(--radius-sm)] px-3 py-2 text-sm",
+        "rounded-[var(--radius)] px-3 py-2 text-sm",
         tone === "success" ? "bg-[var(--success-soft)] text-[var(--success)]" : "bg-[var(--danger-soft)] text-[var(--danger)]",
       )}
     >
@@ -381,10 +381,7 @@ export default function SettingsPanel() {
         title={t("statusTitle")}
         description={t("statusDesc")}
         action={
-          <Button variant="secondary" size="sm" onClick={handleReloadHealth} disabled={healthLoading}>
-            <span aria-hidden className={cx("text-sm leading-none", healthLoading && "animate-spin")}>
-              ↻
-            </span>
+          <Button variant="secondary" size="sm" onClick={handleReloadHealth} loading={healthLoading}>
             {t("reload")}
           </Button>
         }
@@ -400,13 +397,11 @@ export default function SettingsPanel() {
             {healthLoading ? (
               <Badge>{t("checking")}</Badge>
             ) : health?.openaiConfigured ? (
-              <Badge tone="success">
-                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
+              <Badge tone="success" dot>
                 {t("configured")}
               </Badge>
             ) : (
-              <Badge tone="danger">
-                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current" />
+              <Badge tone="danger" dot>
                 {t("notConfigured")}
               </Badge>
             )}
@@ -452,7 +447,7 @@ export default function SettingsPanel() {
 
       {/* ---------------- Sprache / Language ---------------- */}
       <Card title={t("langTitle")} description={t("langDesc")}>
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-2)] px-4 py-3">
           <div>
             <p className="text-sm font-medium text-[var(--foreground)]">{t("langLabel")}</p>
             <p className="mt-0.5 text-xs text-[var(--muted)]">{t("langActive")}</p>
@@ -478,7 +473,7 @@ export default function SettingsPanel() {
           )
         }
       >
-        <div className="flex flex-wrap items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-2)] p-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-2)] p-2">
           <Button variant="secondary" size="sm" onClick={handleExport} disabled={!hasContext}>
             {t("exportJson")}
           </Button>
@@ -565,7 +560,7 @@ export default function SettingsPanel() {
           {TEAM.map((member) => (
             <li
               key={member.name}
-              className="flex items-center gap-3 rounded-[var(--radius-sm)] px-2 py-2.5 transition hover:bg-[var(--surface-2)]"
+              className="flex items-center gap-3 rounded-[var(--radius)] px-2 py-2.5 transition hover:bg-[var(--surface-2)]"
             >
               <Avatar name={member.name} size={36} />
               <div className="min-w-0">
