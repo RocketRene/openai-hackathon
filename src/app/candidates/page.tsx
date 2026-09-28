@@ -11,10 +11,11 @@ export const metadata: Metadata = {
 export default function CandidatesPage() {
   const total = getProfiles().length;
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+    <div>
       <PageHeader
+        kicker="Netzwerk"
         title="Kandidaten"
-        subtitle={`${total.toLocaleString("de-DE")} Profile aus IdeaLab 2026 und Demo-Daten, priorisiert für dich`}
+        subtitle={`${total.toLocaleString("de-DE")} Profile aus IdeaLab 2026 und Demo-Daten – gefiltert nach dem, was du suchst, und priorisiert nach Match-Score.`}
       />
       <CandidateList />
     </div>
