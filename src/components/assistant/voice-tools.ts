@@ -425,10 +425,14 @@ export function userContextToBrief(ctx: UserContext | null): SearchBrief {
 }
 
 /**
- * Suchprofil-Felder → Patch für den UserContext. Bestehende Inhalte bleiben erhalten und werden ergänzt
- * (Stärken/Rollen: Vereinigung; Rahmenbedingungen: Text zusammenführen; Idee: ersetzt, wenn angegeben).
+ * Suchprofil-Felder → Patch für den UserContext.
+ * mode "merge" (Agent, Default): Bestehende Inhalte bleiben erhalten und werden ergänzt
+ *   (Stärken/Rollen: Vereinigung; Rahmenbedingungen: Text zusammenführen; Idee: ersetzt, wenn angegeben).
+ * mode "replace" (Formular): Stärken, Rahmenbedingungen und abgeleitete Team-Rollen ersetzen den alten Wert;
+ *   Kontaktarten (lookingFor) werden nie stillschweigend entfernt.
  */
-export function briefToPatch(brief: Partial<SearchBrief>, current: UserContext, options: { replaceLists?: boolean } = {}): Partial<UserContext> {
+export function briefToPatch(brief: Partial<SearchBrief>, current: UserContext, options: { mode?: "merge" | "replace" } = {}): Partial<UserContext> {
+  const replace = options.mode === "replace";
   const patch: Partial<UserContext> = {};
 
   const idea = brief.idea?.trim();
@@ -436,7 +440,7 @@ export function briefToPatch(brief: Partial<SearchBrief>, current: UserContext, 
 
   if (typeof brief.strengths === "string" && brief.strengths.trim()) {
     const added = splitList(brief.strengths);
-    const next = options.replaceLists ? added : mergeUnique(current.strengths ?? [], added);
+    const next = replace ? added : mergeUnique(current.strengths ?? [], added);
     if (JSON.stringify(next) !== JSON.stringify(current.strengths ?? [])) patch.strengths = next;
   }
 
@@ -444,13 +448,13 @@ export function briefToPatch(brief: Partial<SearchBrief>, current: UserContext, 
   if (lookingFor) {
     const { founderRoles, networkRoles } = parseLookingFor(lookingFor);
     if (founderRoles.length > 0) {
-      const next = options.replaceLists ? founderRoles : mergeUnique(current.lookingForRoles ?? [], founderRoles);
+      const next = replace ? founderRoles : mergeUnique(current.lookingForRoles ?? [], founderRoles);
       if (JSON.stringify(next) !== JSON.stringify(current.lookingForRoles ?? [])) patch.lookingForRoles = next;
       // Wer eine Team-Rolle sucht, sucht (auch) Co-Founder.
       if (!networkRoles.includes("cofounder")) networkRoles.push("cofounder");
     }
     if (networkRoles.length > 0) {
-      const next = options.replaceLists ? networkRoles : mergeUnique(current.lookingFor ?? [], networkRoles);
+      const next = mergeUnique(current.lookingFor ?? [], networkRoles);
       if (JSON.stringify(next) !== JSON.stringify(current.lookingFor ?? [])) patch.lookingFor = next;
     }
     // Freitext als Notiz-Zeile festhalten (ersetzt die vorherige Zeile, keine Duplikate).
@@ -460,7 +464,7 @@ export function briefToPatch(brief: Partial<SearchBrief>, current: UserContext, 
   }
 
   if (typeof brief.constraints === "string" && brief.constraints.trim()) {
-    const next = options.replaceLists ? brief.constraints.trim() : mergeText(current.constraints, brief.constraints);
+    const next = replace ? brief.constraints.trim() : mergeText(current.constraints, brief.constraints);
     if (next !== (current.constraints ?? "")) patch.constraints = next;
   }
 
