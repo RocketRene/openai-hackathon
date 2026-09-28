@@ -243,7 +243,7 @@ export function Label({ children, htmlFor }: { children: ReactNode; htmlFor?: st
   );
 }
 
-export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
+export function Field({ label, children, hint }: { label: ReactNode; children: ReactNode; hint?: ReactNode }) {
   return (
     <div>
       <Label>{label}</Label>
@@ -264,13 +264,13 @@ export function PageHeader({
   eyebrow,
   kicker,
 }: {
-  title: string;
-  subtitle?: string;
+  title: ReactNode;
+  subtitle?: ReactNode;
   action?: ReactNode;
   /** Kleiner Text über dem Titel. */
-  eyebrow?: string;
+  eyebrow?: ReactNode;
   /** Alias für eyebrow (ältere Aufrufe). */
-  kicker?: string;
+  kicker?: ReactNode;
 }) {
   const over = eyebrow ?? kicker;
   return (
@@ -285,7 +285,7 @@ export function PageHeader({
   );
 }
 
-export function EmptyState({ title, body, action, icon }: { title: string; body?: string; action?: ReactNode; icon?: ReactNode }) {
+export function EmptyState({ title, body, action, icon }: { title: ReactNode; body?: ReactNode; action?: ReactNode; icon?: ReactNode }) {
   return (
     <div className="rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] bg-[var(--surface)]/60 px-6 py-12 text-center">
       {icon && <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">{icon}</div>}
@@ -438,9 +438,9 @@ export function Stat({
   href,
   className,
 }: {
-  label: string;
+  label: ReactNode;
   value: ReactNode;
-  hint?: string;
+  hint?: ReactNode;
   icon?: ReactNode;
   href?: string;
   className?: string;
