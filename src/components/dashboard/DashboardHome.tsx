@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SectionTitle } from "@/components/ui";
+import { T } from "@/lib/i18n";
 import DashboardHero from "./DashboardHero";
 import HowItWorks from "./HowItWorks";
 import QuickAccess from "./QuickAccess";
@@ -22,11 +23,11 @@ export default function DashboardHome() {
           <SectionTitle
             action={
               <Link href="/network" className={SECTION_LINK_CLS}>
-                Netzwerk-Analyse →
+                <T de="Netzwerk-Analyse →" en="Network analysis →" />
               </Link>
             }
           >
-            Das Ökosystem in Zahlen
+            <T de="Das Ökosystem in Zahlen" en="The ecosystem in numbers" />
           </SectionTitle>
           <StatsRow />
         </section>

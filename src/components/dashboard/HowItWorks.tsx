@@ -1,21 +1,35 @@
 import { SectionTitle } from "@/components/ui";
+import { T } from "@/lib/i18n";
+import type { Bi } from "./shared";
 
-const STEPS: Array<{ title: string; text: string }> = [
+const STEPS: Array<{ title: Bi; text: Bi }> = [
   {
-    title: "Kontext geben",
-    text: "Onboarding ausfüllen oder den Agenten interviewen lassen: Rolle, Vertical, Idee und Stärken.",
+    title: { de: "Kontext geben", en: "Share your context" },
+    text: {
+      de: "Onboarding ausfüllen oder den Agenten interviewen lassen: Rolle, Vertical, Idee und Stärken.",
+      en: "Complete the onboarding or let the agent interview you: role, vertical, idea and strengths.",
+    },
   },
   {
-    title: "Kandidaten sichten",
-    text: "Der Match-Score priorisiert Co-Founder, Investor:innen, Mentor:innen und Talente für dich.",
+    title: { de: "Kandidaten sichten", en: "Review candidates" },
+    text: {
+      de: "Der Match-Score priorisiert Co-Founder, Investor:innen, Mentor:innen und Talente für dich.",
+      en: "The match score ranks co-founders, investors, mentors and talent for you.",
+    },
   },
   {
-    title: "Outreach senden",
-    text: "Personalisierte Nachrichten passend zum Persönlichkeitstyp – weniger, aber bessere Anschreiben.",
+    title: { de: "Outreach senden", en: "Send outreach" },
+    text: {
+      de: "Personalisierte Nachrichten passend zum Persönlichkeitstyp – weniger, aber bessere Anschreiben.",
+      en: "Personalized messages tailored to personality type – fewer, but better messages.",
+    },
   },
   {
-    title: "Gespräch vorbereiten",
-    text: "Prep-Pack mit Talking Points, Eisbrechern und Red Flags – optional als Voice-Simulation.",
+    title: { de: "Gespräch vorbereiten", en: "Prepare the conversation" },
+    text: {
+      de: "Prep-Pack mit Talking Points, Eisbrechern und Red Flags – optional als Voice-Simulation.",
+      en: "Prep pack with talking points, icebreakers and red flags – optionally as a voice simulation.",
+    },
   },
 ];
 
@@ -23,11 +37,13 @@ const STEPS: Array<{ title: string; text: string }> = [
 export default function HowItWorks() {
   return (
     <section aria-label="So funktioniert Voya">
-      <SectionTitle>So funktioniert&apos;s</SectionTitle>
+      <SectionTitle>
+        <T de="So funktioniert’s" en="How it works" />
+      </SectionTitle>
       <ol className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {STEPS.map((step, index) => (
           <li
-            key={step.title}
+            key={step.title.de}
             className="relative rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-sm)]"
           >
             <div className="flex items-center gap-3">
@@ -35,11 +51,15 @@ export default function HowItWorks() {
                 {index + 1}
               </span>
               <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-                Schritt {index + 1}
+                <T de={`Schritt ${index + 1}`} en={`Step ${index + 1}`} />
               </span>
             </div>
-            <h3 className="mt-4 text-sm font-semibold tracking-tight text-[var(--foreground)]">{step.title}</h3>
-            <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">{step.text}</p>
+            <h3 className="mt-4 text-sm font-semibold tracking-tight text-[var(--foreground)]">
+              <T {...step.title} />
+            </h3>
+            <p className="mt-1 text-xs leading-relaxed text-[var(--muted)]">
+              <T {...step.text} />
+            </p>
             {index < STEPS.length - 1 && (
               <span
                 aria-hidden
