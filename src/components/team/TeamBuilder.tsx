@@ -190,7 +190,7 @@ function TeamSkeleton() {
       <div className="flex flex-col gap-6">
         <Card>
           <Skeleton className="h-4 w-32" />
-          <Skeleton className="mx-auto mt-6 aspect-square w-full max-w-xs rounded-full" />
+          <Skeleton className="mx-auto mt-6 aspect-square w-full max-w-xs" />
         </Card>
         <Card>
           <Skeleton className="h-4 w-40" />
@@ -362,9 +362,9 @@ export default function TeamBuilder() {
                     </p>
                   </div>
                   {m.founderRole && (
-                    <Badge tone="accent" className="hidden sm:inline-flex">
-                      {FOUNDER_ROLE_LABELS[m.founderRole]}
-                    </Badge>
+                    <span className="hidden shrink-0 sm:inline-flex">
+                      <Badge tone="accent">{FOUNDER_ROLE_LABELS[m.founderRole]}</Badge>
+                    </span>
                   )}
                   {!isMe && (
                     <IconButton onClick={() => remove(m.id)} label={`${m.name} aus dem Team entfernen`} tone="danger">
