@@ -11,7 +11,7 @@ export default function OnboardingPage() {
   return (
     <div className="mx-auto w-full max-w-3xl">
       <PageHeader
-        kicker="Onboarding"
+        eyebrow="Onboarding"
         title="Dein Profil"
         subtitle="Fünf kurze Abschnitte – damit Agent und Matching wissen, wer du bist und wen du suchst. Alles lässt sich später ändern."
       />

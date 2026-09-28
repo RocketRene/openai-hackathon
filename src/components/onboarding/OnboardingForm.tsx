@@ -173,16 +173,6 @@ function ChipGroup({
   );
 }
 
-/** Chip als Umschalter – Zustand zusätzlich für Screenreader. */
-function ToggleChip({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
-  return (
-    <Chip active={active} onClick={onClick}>
-      {children}
-      <span className="sr-only">{active ? ", ausgewählt" : ""}</span>
-    </Chip>
-  );
-}
-
 /** Segment-Steuerung für eine Einfachauswahl (z. B. Stage). */
 function Segmented<T extends string>({
   label,
@@ -199,7 +189,7 @@ function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="inline-flex max-w-full flex-wrap gap-1 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-2)] p-1"
+      className="inline-flex max-w-full flex-wrap gap-1 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface-2)] p-1"
     >
       {options.map((o) => {
         const active = o.value === value;
@@ -211,7 +201,7 @@ function Segmented<T extends string>({
             aria-checked={active}
             onClick={() => onChange(o.value)}
             className={cx(
-              "h-8 rounded-[calc(var(--radius-sm)_-_3px)] px-3 text-xs font-medium transition",
+              "h-8 rounded-[calc(var(--radius)_-_4px)] px-3 text-xs font-medium transition",
               FOCUS,
               active
                 ? "bg-[var(--surface)] text-[var(--foreground)] shadow-[var(--shadow-sm)]"
@@ -335,7 +325,7 @@ function TagInput({
     <div>
       <div
         onClick={() => inputRef.current?.focus()}
-        className="flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 shadow-[var(--shadow-sm)] transition focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--ring)]"
+        className="flex min-h-11 w-full cursor-text flex-wrap items-center gap-1.5 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-150 hover:border-[var(--surface-3)] focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--ring)]"
       >
         {tags.map((t) => (
           <Pill key={t} label={t} onRemove={() => onChange(tags.filter((x) => x !== t))} />
@@ -399,7 +389,7 @@ function SuccessCard({ name }: { name: string }) {
     <section
       ref={ref}
       role="status"
-      className="fr-fade-in rounded-[var(--radius)] border border-[var(--success)]/40 bg-[var(--surface)] p-5 shadow-[var(--shadow-sm)]"
+      className="fr-fade-in rounded-[var(--radius-lg)] border border-[var(--success)]/40 bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)] sm:p-5"
     >
       <div className="flex items-start gap-3">
         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--success-soft)] text-[var(--success)]">
@@ -656,7 +646,7 @@ function FormBody({
               <p className="px-1 text-xs text-[var(--muted)]">Kein Profil gefunden – dann einfach unten selbst ausfüllen.</p>
             ) : (
               <>
-                <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-[var(--radius-sm)] border border-[var(--border)]">
+                <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-[var(--radius)] border border-[var(--border)]">
                   {profileHits.map((p, i) => (
                     <li key={p.id}>
                       <button
@@ -732,13 +722,13 @@ function FormBody({
               meta={form.founderRole ? founderRoleLabel(form.founderRole) : "Einfachauswahl"}
             >
               {FOUNDER_ROLES.map((r) => (
-                <ToggleChip
+                <Chip
                   key={r.value}
                   active={form.founderRole === r.value}
                   onClick={() => patch({ founderRole: form.founderRole === r.value ? undefined : r.value })}
                 >
                   {r.label}
-                </ToggleChip>
+                </Chip>
               ))}
             </ChipGroup>
           </div>
@@ -753,13 +743,13 @@ function FormBody({
         <div className="space-y-5">
           <ChipGroup label="Ich suche" meta={`${form.lookingFor.length} ausgewählt`}>
             {NETWORK_ROLES.map((r) => (
-              <ToggleChip
+              <Chip
                 key={r.value}
                 active={form.lookingFor.includes(r.value)}
                 onClick={() => patch({ lookingFor: toggle(form.lookingFor, r.value) })}
               >
                 {r.label}
-              </ToggleChip>
+              </Chip>
             ))}
           </ChipGroup>
 
@@ -783,13 +773,13 @@ function FormBody({
             }
           >
             {FOUNDER_ROLES.map((r) => (
-              <ToggleChip
+              <Chip
                 key={r.value}
                 active={form.lookingForRoles.includes(r.value)}
                 onClick={() => patch({ lookingForRoles: toggle(form.lookingForRoles, r.value) })}
               >
                 {r.label}
-              </ToggleChip>
+              </Chip>
             ))}
           </ChipGroup>
 
@@ -819,13 +809,13 @@ function FormBody({
               meta={form.verticals.length > 0 ? `${form.verticals.length} ausgewählt` : "Mehrfachauswahl"}
             >
               {verticalChips.map((v) => (
-                <ToggleChip
+                <Chip
                   key={v}
                   active={form.verticals.includes(v)}
                   onClick={() => patch({ verticals: toggle(form.verticals, v) })}
                 >
                   {v}
-                </ToggleChip>
+                </Chip>
               ))}
             </ChipGroup>
             <div className="mt-3 flex gap-2">
@@ -895,22 +885,20 @@ function FormBody({
 
       {/* Sticky Fußleiste */}
       <div className="sticky bottom-3 z-20 pt-1">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)]/90 px-4 py-3 shadow-[var(--shadow-md)] backdrop-blur">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)]/90 px-4 py-3 shadow-[var(--shadow-lg)] backdrop-blur">
           <div className="flex min-w-0 items-center gap-2 text-xs">
             {error ? (
               <p role="alert" className="font-medium text-[var(--danger)]">
                 {error}
               </p>
             ) : dirty ? (
-              <>
-                <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--warning)]" />
-                <span className="text-[var(--muted)]">Ungespeicherte Änderungen</span>
-              </>
+              <Badge tone="warning" dot>
+                Ungespeicherte Änderungen
+              </Badge>
             ) : saved ? (
-              <>
-                <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--success)]" />
-                <span className="text-[var(--muted)]">Gespeichert</span>
-              </>
+              <Badge tone="success" dot>
+                Gespeichert
+              </Badge>
             ) : (
               <span className="text-[var(--muted)]">{pct} % ausgefüllt</span>
             )}
