@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -13,10 +13,18 @@ export const metadata: Metadata = {
     "Findet aus Konferenz- und LinkedIn-Daten die richtigen Co-Founder, Investoren und Mentor:innen – mit personalisiertem Outreach und Voice-Vorbereitung.",
 };
 
+export const viewport: Viewport = {
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7f6f2" },
+    { media: "(prefers-color-scheme: dark)", color: "#131217" },
+  ],
+};
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="de" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full">
+      <body className="min-h-full bg-[var(--background)] text-[var(--foreground)]">
         <AppShell>{children}</AppShell>
       </body>
     </html>
