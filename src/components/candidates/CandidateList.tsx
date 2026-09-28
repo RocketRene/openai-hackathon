@@ -7,10 +7,12 @@
  * - Es werden nur PAGE_SIZE Karten gerendert; "Mehr laden" hängt weitere an.
  * - Toolbar ist ab md sticky unter dem App-Header (--header-height); Filtern rechnet deferred,
  *   die alte Liste bleibt gedimmt stehen, „Mehr laden“ zeigt Skeleton-Karten.
+ * - Zweisprachig (DE/EN): Texte über `useT(DICT)`, Match-Gründe/Tier-Labels über `rankCandidates(…, { locale })`.
  */
 import { Suspense, useCallback, useDeferredValue, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { getProfiles, searchProfiles } from "@/lib/data";
+import { COMMON, useLocale, useT, type Dict, type Locale } from "@/lib/i18n";
 import { rankCandidates } from "@/lib/matching";
 import type { MatchResult, Profile } from "@/lib/types";
 import { useUserContext } from "@/lib/user-context";
@@ -35,11 +37,49 @@ interface ListState {
   visible: number;
 }
 
-function formatCount(n: number): string {
-  return n.toLocaleString("de-DE");
+function formatCount(n: number, locale: Locale): string {
+  return n.toLocaleString(locale === "en" ? "en-US" : "de-DE");
 }
 
 const GRID_CLASSES = "grid gap-4 sm:grid-cols-2 xl:grid-cols-3";
+
+const DICT = {
+  loadingSr: { de: "Kandidaten werden geladen …", en: "Loading candidates …" },
+  resultOne: { de: "Treffer", en: "result" },
+  results: { de: "Treffer", en: "results" },
+  ofAll: { de: "von {all}", en: "of {all}" },
+  sort: { de: "Sortieren", en: "Sort" },
+  sortGroup: { de: "Sortierung", en: "Sort order" },
+  sortScore: { de: "Score", en: "Score" },
+  sortScoreTitle: { de: "Nach Match-Score sortieren", en: "Sort by match score" },
+  sortScoreDisabled: { de: "Match-Scores brauchen deinen Nutzer-Kontext", en: "Match scores need your user context" },
+  sortName: { de: "A–Z", en: "A–Z" },
+  sortNameTitle: { de: "Alphabetisch sortieren", en: "Sort alphabetically" },
+  sortSource: { de: "Quelle", en: "Source" },
+  sortSourceTitle: { de: "Echte IdeaLab-Profile zuerst", en: "Real IdeaLab profiles first" },
+  hintTitle: { de: "Ohne Kontext keine Match-Scores.", en: "No match scores without context." },
+  hintBody: {
+    de: "Kurz Profil anlegen oder den Demo-Kontext laden – dann priorisiert Voya nach Passung.",
+    en: "Set up a quick profile or load the demo context – then Voya prioritizes by fit.",
+  },
+  createProfile: { de: "Profil anlegen", en: "Create profile" },
+  emptyNoProfilesTitle: { de: "Noch keine Profile geladen", en: "No profiles loaded yet" },
+  emptyNoProfilesBody: {
+    de: "Die Profil-Dateien unter src/data/profiles sind noch leer. Sobald Import und Demo-Daten da sind, erscheinen sie hier.",
+    en: "The profile files under src/data/profiles are still empty. Once the import and demo data are in place, they will show up here.",
+  },
+  emptyNoResultsTitle: { de: "Keine Treffer", en: "No results" },
+  emptyManyFilters: {
+    de: "Mehrere Filter greifen gleichzeitig. Lockere einen davon – meistens reicht es, Vertical oder Team-Rolle wegzulassen.",
+    en: "Several filters apply at once. Loosen one of them – usually dropping the vertical or team role is enough.",
+  },
+  emptyOneFilter: { de: "Versuche einen anderen Suchbegriff oder setze den Filter zurück.", en: "Try a different search term or reset the filter." },
+  keepQuery: { de: "Nur Suchbegriff behalten", en: "Keep search term only" },
+  resetFilters: { de: "Alle Filter zurücksetzen", en: "Reset all filters" },
+  listLabel: { de: "Kandidaten", en: "Candidates" },
+  shownOf: { de: "{shown} von {total} angezeigt", en: "{shown} of {total} shown" },
+  loadMore: { de: "Mehr laden ({count} weitere)", en: "Load more ({count} more)" },
+} satisfies Dict;
 
 /* ------------------------------------------------------------------ */
 /* Lade-Zustände                                                       */
@@ -58,6 +98,7 @@ function SkeletonCards({ count = SKELETON_COUNT }: { count?: number }) {
 }
 
 function CandidateListFallback() {
+  const t = useT(DICT);
   return (
     <div className="flex flex-col gap-4" aria-busy="true" aria-live="polite">
       <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-3 shadow-[var(--shadow-sm)]" aria-hidden>
@@ -75,7 +116,7 @@ function CandidateListFallback() {
           ))}
         </div>
       </div>
-      <p className="sr-only">Kandidaten werden geladen …</p>
+      <p className="sr-only">{t("loadingSr")}</p>
       <ul className={GRID_CLASSES} aria-hidden>
         <SkeletonCards />
       </ul>
@@ -88,29 +129,32 @@ function CandidateListFallback() {
 /* ------------------------------------------------------------------ */
 
 function ResultCount({ total, all }: { total: number; all: number }) {
+  const [locale] = useLocale();
+  const t = useT(DICT);
   return (
     <p className="text-xs tabular-nums text-[var(--muted)]" aria-live="polite">
-      <span className="font-semibold text-[var(--foreground)]">{formatCount(total)}</span> Treffer
-      {total !== all && <span className="hidden sm:inline"> von {formatCount(all)}</span>}
+      <span className="font-semibold text-[var(--foreground)]">{formatCount(total, locale)}</span> {t(total === 1 ? "resultOne" : "results")}
+      {total !== all && <span className="hidden sm:inline"> {t("ofAll", { all: formatCount(all, locale) })}</span>}
     </p>
   );
 }
 
 function SortToggle({ value, scoreAvailable, onChange }: { value: SortKey; scoreAvailable: boolean; onChange: (next: SortKey) => void }) {
+  const t = useT(DICT);
   const options: { key: SortKey; label: string; disabled?: boolean; title: string }[] = [
     {
       key: "score",
-      label: "Score",
+      label: t("sortScore"),
       disabled: !scoreAvailable,
-      title: scoreAvailable ? "Nach Match-Score sortieren" : "Match-Scores brauchen deinen Nutzer-Kontext",
+      title: scoreAvailable ? t("sortScoreTitle") : t("sortScoreDisabled"),
     },
-    { key: "name", label: "A–Z", title: "Alphabetisch sortieren" },
-    { key: "source", label: "Quelle", title: "Echte IdeaLab-Profile zuerst" },
+    { key: "name", label: t("sortName"), title: t("sortNameTitle") },
+    { key: "source", label: t("sortSource"), title: t("sortSourceTitle") },
   ];
   return (
     <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
-      <span className="hidden sm:inline">Sortieren</span>
-      <div role="group" aria-label="Sortierung" className="inline-flex h-8 items-center rounded-full border border-[var(--border)] bg-[var(--surface-2)] p-0.5">
+      <span className="hidden sm:inline">{t("sort")}</span>
+      <div role="group" aria-label={t("sortGroup")} className="inline-flex h-8 items-center rounded-full border border-[var(--border)] bg-[var(--surface-2)] p-0.5">
         {options.map((option) => (
           <button
             key={option.key}
@@ -139,21 +183,22 @@ function SortToggle({ value, scoreAvailable, onChange }: { value: SortKey; score
 /* ------------------------------------------------------------------ */
 
 function ContextHint({ onLoadDemo }: { onLoadDemo: () => void }) {
+  const t = useT(DICT);
+  const tc = useT(COMMON);
   return (
     <div
       role="note"
       className="flex flex-wrap items-center justify-between gap-3 rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] bg-[var(--surface)]/60 px-4 py-2.5"
     >
       <p className="text-xs text-[var(--muted)] sm:text-sm">
-        <span className="font-medium text-[var(--foreground)]">Ohne Kontext keine Match-Scores.</span> Kurz Profil anlegen oder den Demo-Kontext
-        laden – dann priorisiert Voya nach Passung.
+        <span className="font-medium text-[var(--foreground)]">{t("hintTitle")}</span> {t("hintBody")}
       </p>
       <div className="flex flex-wrap gap-2">
         <LinkButton href="/onboarding" variant="ghost" size="sm">
-          Profil anlegen
+          {t("createProfile")}
         </LinkButton>
         <Button type="button" size="sm" onClick={onLoadDemo}>
-          Demo-Kontext laden
+          {tc("loadDemo")}
         </Button>
       </div>
     </div>
@@ -169,6 +214,9 @@ function CandidateListInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const urlKey = searchParams.toString();
+  const [locale] = useLocale();
+  const t = useT(DICT);
+  const tc = useT(COMMON);
 
   const [state, setState] = useState<ListState>(() => ({
     filters: parseFilters(searchParams),
@@ -192,10 +240,11 @@ function CandidateListInner() {
   const { userContext, ready, loadDemo } = useUserContext();
   const allProfiles = getProfiles();
 
+  // Match-Gründe (Top-Grund auf der Karte) kommen aus rankCandidates in der aktiven Sprache.
   const matches = useMemo<Map<string, MatchResult> | null>(() => {
     if (!userContext) return null;
-    return new Map(rankCandidates(userContext, allProfiles).map((m) => [m.profileId, m] as const));
-  }, [userContext, allProfiles]);
+    return new Map(rankCandidates(userContext, allProfiles, { locale }).map((m) => [m.profileId, m] as const));
+  }, [userContext, allProfiles, locale]);
 
   const [sortChoice, setSortChoice] = useState<SortKey | null>(null);
   // Score nur mit Kontext; ohne Wahl: Score wenn möglich, sonst Name.
@@ -253,29 +302,21 @@ function CandidateListInner() {
 
       {total === 0 ? (
         allProfiles.length === 0 ? (
-          <EmptyState
-            icon={<span aria-hidden>◌</span>}
-            title="Noch keine Profile geladen"
-            body="Die Profil-Dateien unter src/data/profiles sind noch leer. Sobald Import und Demo-Daten da sind, erscheinen sie hier."
-          />
+          <EmptyState icon={<span aria-hidden>◌</span>} title={t("emptyNoProfilesTitle")} body={t("emptyNoProfilesBody")} />
         ) : (
           <EmptyState
             icon={<span aria-hidden>⌕</span>}
-            title="Keine Treffer"
-            body={
-              activeCount > 1
-                ? "Mehrere Filter greifen gleichzeitig. Lockere einen davon – meistens reicht es, Vertical oder Team-Rolle wegzulassen."
-                : "Versuche einen anderen Suchbegriff oder setze den Filter zurück."
-            }
+            title={t("emptyNoResultsTitle")}
+            body={activeCount > 1 ? t("emptyManyFilters") : t("emptyOneFilter")}
             action={
               <>
                 {canKeepQuery && (
                   <Button type="button" variant="secondary" onClick={() => setFilters({ query: state.filters.query })}>
-                    Nur Suchbegriff behalten
+                    {t("keepQuery")}
                   </Button>
                 )}
                 <Button type="button" variant={canKeepQuery ? "ghost" : "secondary"} onClick={() => setFilters({})}>
-                  Alle Filter zurücksetzen
+                  {t("resetFilters")}
                 </Button>
               </>
             }
@@ -285,7 +326,7 @@ function CandidateListInner() {
         <>
           <ul
             className={cx(GRID_CLASSES, "transition-opacity duration-200", isStale && "opacity-60")}
-            aria-label="Kandidaten"
+            aria-label={t("listLabel")}
             aria-busy={isStale || isLoadingMore}
           >
             {visibleProfiles.map((profile) => (
@@ -299,7 +340,7 @@ function CandidateListInner() {
           <div className="flex flex-col items-center gap-3 pt-4">
             <div className="flex flex-col items-center gap-1.5">
               <p className="text-xs tabular-nums text-[var(--muted)]">
-                {formatCount(visibleProfiles.length)} von {formatCount(total)} angezeigt
+                {t("shownOf", { shown: formatCount(visibleProfiles.length, locale), total: formatCount(total, locale) })}
               </p>
               <div className="h-1 w-40 overflow-hidden rounded-full bg-[var(--surface-3)]" aria-hidden>
                 <div className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-300" style={{ width: `${progress}%` }} />
@@ -307,7 +348,7 @@ function CandidateListInner() {
             </div>
             {hasMore && (
               <Button type="button" variant="secondary" onClick={loadMore} disabled={isLoadingMore}>
-                {isLoadingMore ? "Lädt …" : `Mehr laden (${formatCount(Math.min(PAGE_SIZE, total - visibleProfiles.length))} weitere)`}
+                {isLoadingMore ? tc("loading") : t("loadMore", { count: formatCount(Math.min(PAGE_SIZE, total - visibleProfiles.length), locale) })}
               </Button>
             )}
           </div>

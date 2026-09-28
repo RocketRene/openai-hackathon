@@ -4,12 +4,23 @@
  * Rollen als Chip-Reihe, aktive Filter als entfernbare Pills, rechts ein Slot (Trefferzahl, Sortierung).
  * Kontrolliert: Zustand kommt von außen (CandidateList hält ihn in der URL).
  * Enthält auch die URL <-> Filter-Konvertierung, damit Liste und Filter dasselbe Vokabular nutzen.
+ * Alle sichtbaren Texte zweisprachig (DE/EN) über `useT(DICT)` bzw. die `*_I18N`-Label-Tabellen.
  */
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { getEvents, getVerticals } from "@/lib/data";
-import { PERSONALITY_LABELS, type FounderRole, type NetworkRole, type PersonalityType, type ProfileFilters } from "@/lib/types";
+import { COMMON, useLocale, useT, type Dict, type Locale } from "@/lib/i18n";
+import type { FounderRole, NetworkRole, PersonalityType, ProfileFilters } from "@/lib/types";
 import { Button, Chip, cx } from "@/components/ui";
-import { FOUNDER_ROLE_LABELS, NETWORK_ROLE_LABELS, SOURCE_LABELS, formatVertical, type ProfileSource } from "./CandidateCard";
+import {
+  FOUNDER_ROLE_LABELS_I18N,
+  NETWORK_ROLE_LABELS_I18N,
+  PERSONALITY_LABELS_I18N,
+  SOURCE_LABELS_I18N,
+  formatVertical,
+  labelFor,
+  type BiLabel,
+  type ProfileSource,
+} from "./CandidateCard";
 
 /** Quelle-Filter: nur echte IdeaLab-Daten oder nur Demo-Daten (undefined = alle). */
 export type SourceFilter = Extract<ProfileSource, "idealab" | "demo">;
@@ -30,15 +41,42 @@ export const FILTER_KEYS = [
   "source",
 ] as const satisfies readonly (keyof CandidateFilterState)[];
 
-const NETWORK_ROLES = Object.keys(NETWORK_ROLE_LABELS) as NetworkRole[];
-const FOUNDER_ROLES = Object.keys(FOUNDER_ROLE_LABELS) as FounderRole[];
-const PERSONALITIES = Object.keys(PERSONALITY_LABELS) as PersonalityType[];
+const NETWORK_ROLES = Object.keys(NETWORK_ROLE_LABELS_I18N) as NetworkRole[];
+const FOUNDER_ROLES = Object.keys(FOUNDER_ROLE_LABELS_I18N) as FounderRole[];
+const PERSONALITIES = Object.keys(PERSONALITY_LABELS_I18N) as PersonalityType[];
 const SOURCES: SourceFilter[] = ["idealab", "demo"];
 
-const SOURCE_FILTER_LABELS: Record<SourceFilter, string> = {
-  idealab: SOURCE_LABELS.idealab,
-  demo: "Demo-Daten",
+const SOURCE_FILTER_LABELS: Record<SourceFilter, BiLabel> = {
+  idealab: SOURCE_LABELS_I18N.idealab,
+  demo: { de: "Demo-Daten", en: "Demo data" },
 };
+
+const DICT = {
+  searchPlaceholder: { de: "Name, Skill, Firma, Ort, Vertical …", en: "Name, skill, company, location, vertical …" },
+  searchLabel: { de: "Kandidaten durchsuchen", en: "Search candidates" },
+  clearSearch: { de: "Suche leeren", en: "Clear search" },
+  filters: { de: "Filter", en: "Filters" },
+  founderRole: { de: "Team-Rolle", en: "Team role" },
+  allFounderRoles: { de: "Alle Team-Rollen", en: "All team roles" },
+  vertical: { de: "Vertical", en: "Vertical" },
+  allVerticals: { de: "Alle Verticals", en: "All verticals" },
+  event: { de: "Event", en: "Event" },
+  allEvents: { de: "Alle Events", en: "All events" },
+  personality: { de: "Persönlichkeitstyp", en: "Personality type" },
+  allPersonalities: { de: "Alle Typen", en: "All types" },
+  source: { de: "Quelle", en: "Source" },
+  allSources: { de: "Alle Quellen", en: "All sources" },
+  networkRoleGroup: { de: "Rolle im Ökosystem", en: "Role in the ecosystem" },
+  activeOne: { de: "1 Filter aktiv", en: "1 filter active" },
+  activeMany: { de: "{count} Filter aktiv", en: "{count} filters active" },
+  resetAll: { de: "Alle zurücksetzen", en: "Reset all" },
+  removeFilter: { de: "Filter entfernen: {label}", en: "Remove filter: {label}" },
+  pillQuery: { de: "„{query}“", en: "“{query}”" },
+  pillFounderRole: { de: "Team-Rolle: {label}", en: "Team role: {label}" },
+  pillSource: { de: "Quelle: {label}", en: "Source: {label}" },
+} satisfies Dict;
+
+type Translate = (key: keyof typeof DICT, vars?: Record<string, string | number>) => string;
 
 const SEARCH_DEBOUNCE_MS = 200;
 
@@ -100,6 +138,7 @@ function SearchInput({
   onChange: (query: string) => void;
   className?: string;
 }) {
+  const t = useT(DICT);
   const inputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(value);
   const [seen, setSeen] = useState(value);
@@ -157,17 +196,17 @@ function SearchInput({
             clear();
           }
         }}
-        placeholder="Name, Skill, Firma, Ort, Vertical …"
+        placeholder={t("searchPlaceholder")}
         autoComplete="off"
         spellCheck={false}
-        aria-label="Kandidaten durchsuchen"
+        aria-label={t("searchLabel")}
         className="h-10 w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] pl-9 pr-12 text-sm text-[var(--foreground)] shadow-[var(--shadow-sm)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--ring)] [&::-webkit-search-cancel-button]:appearance-none"
       />
       {text ? (
         <button
           type="button"
           onClick={clear}
-          aria-label="Suche leeren"
+          aria-label={t("clearSearch")}
           className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-sm leading-none text-[var(--muted)] transition hover:bg-[var(--surface-2)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
         >
           ×
@@ -229,24 +268,27 @@ interface ActiveFilter {
   label: string;
 }
 
-function describeActiveFilters(filters: CandidateFilterState, eventNames: Map<string, string>): ActiveFilter[] {
+function describeActiveFilters(filters: CandidateFilterState, eventNames: Map<string, string>, locale: Locale, t: Translate): ActiveFilter[] {
   const out: ActiveFilter[] = [];
-  if (filters.query) out.push({ key: "query", label: `„${filters.query}“` });
-  if (filters.networkRole) out.push({ key: "networkRole", label: NETWORK_ROLE_LABELS[filters.networkRole] });
-  if (filters.founderRole) out.push({ key: "founderRole", label: `Team-Rolle: ${FOUNDER_ROLE_LABELS[filters.founderRole]}` });
+  if (filters.query) out.push({ key: "query", label: t("pillQuery", { query: filters.query }) });
+  if (filters.networkRole) out.push({ key: "networkRole", label: labelFor(NETWORK_ROLE_LABELS_I18N, filters.networkRole, locale) });
+  if (filters.founderRole) {
+    out.push({ key: "founderRole", label: t("pillFounderRole", { label: labelFor(FOUNDER_ROLE_LABELS_I18N, filters.founderRole, locale) }) });
+  }
   if (filters.vertical) out.push({ key: "vertical", label: formatVertical(filters.vertical) });
   if (filters.event) out.push({ key: "event", label: eventNames.get(filters.event) ?? filters.event });
-  if (filters.personality) out.push({ key: "personality", label: PERSONALITY_LABELS[filters.personality] });
-  if (filters.source) out.push({ key: "source", label: `Quelle: ${SOURCE_FILTER_LABELS[filters.source]}` });
+  if (filters.personality) out.push({ key: "personality", label: labelFor(PERSONALITY_LABELS_I18N, filters.personality, locale) });
+  if (filters.source) out.push({ key: "source", label: t("pillSource", { label: labelFor(SOURCE_FILTER_LABELS, filters.source, locale) }) });
   return out;
 }
 
 function FilterPill({ label, onRemove }: { label: string; onRemove: () => void }) {
+  const t = useT(DICT);
   return (
     <button
       type="button"
       onClick={onRemove}
-      aria-label={`Filter entfernen: ${label}`}
+      aria-label={t("removeFilter", { label })}
       className="inline-flex h-7 max-w-full items-center gap-1 rounded-full border border-[var(--accent)]/30 bg-[var(--accent-soft)] pl-2.5 pr-1.5 text-xs font-medium text-[var(--accent)] transition hover:border-[var(--accent)]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
     >
       <span className="truncate">{label}</span>
@@ -271,12 +313,15 @@ export interface CandidateFiltersProps {
 
 export function CandidateFilters({ filters, onChange, className, trailing }: CandidateFiltersProps) {
   const id = useId();
+  const [locale] = useLocale();
+  const t = useT(DICT);
+  const tc = useT(COMMON);
   const verticals = useMemo(() => getVerticals(), []);
   const events = useMemo(() => getEvents(), []);
   const eventNames = useMemo(() => new Map(events.map((e) => [e.slug, e.name] as const)), [events]);
   const [moreOpen, setMoreOpen] = useState(false);
 
-  const active = describeActiveFilters(filters, eventNames);
+  const active = describeActiveFilters(filters, eventNames, locale, t);
   const activeCount = active.length;
   const selectCount = [filters.founderRole, filters.vertical, filters.event, filters.personality, filters.source].filter(Boolean).length;
 
@@ -285,7 +330,7 @@ export function CandidateFilters({ filters, onChange, className, trailing }: Can
 
   return (
     <section
-      aria-label="Filter"
+      aria-label={t("filters")}
       className={cx("rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-3 shadow-[var(--shadow-sm)]", className)}
     >
       {/* Zeile 1: Suche prominent + kompakte Selects (mobil einklappbar) */}
@@ -306,7 +351,8 @@ export function CandidateFilters({ filters, onChange, className, trailing }: Can
             aria-controls={`${id}-more`}
             onClick={() => setMoreOpen((open) => !open)}
           >
-            Filter{selectCount > 0 ? ` · ${selectCount}` : ""}
+            {t("filters")}
+            {selectCount > 0 ? ` · ${selectCount}` : ""}
             <span aria-hidden className="text-[10px]">
               {moreOpen ? "▲" : "▼"}
             </span>
@@ -319,20 +365,20 @@ export function CandidateFilters({ filters, onChange, className, trailing }: Can
         >
           <ToolbarSelect
             id={`${id}-founderRole`}
-            label="Team-Rolle"
+            label={t("founderRole")}
             value={filters.founderRole ?? ""}
             onChange={(value) => update({ founderRole: orUndefined(value) as FounderRole | undefined })}
           >
-            <option value="">Alle Team-Rollen</option>
+            <option value="">{t("allFounderRoles")}</option>
             {FOUNDER_ROLES.map((role) => (
               <option key={role} value={role}>
-                {FOUNDER_ROLE_LABELS[role]}
+                {labelFor(FOUNDER_ROLE_LABELS_I18N, role, locale)}
               </option>
             ))}
           </ToolbarSelect>
 
-          <ToolbarSelect id={`${id}-vertical`} label="Vertical" value={filters.vertical ?? ""} onChange={(value) => update({ vertical: orUndefined(value) })}>
-            <option value="">Alle Verticals</option>
+          <ToolbarSelect id={`${id}-vertical`} label={t("vertical")} value={filters.vertical ?? ""} onChange={(value) => update({ vertical: orUndefined(value) })}>
+            <option value="">{t("allVerticals")}</option>
             {filters.vertical && !verticals.includes(filters.vertical) && <option value={filters.vertical}>{formatVertical(filters.vertical)}</option>}
             {verticals.map((vertical) => (
               <option key={vertical} value={vertical}>
@@ -341,8 +387,8 @@ export function CandidateFilters({ filters, onChange, className, trailing }: Can
             ))}
           </ToolbarSelect>
 
-          <ToolbarSelect id={`${id}-event`} label="Event" value={filters.event ?? ""} onChange={(value) => update({ event: orUndefined(value) })}>
-            <option value="">Alle Events</option>
+          <ToolbarSelect id={`${id}-event`} label={t("event")} value={filters.event ?? ""} onChange={(value) => update({ event: orUndefined(value) })}>
+            <option value="">{t("allEvents")}</option>
             {filters.event && !eventNames.has(filters.event) && <option value={filters.event}>{filters.event}</option>}
             {events.map((event) => (
               <option key={event.slug} value={event.slug}>
@@ -353,28 +399,28 @@ export function CandidateFilters({ filters, onChange, className, trailing }: Can
 
           <ToolbarSelect
             id={`${id}-personality`}
-            label="Persönlichkeitstyp"
+            label={t("personality")}
             value={filters.personality ?? ""}
             onChange={(value) => update({ personality: orUndefined(value) as PersonalityType | undefined })}
           >
-            <option value="">Alle Typen</option>
+            <option value="">{t("allPersonalities")}</option>
             {PERSONALITIES.map((type) => (
               <option key={type} value={type}>
-                {PERSONALITY_LABELS[type]}
+                {labelFor(PERSONALITY_LABELS_I18N, type, locale)}
               </option>
             ))}
           </ToolbarSelect>
 
           <ToolbarSelect
             id={`${id}-source`}
-            label="Quelle"
+            label={t("source")}
             value={filters.source ?? ""}
             onChange={(value) => update({ source: orUndefined(value) as SourceFilter | undefined })}
           >
-            <option value="">Alle Quellen</option>
+            <option value="">{t("allSources")}</option>
             {SOURCES.map((source) => (
               <option key={source} value={source}>
-                {SOURCE_FILTER_LABELS[source]}
+                {labelFor(SOURCE_FILTER_LABELS, source, locale)}
               </option>
             ))}
           </ToolbarSelect>
@@ -383,9 +429,9 @@ export function CandidateFilters({ filters, onChange, className, trailing }: Can
 
       {/* Zeile 2: Rollen-Chips links, Trefferzahl + Sortierung rechts */}
       <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[var(--border)] pt-3">
-        <div role="group" aria-label="Rolle im Ökosystem" className="flex flex-wrap gap-1.5">
+        <div role="group" aria-label={t("networkRoleGroup")} className="flex flex-wrap gap-1.5">
           <Chip active={!filters.networkRole} onClick={() => filters.networkRole && update({ networkRole: undefined })}>
-            Alle
+            {tc("all")}
           </Chip>
           {NETWORK_ROLES.map((role) => (
             <Chip
@@ -393,7 +439,7 @@ export function CandidateFilters({ filters, onChange, className, trailing }: Can
               active={filters.networkRole === role}
               onClick={() => update({ networkRole: filters.networkRole === role ? undefined : role })}
             >
-              {NETWORK_ROLE_LABELS[role]}
+              {labelFor(NETWORK_ROLE_LABELS_I18N, role, locale)}
             </Chip>
           ))}
         </div>
@@ -403,12 +449,12 @@ export function CandidateFilters({ filters, onChange, className, trailing }: Can
       {/* Zeile 3: aktive Filter als entfernbare Pills */}
       {activeCount > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[var(--border)] pt-3">
-          <span className="mr-1 text-xs text-[var(--muted)]">{activeCount === 1 ? "1 Filter aktiv" : `${activeCount} Filter aktiv`}</span>
+          <span className="mr-1 text-xs text-[var(--muted)]">{activeCount === 1 ? t("activeOne") : t("activeMany", { count: activeCount })}</span>
           {active.map((item) => (
             <FilterPill key={item.key} label={item.label} onRemove={() => update({ [item.key]: undefined })} />
           ))}
           <Button type="button" variant="ghost" size="sm" className="ml-auto" onClick={() => onChange({})}>
-            Alle zurücksetzen
+            {t("resetAll")}
           </Button>
         </div>
       )}
