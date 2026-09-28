@@ -178,18 +178,8 @@ export default function TipsPanel() {
               {t("showRules")}
             </Button>
           )}
-          <Button onClick={refine} disabled={loading} aria-busy={loading}>
-            {loading ? (
-              <>
-                <span
-                  aria-hidden="true"
-                  className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--accent-contrast)]/40 border-t-[var(--accent-contrast)]"
-                />
-                {t("refining")}
-              </>
-            ) : (
-              <>✦ {t("refine")}</>
-            )}
+          <Button onClick={refine} loading={loading}>
+            {loading ? t("refining") : <>✦ {t("refine")}</>}
           </Button>
         </div>
       </div>
@@ -277,7 +267,7 @@ function ProfileSummary({ user, locale }: { user: UserContext; locale: Locale })
             <Badge tone="neutral">
               {t("stage")}: {user.stage ? localize(STAGE_LABELS_I18N[user.stage], locale) : t("notSet")}
             </Badge>
-            <Badge tone={weakTone}>
+            <Badge tone={weakTone} dot>
               {t("weakest")}: {localize(FOUNDER_DIM_LABELS_I18N[weak], locale)} {weakValue}/10
             </Badge>
           </div>
@@ -326,9 +316,11 @@ function ProfileSummary({ user, locale }: { user: UserContext; locale: Locale })
 
 function TipCard({ tip, locale, priorityLabel }: { tip: Tip; locale: Locale; priorityLabel: string }) {
   return (
-    <Card className="flex min-w-0 flex-col gap-2 transition hover:border-[var(--accent)]/40 hover:shadow-[var(--shadow-md)]">
+    <Card interactive className="flex min-w-0 flex-col gap-2">
       <div className="flex items-center justify-between gap-2">
-        <Badge tone={PRIORITY_TONE[tip.priority]}>{localize(TIP_PRIORITY_LABELS_I18N[tip.priority], locale)}</Badge>
+        <Badge tone={PRIORITY_TONE[tip.priority]} dot>
+          {localize(TIP_PRIORITY_LABELS_I18N[tip.priority], locale)}
+        </Badge>
         <span className="text-[11px] text-[var(--muted)]" title={priorityLabel}>
           P{tip.priority}
         </span>
