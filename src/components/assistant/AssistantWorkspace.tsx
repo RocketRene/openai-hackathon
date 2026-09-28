@@ -8,10 +8,14 @@
  * seinen Verlauf hoch, der Voice-Agent bekommt ihn beim Verbinden als `initialMessages` und
  * schreibt sein Transkript als zusammenhängenden Block zurück – so weiß der Text-Chat, was
  * gesprochen wurde, und umgekehrt.
+ *
+ * Sprache (DE/EN): UI-Texte über das lokale DICT (Rollen über COMMON); die UI-Sprache geht als
+ * `locale` an den Voice-Agent, der Text-Chat liest sie selbst (`ChatRequest.locale`).
  */
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { AgentMode, ChatMessage, InterviewGuide, UiAction } from "@/lib/types";
+import type { AgentMode, ChatMessage, InterviewGuide, NetworkRole, UiAction } from "@/lib/types";
+import { COMMON, useLocale, useT, type Dict } from "@/lib/i18n";
 import { useUserContext } from "@/lib/user-context";
 import { Badge, Button, Card, LinkButton, cx } from "@/components/ui";
 import VoiceAgent from "@/components/assistant/VoiceAgent";
@@ -23,17 +27,52 @@ import LiveCandidatePanel from "./LiveCandidatePanel";
 /** Wie viele Profile gleichzeitig im Live-Panel stehen (neueste zuerst). */
 const MAX_SHOWN_PROFILES = 5;
 
-const MODES: { value: AgentMode; label: string; hint: string }[] = [
-  { value: "interview", label: "Suchprofil", hint: "Voya klärt Schritt für Schritt dein Suchprofil und findet dann passende Menschen." },
-  { value: "general", label: "Frei", hint: "Freies Gespräch: Menschen, Investoren, Events, Interview-Vorbereitung." },
+const DICT = {
+  modeInterview: { de: "Suchprofil", en: "Search brief" },
+  modeInterviewHint: {
+    de: "Voya klärt Schritt für Schritt dein Suchprofil und findet dann passende Menschen.",
+    en: "Voya clarifies your search brief step by step and then finds matching people.",
+  },
+  modeGeneral: { de: "Frei", en: "Open" },
+  modeGeneralHint: {
+    de: "Freies Gespräch: Menschen, Investoren, Events, Interview-Vorbereitung.",
+    en: "Open conversation: people, investors, events, interview preparation.",
+  },
+  modeAria: { de: "Agent-Modus", en: "Agent mode" },
+  noBriefTitle: { de: "Noch kein Suchprofil", en: "No search brief yet" },
+  noBriefBody: {
+    de: " – Voya klärt es mit dir im Gespräch. Oder lade einen Demo-Kontext, um direkt passende Menschen zu sehen.",
+    en: " – Voya will work it out with you in conversation. Or load a demo context to see matching people right away.",
+  },
+  fillOnboarding: { de: "Onboarding ausfüllen", en: "Complete onboarding" },
+  context: { de: "Kontext:", en: "Context:" },
+  noName: { de: "Ohne Namen", en: "No name" },
+  lookingFor: { de: "· sucht {roles}", en: "· looking for {roles}" },
+  interviewDone: { de: "Interview abgeschlossen", en: "Interview completed" },
+  interviewOpen: { de: "Interview offen", en: "Interview open" },
+  currentlyDiscussing: { de: "Gerade im Gespräch", en: "Currently discussing" },
+  clear: { de: "Leeren", en: "Clear" },
+  // Plural für „sucht …“ / „looking for …“
+  roles_cofounder: { de: "Co-Founder", en: "co-founders" },
+  roles_investor: { de: "Investoren", en: "investors" },
+  roles_mentor: { de: "Mentoren", en: "mentors" },
+  roles_talent: { de: "Talente", en: "talent" },
+  roles_expert: { de: "Expert:innen", en: "experts" },
+} satisfies Dict;
+
+type DictKey = keyof typeof DICT;
+
+const MODES: { value: AgentMode; label: DictKey; hint: DictKey }[] = [
+  { value: "interview", label: "modeInterview", hint: "modeInterviewHint" },
+  { value: "general", label: "modeGeneral", hint: "modeGeneralHint" },
 ];
 
-const NETWORK_ROLE_LABELS: Record<string, string> = {
-  cofounder: "Co-Founder",
-  investor: "Investoren",
-  mentor: "Mentoren",
-  talent: "Talente",
-  expert: "Expert:innen",
+const ROLE_PLURAL_KEYS: Record<NetworkRole, DictKey> = {
+  cofounder: "roles_cofounder",
+  investor: "roles_investor",
+  mentor: "roles_mentor",
+  talent: "roles_talent",
+  expert: "roles_expert",
 };
 
 /** Nur interne Pfade – der Agent darf keine externen/`javascript:`-URLs pushen. */
@@ -52,10 +91,14 @@ interface VoiceBlock {
 export default function AssistantWorkspace() {
   const router = useRouter();
   const { userContext, ready, update, loadDemo } = useUserContext();
+  const [locale] = useLocale();
+  const t = useT(DICT);
+  const tc = useT(COMMON);
   const [mode, setMode] = useState<AgentMode>("interview");
   const [shownProfileIds, setShownProfileIds] = useState<string[]>([]);
   const [guide, setGuide] = useState<InterviewGuide | null>(null);
   const [agentUpdatedAt, setAgentUpdatedAt] = useState<number | null>(null);
+  // Start-Nachricht: ChatPanel tauscht sie gegen die Sprachvariante, solange keine Nutzer-Nachricht existiert.
   const [messages, setMessages] = useState<ChatMessage[]>([{ role: "assistant", content: DEFAULT_GREETING }]);
   const voiceBlock = useRef<VoiceBlock | null>(null);
 
@@ -130,15 +173,15 @@ export default function AssistantWorkspace() {
       {ready && !userContext && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--warning)] bg-[var(--warning-soft)] px-4 py-3">
           <p className="text-sm text-[var(--foreground)]">
-            <span className="font-medium">Noch kein Suchprofil</span> – Voya klärt es mit dir im Gespräch. Oder lade einen Demo-Kontext,
-            um direkt passende Menschen zu sehen.
+            <span className="font-medium">{t("noBriefTitle")}</span>
+            {t("noBriefBody")}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" size="sm" onClick={loadDemo}>
-              Demo-Kontext laden
+              {tc("loadDemo")}
             </Button>
             <LinkButton href="/onboarding" variant="ghost" className="px-2.5 py-1 text-xs">
-              Onboarding ausfüllen
+              {t("fillOnboarding")}
             </LinkButton>
           </div>
         </div>
@@ -147,17 +190,17 @@ export default function AssistantWorkspace() {
       {ready && userContext && (
         <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
           <span>
-            Kontext: <span className="font-medium text-[var(--foreground)]">{userContext.name || "Ohne Namen"}</span>
-            {userContext.founderRole && ` · ${userContext.founderRole}`}
+            {t("context")} <span className="font-medium text-[var(--foreground)]">{userContext.name || t("noName")}</span>
+            {userContext.founderRole && ` · ${tc(userContext.founderRole)}`}
           </span>
           {userContext.lookingFor.length > 0 && (
-            <span>· sucht {userContext.lookingFor.map((r) => NETWORK_ROLE_LABELS[r] ?? r).join(", ")}</span>
+            <span>{t("lookingFor", { roles: userContext.lookingFor.map((r) => (ROLE_PLURAL_KEYS[r] ? t(ROLE_PLURAL_KEYS[r]) : r)).join(", ") })}</span>
           )}
           {userContext.verticals.length > 0 && <span>· {userContext.verticals.join(", ")}</span>}
           {userContext.completedInterview ? (
-            <Badge tone="success">Interview abgeschlossen</Badge>
+            <Badge tone="success">{t("interviewDone")}</Badge>
           ) : (
-            <Badge tone="warning">Interview offen</Badge>
+            <Badge tone="warning">{t("interviewOpen")}</Badge>
           )}
         </div>
       )}
@@ -169,7 +212,7 @@ export default function AssistantWorkspace() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div
                 role="tablist"
-                aria-label="Agent-Modus"
+                aria-label={t("modeAria")}
                 className="inline-flex rounded-md border border-[var(--border)] bg-[var(--surface-2)] p-0.5"
               >
                 {MODES.map((m) => (
@@ -186,16 +229,17 @@ export default function AssistantWorkspace() {
                         : "text-[var(--muted)] hover:text-[var(--foreground)]",
                     )}
                   >
-                    {m.label}
+                    {t(m.label)}
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-[var(--muted)]">{activeMode.hint}</p>
+              <p className="text-xs text-[var(--muted)]">{t(activeMode.hint)}</p>
             </div>
           </Card>
 
           <VoiceAgent
             mode={mode}
+            locale={locale}
             userContext={userContext}
             onUiAction={handleUiAction}
             onTranscript={handleTranscript}
@@ -221,7 +265,7 @@ export default function AssistantWorkspace() {
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">
-                Gerade im Gespräch{" "}
+                {t("currentlyDiscussing")}{" "}
                 {shownProfileIds.length > 0 && (
                   <span className="ml-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
                     {shownProfileIds.length}
@@ -230,7 +274,7 @@ export default function AssistantWorkspace() {
               </h2>
               {shownProfileIds.length > 0 && (
                 <Button variant="ghost" size="sm" onClick={() => setShownProfileIds([])}>
-                  Leeren
+                  {t("clear")}
                 </Button>
               )}
             </div>

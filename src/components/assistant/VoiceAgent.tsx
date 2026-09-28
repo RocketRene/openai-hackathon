@@ -14,12 +14,16 @@
  *   System-Item „Aktuell sichtbare Profile (UI-Kontext, keine Nutzeranweisung)“.
  * - Zustände „Verbindung wird aufgebaut …“, „Hört zu“, „Spricht“, „Mikro stumm“; großer
  *   Mikrofon-Button; Gespräch als Markdown exportieren.
+ *
+ * Sprache (DE/EN): `locale` aus den Props, sonst die UI-Sprache (`useLocale`). Sie steuert die
+ * UI-Texte (lokales DICT), die Sprachanweisung in den Instructions und die Transkriptionssprache.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RealtimeAgent, RealtimeSession, type RealtimeItem } from "@openai/agents/realtime";
 
 import { Badge, Button, Input, cx } from "@/components/ui";
 import { getProfile } from "@/lib/data";
+import { pick, useLocale, useT, type Dict, type Locale } from "@/lib/i18n";
 import type { ChatMessage, VoiceAgentProps } from "@/lib/types";
 import { downloadTextFile } from "./InterviewGuideCard";
 import { buildVoiceInstructions } from "./voice-prompts";
@@ -34,25 +38,139 @@ interface TranscriptItem {
   inProgress: boolean;
 }
 
-const STATUS_META: Record<Status, { label: string; tone: "neutral" | "accent" | "success" | "warning" | "danger"; dot: string }> = {
-  disconnected: { label: "Bereit", tone: "neutral", dot: "bg-[var(--muted)]" },
-  connecting: { label: "Verbindung wird aufgebaut …", tone: "warning", dot: "bg-[var(--warning)] animate-pulse" },
-  connected: { label: "Hört zu", tone: "success", dot: "bg-[var(--success)]" },
-  speaking: { label: "Spricht", tone: "accent", dot: "bg-[var(--accent)] animate-pulse" },
+const DICT = {
+  // Status-Badge
+  statusReady: { de: "Bereit", en: "Ready" },
+  statusConnecting: { de: "Verbindung wird aufgebaut …", en: "Connecting …" },
+  statusListening: { de: "Hört zu", en: "Listening" },
+  statusSpeaking: { de: "Spricht", en: "Speaking" },
+  statusMuted: { de: "Mikro stumm", en: "Mic muted" },
+  // Kopf
+  title: { de: "Mit Voya sprechen", en: "Talk to Voya" },
+  modeInterview: { de: "Suchprofil schärfen", en: "Sharpen search brief" },
+  modeSimulation: { de: "Simulation: {name}", en: "Simulation: {name}" },
+  modeGeneral: { de: "Freies Gespräch", en: "Open conversation" },
+  candidateFallback: { de: "Kandidat:in", en: "candidate" },
+  hintInterview: {
+    de: "Voya klärt mit dir Schritt für Schritt Idee, Stärken, gesuchte Ergänzung und Rahmenbedingungen und findet dann passende Menschen in den echten Profilen. Sag z. B. „Guck dir mal den Max an“ oder „Bereite ein Interview mit Lena vor“.",
+    en: "Voya walks you step by step through your idea, strengths, the complement you're looking for and your constraints, then finds matching people in the real profiles. Say e.g. “Show me Max” or “Prepare an interview with Lena”.",
+  },
+  hintSimulation: {
+    de: "Voya spielt {name} in einem simulierten Erstgespräch – keine echten Aussagen der Person. Sag „Feedback“, um aus der Rolle zu treten.",
+    en: "Voya plays {name} in a simulated first conversation – not real statements by this person. Say “Feedback” to step out of the role.",
+  },
+  hintGeneral: {
+    de: "Frag nach Menschen, Events, deiner Merkliste oder wer zu dir passt – oder sag „Bereite ein Interview mit … vor“.",
+    en: "Ask about people, events, your shortlist or who matches you – or say “Prepare an interview with …”.",
+  },
+  // Mikrofon-Button
+  micStart: { de: "Voice-Agent starten", en: "Start voice agent" },
+  micConnecting: { de: "Verbindung wird aufgebaut", en: "Connecting" },
+  micUnmute: { de: "Mikro wieder einschalten", en: "Unmute microphone" },
+  micMute: { de: "Mikro stummschalten", en: "Mute microphone" },
+  lineConnecting: { de: "Verbindung wird aufgebaut …", en: "Connecting …" },
+  lineTapToTalk: { de: "Tippe aufs Mikrofon, um zu sprechen.", en: "Tap the microphone to talk." },
+  lineMuted: { de: "Mikro stumm – tippe, um wieder zu sprechen.", en: "Mic muted – tap to talk again." },
+  lineSpeaking: { de: "{name} spricht – du kannst unterbrechen.", en: "{name} is speaking – you can interrupt." },
+  lineListening: { de: "Hört zu – sprich einfach los.", en: "Listening – just start talking." },
+  interrupt: { de: "Unterbrechen", en: "Interrupt" },
+  end: { de: "Beenden", en: "End" },
+  activity: { de: "Aktivität des Agenten", en: "Agent activity" },
+  toolRunning: { de: "Führe {name} aus …", en: "Running {name} …" },
+  // Transkript
+  transcript: { de: "Transkript", en: "Transcript" },
+  liveTranscript: { de: "Live-Transkript", en: "Live transcript" },
+  exportMarkdown: { de: "Gespräch als Markdown", en: "Conversation as Markdown" },
+  emptyConnected: { de: "Verbunden – sprich einfach los.", en: "Connected – just start talking." },
+  emptyIdle: {
+    de: "Noch kein Gespräch. Starte den Voice-Agent und sprich einfach los.",
+    en: "No conversation yet. Start the voice agent and just talk.",
+  },
+  you: { de: "Du", en: "You" },
+  simulationTag: { de: " · Simulation", en: " · Simulation" },
+  disclaimerSimulation: {
+    de: "Simulation auf Basis des Profils – keine echten Aussagen der Person. KI kann sich irren.",
+    en: "Simulation based on the profile – not real statements by this person. AI can make mistakes.",
+  },
+  disclaimer: {
+    de: "KI kann sich irren. Prüfe wichtige Angaben im Profil – Verfügbarkeit und Gründungsinteresse klärt ihr im Gespräch.",
+    en: "AI can make mistakes. Check important details in the profile – availability and interest in founding are for the conversation.",
+  },
+  typePlaceholder: { de: "Oder tippen statt sprechen …", en: "Or type instead of talking …" },
+  typeAria: { de: "Textnachricht an den Voice-Agent", en: "Text message to the voice agent" },
+  send: { de: "Senden", en: "Send" },
+  // Fehler
+  errNoKey: {
+    de: "OPENAI_API_KEY fehlt – der Voice-Agent braucht einen OpenAI-Key auf dem Server. Der Text-Chat funktioniert trotzdem.",
+    en: "OPENAI_API_KEY is missing – the voice agent needs an OpenAI key on the server. The text chat still works.",
+  },
+  errSessionStatus: { de: "Session-Endpunkt antwortet mit Status {status}.", en: "Session endpoint responded with status {status}." },
+  errNoEphemeralKey: {
+    de: "Kein Ephemeral-Key in der Antwort von /api/realtime/session.",
+    en: "No ephemeral key in the response from /api/realtime/session.",
+  },
+  errMicDenied: {
+    de: "Mikrofon-Zugriff verweigert – bitte im Browser erlauben und erneut starten.",
+    en: "Microphone access denied – please allow it in the browser and start again.",
+  },
+  errMicNotFound: {
+    de: "Kein Mikrofon gefunden. Bitte ein Mikrofon anschließen und erneut starten.",
+    en: "No microphone found. Please connect a microphone and start again.",
+  },
+  errNetwork: {
+    de: "Verbindung fehlgeschlagen – läuft der Server und ist das Netzwerk erreichbar?",
+    en: "Connection failed – is the server running and the network reachable?",
+  },
+  errConnect: { de: "Verbindung fehlgeschlagen: {msg}", en: "Connection failed: {msg}" },
+  errUnknown: { de: "Unbekannter Fehler", en: "Unknown error" },
+  // Markdown-Export
+  mdFilename: { de: "voya-gespraech.md", en: "voya-conversation.md" },
+} satisfies Dict;
+
+type DictKey = keyof typeof DICT;
+type Translate = (key: DictKey, vars?: Record<string, string | number>) => string;
+
+const STATUS_META: Record<Status, { label: DictKey; tone: "neutral" | "accent" | "success" | "warning" | "danger"; dot: string }> = {
+  disconnected: { label: "statusReady", tone: "neutral", dot: "bg-[var(--muted)]" },
+  connecting: { label: "statusConnecting", tone: "warning", dot: "bg-[var(--warning)] animate-pulse" },
+  connected: { label: "statusListening", tone: "success", dot: "bg-[var(--success)]" },
+  speaking: { label: "statusSpeaking", tone: "accent", dot: "bg-[var(--accent)] animate-pulse" },
 };
 
+type Localized = { de: string; en: string };
+
 /** Laufende Tool-Aktivität (Präsens) und erledigte (Perfekt) – als Badges im UI. */
-const TOOL_LABELS: Record<string, { running: string; done: string }> = {
-  show_candidate: { running: "Lade Profil …", done: "Profil geladen" },
-  get_candidate: { running: "Lade Lebenslauf …", done: "Lebenslauf geladen" },
-  search_candidates: { running: "Durchsuche Profile …", done: "Profile durchsucht" },
-  update_brief: { running: "Aktualisiere Suchprofil …", done: "Suchprofil aktualisiert" },
-  save_user_context: { running: "Speichere dein Profil …", done: "Profil gespeichert" },
-  propose_candidates: { running: "Berechne Matches …", done: "Matches berechnet" },
-  list_events: { running: "Lade Events …", done: "Events geladen" },
-  prepare_interview: { running: "Erstelle Interview-Leitfaden …", done: "Leitfaden erstellt" },
-  shortlist_candidate: { running: "Setze auf die Merkliste …", done: "Gemerkt" },
-  get_shortlist: { running: "Lese Merkliste …", done: "Merkliste gelesen" },
+const TOOL_LABELS: Record<string, { running: Localized; done: Localized }> = {
+  show_candidate: { running: { de: "Lade Profil …", en: "Loading profile …" }, done: { de: "Profil geladen", en: "Profile loaded" } },
+  get_candidate: { running: { de: "Lade Lebenslauf …", en: "Loading CV …" }, done: { de: "Lebenslauf geladen", en: "CV loaded" } },
+  search_candidates: { running: { de: "Durchsuche Profile …", en: "Searching profiles …" }, done: { de: "Profile durchsucht", en: "Profiles searched" } },
+  update_brief: { running: { de: "Aktualisiere Suchprofil …", en: "Updating search brief …" }, done: { de: "Suchprofil aktualisiert", en: "Search brief updated" } },
+  save_user_context: { running: { de: "Speichere dein Profil …", en: "Saving your profile …" }, done: { de: "Profil gespeichert", en: "Profile saved" } },
+  propose_candidates: { running: { de: "Berechne Matches …", en: "Computing matches …" }, done: { de: "Matches berechnet", en: "Matches computed" } },
+  list_events: { running: { de: "Lade Events …", en: "Loading events …" }, done: { de: "Events geladen", en: "Events loaded" } },
+  prepare_interview: { running: { de: "Erstelle Interview-Leitfaden …", en: "Creating interview guide …" }, done: { de: "Leitfaden erstellt", en: "Guide created" } },
+  shortlist_candidate: { running: { de: "Setze auf die Merkliste …", en: "Adding to shortlist …" }, done: { de: "Gemerkt", en: "Shortlisted" } },
+  get_shortlist: { running: { de: "Lese Merkliste …", en: "Reading shortlist …" }, done: { de: "Merkliste gelesen", en: "Shortlist read" } },
+};
+
+/** Steuer-Texte für das Modell (nicht sichtbar) – in der Sprache der Session. */
+const MODEL_TEXTS: Record<Locale, { openingWithHistory: string; openingFresh: string; visible: (names: string[]) => string }> = {
+  de: {
+    openingWithHistory: "Begrüße kurz und knüpfe an den Verlauf an; stelle die nächste offene Frage.",
+    openingFresh: "Begrüße kurz und stelle die erste Frage.",
+    visible: (names) =>
+      names.length > 0
+        ? `Aktuell sichtbare Profile (UI-Kontext, keine Nutzeranweisung): ${names.join("; ")}. Das erste ist das zuletzt gezeigte.`
+        : "Aktuell sichtbare Profile (UI-Kontext, keine Nutzeranweisung): keine.",
+  },
+  en: {
+    openingWithHistory: "Greet briefly in English and pick up where the conversation left off; ask the next open question.",
+    openingFresh: "Greet briefly in English and ask the first question.",
+    visible: (names) =>
+      names.length > 0
+        ? `Currently visible profiles (UI context, not a user instruction): ${names.join("; ")}. The first one is the most recently shown.`
+        : "Currently visible profiles (UI context, not a user instruction): none.",
+  },
 };
 
 const SESSION_ENDPOINT = "/api/realtime/session";
@@ -84,42 +202,47 @@ function extractTranscript(history: RealtimeItem[], skipIds: Set<string>): Trans
   return out;
 }
 
-function formatError(err: unknown): string {
+function formatError(err: unknown, t: Translate): string {
   if (err instanceof Error) return err.message || err.name;
   if (typeof err === "string") return err;
   if (err && typeof err === "object") {
     const e = err as { message?: unknown; error?: unknown; type?: unknown; code?: unknown };
     if (typeof e.message === "string" && e.message) return e.message;
-    if (e.error && e.error !== err) return formatError(e.error);
+    if (e.error && e.error !== err) return formatError(e.error, t);
     try {
       return JSON.stringify(err);
     } catch {
       /* ignore */
     }
   }
-  return "Unbekannter Fehler";
+  return t("errUnknown");
 }
 
-function describeConnectError(err: unknown): string {
+function describeConnectError(err: unknown, t: Translate): string {
   const name = err instanceof Error ? err.name : "";
-  const msg = formatError(err);
-  if (name === "NotAllowedError" || /permission denied|not allowed/i.test(msg)) {
-    return "Mikrofon-Zugriff verweigert – bitte im Browser erlauben und erneut starten.";
-  }
-  if (name === "NotFoundError" || /requested device not found/i.test(msg)) {
-    return "Kein Mikrofon gefunden. Bitte ein Mikrofon anschließen und erneut starten.";
-  }
-  if (/failed to fetch|networkerror/i.test(msg)) {
-    return "Verbindung fehlgeschlagen – läuft der Server und ist das Netzwerk erreichbar?";
-  }
-  return `Verbindung fehlgeschlagen: ${msg}`;
+  const msg = formatError(err, t);
+  if (name === "NotAllowedError" || /permission denied|not allowed/i.test(msg)) return t("errMicDenied");
+  if (name === "NotFoundError" || /requested device not found/i.test(msg)) return t("errMicNotFound");
+  if (/failed to fetch|networkerror/i.test(msg)) return t("errNetwork");
+  return t("errConnect", { msg });
 }
 
 /** Gesprächsverlauf als Markdown (Voya: voya-gespraech.md). */
-export function transcriptToMarkdown(items: { role: "user" | "assistant"; text: string }[], assistantName = "Voya"): string {
-  const lines: string[] = ["# Gespräch mit Voya", "", `Exportiert am ${new Date().toLocaleString("de-DE")}`, ""];
+export function transcriptToMarkdown(
+  items: { role: "user" | "assistant"; text: string }[],
+  assistantName = "Voya",
+  locale: Locale = "de",
+): string {
+  const exportedAt = pick(locale, "Exportiert am", "Exported on");
+  const you = pick(locale, "Du", "You");
+  const lines: string[] = [
+    `# ${pick(locale, "Gespräch mit Voya", "Conversation with Voya")}`,
+    "",
+    `${exportedAt} ${new Date().toLocaleString(locale === "en" ? "en-GB" : "de-DE")}`,
+    "",
+  ];
   for (const item of items) {
-    lines.push(`## ${item.role === "user" ? "Du" : assistantName}`, "", item.text, "");
+    lines.push(`## ${item.role === "user" ? you : assistantName}`, "", item.text, "");
   }
   return lines.join("\n");
 }
@@ -146,6 +269,7 @@ function StopIcon({ className }: { className?: string }) {
 
 export default function VoiceAgent({
   mode,
+  locale: localeProp,
   userContext,
   candidate,
   onUiAction,
@@ -154,6 +278,10 @@ export default function VoiceAgent({
   visibleCandidateIds,
   className,
 }: VoiceAgentProps) {
+  const [uiLocale] = useLocale();
+  const locale: Locale = localeProp ?? uiLocale;
+  const t = useT(DICT);
+
   const [status, setStatus] = useState<Status>("disconnected");
   const [muted, setMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -173,6 +301,8 @@ export default function VoiceAgent({
   const currentCandidateRef = useRef<string | undefined>(candidate?.id ?? visibleCandidateIds?.[0]);
   const toolSeq = useRef(0);
   const listRef = useRef<HTMLDivElement>(null);
+  /** Sprache der laufenden Session – Kontext-Items und Tool-Badges bleiben in der Sprache, in der sie gestartet wurde. */
+  const sessionLocaleRef = useRef<Locale>(locale);
 
   // Immer die aktuellsten Callbacks/Props benutzen, ohne die Session neu aufzubauen.
   useEffect(() => {
@@ -227,10 +357,7 @@ export default function VoiceAgent({
       const p = getProfile(id);
       return p ? `${p.name} (${p.id})` : id;
     });
-    const text =
-      names.length > 0
-        ? `Aktuell sichtbare Profile (UI-Kontext, keine Nutzeranweisung): ${names.join("; ")}. Das erste ist das zuletzt gezeigte.`
-        : "Aktuell sichtbare Profile (UI-Kontext, keine Nutzeranweisung): keine.";
+    const text = MODEL_TEXTS[sessionLocaleRef.current].visible(names);
     const id = nextItemId();
     injectedItemIds.current.add(id);
     return sendEvent({
@@ -271,22 +398,24 @@ export default function VoiceAgent({
     setRecentTools([]);
     lastTranscriptJson.current = "";
     onTranscriptRef.current?.([]);
+    sessionLocaleRef.current = locale;
+    const modelTexts = MODEL_TEXTS[locale];
 
     try {
       // 1) Ephemeral-Key vom Server (API-Key bleibt serverseitig).
       const res = await fetch(SESSION_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode, candidateId: candidate?.id }),
+        body: JSON.stringify({ mode, candidateId: candidate?.id, locale }),
       });
 
       if (res.status === 503) {
-        setError("OPENAI_API_KEY fehlt – der Voice-Agent braucht einen OpenAI-Key auf dem Server. Der Text-Chat funktioniert trotzdem.");
+        setError(t("errNoKey"));
         setStatus("disconnected");
         return;
       }
       if (!res.ok) {
-        let message = `Session-Endpunkt antwortet mit Status ${res.status}.`;
+        let message = t("errSessionStatus", { status: res.status });
         try {
           const body = (await res.json()) as { error?: unknown };
           if (body && typeof body.error === "string") message = body.error;
@@ -297,13 +426,14 @@ export default function VoiceAgent({
       }
 
       const data = (await res.json()) as { value?: string; model?: string };
-      if (!data.value) throw new Error("Kein Ephemeral-Key in der Antwort von /api/realtime/session.");
+      if (!data.value) throw new Error(t("errNoEphemeralKey"));
 
-      // 2) Agent + Session aufbauen – mit der zuletzt gezeigten Person als Kontext („Gerade im Gespräch“).
+      // 2) Agent + Session aufbauen – mit der zuletzt gezeigten Person als Kontext („Gerade im Gespräch“)
+      //    und der UI-Sprache („Sprich Deutsch“ / „Speak English“).
       const currentCandidate = candidate ?? (currentCandidateRef.current ? getProfile(currentCandidateRef.current) : undefined);
       const agent = new RealtimeAgent({
         name: "Voya",
-        instructions: buildVoiceInstructions(mode, userContext, candidate, { currentCandidate: currentCandidate ?? null }),
+        instructions: buildVoiceInstructions(mode, userContext, candidate, { currentCandidate: currentCandidate ?? null, locale }),
         tools: createVoiceTools({
           emit: (action) => {
             if (action.type === "show_candidate" || action.type === "show_interview_guide") {
@@ -322,7 +452,7 @@ export default function VoiceAgent({
         config: {
           audio: {
             input: {
-              transcription: { model: "gpt-4o-mini-transcribe", language: "de" },
+              transcription: { model: "gpt-4o-mini-transcribe", language: locale },
             },
           },
         },
@@ -341,18 +471,22 @@ export default function VoiceAgent({
         }
       });
       session.on("error", (event) => {
-        setError(formatError(event.error));
+        setError(formatError(event.error, t));
       });
       session.on("audio_start", () => setStatus("speaking"));
       session.on("audio_stopped", () => setStatus("connected"));
       session.on("audio_interrupted", () => setStatus("connected"));
       session.on("agent_tool_start", (_context, _agent, tool) => {
-        setToolActivity(TOOL_LABELS[tool.name]?.running ?? `Führe ${tool.name} aus …`);
+        const l = sessionLocaleRef.current;
+        const labels = TOOL_LABELS[tool.name];
+        setToolActivity(labels ? pick(l, labels.running.de, labels.running.en) : t("toolRunning", { name: tool.name }));
       });
       session.on("agent_tool_end", (_context, _agent, tool) => {
         setToolActivity(null);
         toolSeq.current += 1;
-        const label = TOOL_LABELS[tool.name]?.done ?? tool.name;
+        const l = sessionLocaleRef.current;
+        const labels = TOOL_LABELS[tool.name];
+        const label = labels ? pick(l, labels.done.de, labels.done.en) : tool.name;
         setRecentTools((prev) => [{ id: toolSeq.current, label }, ...prev].slice(0, 3));
       });
 
@@ -392,10 +526,7 @@ export default function VoiceAgent({
       if (sendVisibleContext()) lastVisibleKey.current = visibleKey;
 
       // 5) Der Agent eröffnet das Gespräch – mit Bezug auf den Verlauf, wenn es einen gibt.
-      const opening =
-        history.length > 0
-          ? "Begrüße kurz und knüpfe an den Verlauf an; stelle die nächste offene Frage."
-          : "Begrüße kurz und stelle die erste Frage.";
+      const opening = history.length > 0 ? modelTexts.openingWithHistory : modelTexts.openingFresh;
       sendEvent({ type: "response.create", response: { instructions: opening } });
     } catch (err) {
       const s = sessionRef.current;
@@ -408,9 +539,9 @@ export default function VoiceAgent({
         }
       }
       setStatus("disconnected");
-      setError(describeConnectError(err));
+      setError(describeConnectError(err, t));
     }
-  }, [mode, userContext, candidate, sendEvent, sendVisibleContext, visibleKey]);
+  }, [mode, userContext, candidate, locale, t, sendEvent, sendVisibleContext, visibleKey]);
 
   const toggleMute = useCallback(() => {
     const s = sessionRef.current;
@@ -420,9 +551,9 @@ export default function VoiceAgent({
       s.mute(next);
       setMuted(next);
     } catch (err) {
-      setError(formatError(err));
+      setError(formatError(err, t));
     }
-  }, [muted]);
+  }, [muted, t]);
 
   const interrupt = useCallback(() => {
     const s = sessionRef.current;
@@ -431,9 +562,9 @@ export default function VoiceAgent({
       s.interrupt();
       setStatus("connected");
     } catch (err) {
-      setError(formatError(err));
+      setError(formatError(err, t));
     }
-  }, []);
+  }, [t]);
 
   const sendText = useCallback(() => {
     const s = sessionRef.current;
@@ -443,39 +574,28 @@ export default function VoiceAgent({
       s.sendMessage(text);
       setTextInput("");
     } catch (err) {
-      setError(formatError(err));
+      setError(formatError(err, t));
     }
-  }, [textInput]);
+  }, [textInput, t]);
 
   const connected = status === "connected" || status === "speaking";
   const meta = STATUS_META[status];
-  const statusLabel = connected && muted ? "Mikro stumm" : meta.label;
+  const statusLabel = connected && muted ? t("statusMuted") : t(meta.label);
   const statusTone = connected && muted ? "warning" : meta.tone;
 
   const isSimulation = mode === "prep-simulation";
-  const modeLabel =
-    mode === "interview" ? "Suchprofil schärfen" : isSimulation ? `Simulation: ${candidate?.name ?? "Kandidat:in"}` : "Freies Gespräch";
-  const hint =
-    mode === "interview"
-      ? "Voya klärt mit dir Schritt für Schritt Idee, Stärken, gesuchte Ergänzung und Rahmenbedingungen und findet dann passende Menschen in den echten Profilen. Sag z. B. „Guck dir mal den Max an“ oder „Bereite ein Interview mit Lena vor“."
-      : isSimulation
-        ? `Voya spielt ${candidate?.name ?? "die Kandidat:in"} in einem simulierten Erstgespräch – keine echten Aussagen der Person. Sag „Feedback“, um aus der Rolle zu treten.`
-        : "Frag nach Menschen, Events, deiner Merkliste oder wer zu dir passt – oder sag „Bereite ein Interview mit … vor“.";
+  const candidateName = candidate?.name ?? t("candidateFallback");
+  const modeLabel = mode === "interview" ? t("modeInterview") : isSimulation ? t("modeSimulation", { name: candidateName }) : t("modeGeneral");
+  const hint = mode === "interview" ? t("hintInterview") : isSimulation ? t("hintSimulation", { name: candidateName }) : t("hintGeneral");
   const assistantName = mode === "prep-simulation" && candidate ? candidate.name.split(" ")[0] : "Voya";
 
   const exportTranscript = () => {
-    const items = transcript.filter((t) => !t.inProgress || t.text).map(({ role, text }) => ({ role, text }));
-    downloadTextFile("voya-gespraech.md", transcriptToMarkdown(items, assistantName));
+    const items = transcript.filter((item) => !item.inProgress || item.text).map(({ role, text }) => ({ role, text }));
+    downloadTextFile(t("mdFilename"), transcriptToMarkdown(items, assistantName, locale));
   };
 
   // Großer Mikrofon-Button: startet die Verbindung, stummschalten/an bei bestehender Verbindung.
-  const micLabel = !connected
-    ? status === "connecting"
-      ? "Verbindung wird aufgebaut"
-      : "Voice-Agent starten"
-    : muted
-      ? "Mikro wieder einschalten"
-      : "Mikro stummschalten";
+  const micLabel = !connected ? (status === "connecting" ? t("micConnecting") : t("micStart")) : muted ? t("micUnmute") : t("micMute");
   const onMicClick = () => {
     if (status === "connecting") return;
     if (!connected) void start();
@@ -487,7 +607,7 @@ export default function VoiceAgent({
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <span className={cx("inline-block h-2.5 w-2.5 rounded-full", meta.dot)} aria-hidden="true" />
-          <h3 className="text-sm font-semibold text-[var(--foreground)]">Mit Voya sprechen</h3>
+          <h3 className="text-sm font-semibold text-[var(--foreground)]">{t("title")}</h3>
           <Badge tone={isSimulation ? "warning" : "neutral"}>{modeLabel}</Badge>
         </div>
         <Badge tone={statusTone}>{statusLabel}</Badge>
@@ -538,39 +658,39 @@ export default function VoiceAgent({
           <p className="text-sm font-medium text-[var(--foreground)]">
             {!connected
               ? status === "connecting"
-                ? "Verbindung wird aufgebaut …"
-                : "Tippe aufs Mikrofon, um zu sprechen."
+                ? t("lineConnecting")
+                : t("lineTapToTalk")
               : muted
-                ? "Mikro stumm – tippe, um wieder zu sprechen."
+                ? t("lineMuted")
                 : status === "speaking"
-                  ? `${assistantName} spricht – du kannst unterbrechen.`
-                  : "Hört zu – sprich einfach los."}
+                  ? t("lineSpeaking", { name: assistantName })
+                  : t("lineListening")}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {connected && (
               <>
                 {status === "speaking" && (
                   <Button variant="ghost" size="sm" onClick={interrupt}>
-                    Unterbrechen
+                    {t("interrupt")}
                   </Button>
                 )}
                 <Button variant="danger" size="sm" onClick={stop}>
                   <StopIcon className="h-3.5 w-3.5" />
-                  Beenden
+                  {t("end")}
                 </Button>
               </>
             )}
           </div>
           {(toolActivity || recentTools.length > 0) && (
-            <div className="flex flex-wrap items-center gap-1.5" aria-live="polite" aria-label="Aktivität des Agenten">
+            <div className="flex flex-wrap items-center gap-1.5" aria-live="polite" aria-label={t("activity")}>
               {toolActivity && (
                 <Badge tone="accent" className="animate-pulse">
                   {toolActivity}
                 </Badge>
               )}
-              {recentTools.map((t) => (
-                <Badge key={t.id} tone="neutral">
-                  ✓ {t.label}
+              {recentTools.map((item) => (
+                <Badge key={item.id} tone="neutral">
+                  ✓ {item.label}
                 </Badge>
               ))}
             </div>
@@ -579,10 +699,10 @@ export default function VoiceAgent({
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2">
-        <span className="text-xs font-medium text-[var(--muted)]">Transkript</span>
+        <span className="text-xs font-medium text-[var(--muted)]">{t("transcript")}</span>
         {transcript.length > 0 && (
           <Button variant="ghost" size="sm" onClick={exportTranscript}>
-            Gespräch als Markdown
+            {t("exportMarkdown")}
           </Button>
         )}
       </div>
@@ -590,12 +710,10 @@ export default function VoiceAgent({
         ref={listRef}
         className="mt-1 max-h-64 space-y-2 overflow-y-auto rounded-md bg-[var(--surface-2)] p-3"
         aria-live="polite"
-        aria-label="Live-Transkript"
+        aria-label={t("liveTranscript")}
       >
         {transcript.length === 0 ? (
-          <p className="text-xs text-[var(--muted)]">
-            {connected ? "Verbunden – sprich einfach los." : "Noch kein Gespräch. Starte den Voice-Agent und sprich einfach los."}
-          </p>
+          <p className="text-xs text-[var(--muted)]">{connected ? t("emptyConnected") : t("emptyIdle")}</p>
         ) : (
           transcript.map((item) => (
             <div key={item.id} className={cx("flex", item.role === "user" ? "justify-end" : "justify-start")}>
@@ -609,8 +727,8 @@ export default function VoiceAgent({
                 )}
               >
                 <span className="block text-[10px] font-medium uppercase tracking-wide opacity-70">
-                  {item.role === "user" ? "Du" : assistantName}
-                  {isSimulation && item.role === "assistant" ? " · Simulation" : ""}
+                  {item.role === "user" ? t("you") : assistantName}
+                  {isSimulation && item.role === "assistant" ? t("simulationTag") : ""}
                 </span>
                 {item.text}
               </div>
@@ -618,11 +736,7 @@ export default function VoiceAgent({
           ))
         )}
       </div>
-      <p className="mt-1.5 text-[11px] text-[var(--muted)]">
-        {isSimulation
-          ? "Simulation auf Basis des Profils – keine echten Aussagen der Person. KI kann sich irren."
-          : "KI kann sich irren. Prüfe wichtige Angaben im Profil – Verfügbarkeit und Gründungsinteresse klärt ihr im Gespräch."}
-      </p>
+      <p className="mt-1.5 text-[11px] text-[var(--muted)]">{isSimulation ? t("disclaimerSimulation") : t("disclaimer")}</p>
 
       {connected && (
         <form
@@ -635,11 +749,11 @@ export default function VoiceAgent({
           <Input
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
-            placeholder="Oder tippen statt sprechen …"
-            aria-label="Textnachricht an den Voice-Agent"
+            placeholder={t("typePlaceholder")}
+            aria-label={t("typeAria")}
           />
           <Button type="submit" variant="secondary" disabled={!textInput.trim()}>
-            Senden
+            {t("send")}
           </Button>
         </form>
       )}

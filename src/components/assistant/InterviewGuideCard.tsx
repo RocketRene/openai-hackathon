@@ -2,10 +2,23 @@
 /**
  * Interviewleitfaden-Karte (Voya: prepare_interview): Abschnitte mit Minuten, Fragen,
  * „im Gespräch klären“ und Download als Markdown (Blob-Download wie in Voya).
+ *
+ * Sprache (DE/EN): UI-Texte über das lokale DICT; Titel, Dauer und Fragen kommen aus dem Leitfaden.
  */
 import type { InterviewGuide } from "@/lib/types";
 import { interviewGuideToMarkdown } from "@/lib/interview-guide";
+import { useT, type Dict } from "@/lib/i18n";
 import { Badge, Button, Card, LinkButton } from "@/components/ui";
+
+const DICT = {
+  closeGuide: { de: "Leitfaden schließen", en: "Close guide" },
+  close: { de: "Schließen", en: "Close" },
+  minutes: { de: "{n} min", en: "{n} min" },
+  clarify: { de: "Im Gespräch klären", en: "Clarify in the conversation" },
+  download: { de: "Als Markdown herunterladen", en: "Download as Markdown" },
+  openPrep: { de: "Vorbereitung öffnen", en: "Open preparation" },
+  note: { de: "Fragen beziehen sich nur auf Angaben aus dem Profil.", en: "Questions are based only on information from the profile." },
+} satisfies Dict;
 
 /** Löst im Browser einen Datei-Download aus (Blob + temporärer Link). */
 export function downloadTextFile(filename: string, content: string, type = "text/markdown;charset=utf-8"): void {
@@ -37,6 +50,7 @@ export interface InterviewGuideCardProps {
 }
 
 export default function InterviewGuideCard({ guide, onClose, className }: InterviewGuideCardProps) {
+  const t = useT(DICT);
   const download = () => {
     downloadTextFile(`interview-${slugify(guide.name) || guide.profileId}.md`, interviewGuideToMarkdown(guide));
   };
@@ -49,8 +63,8 @@ export default function InterviewGuideCard({ guide, onClose, className }: Interv
         <div className="flex items-center gap-2">
           <Badge tone="accent">{guide.duration}</Badge>
           {onClose && (
-            <Button variant="ghost" size="sm" onClick={onClose} aria-label="Leitfaden schließen">
-              Schließen
+            <Button variant="ghost" size="sm" onClick={onClose} aria-label={t("closeGuide")}>
+              {t("close")}
             </Button>
           )}
         </div>
@@ -64,7 +78,7 @@ export default function InterviewGuideCard({ guide, onClose, className }: Interv
                 <span className="mr-1.5 text-[var(--accent)]">{i + 1}.</span>
                 {section.title}
               </h4>
-              <span className="shrink-0 text-xs text-[var(--muted)]">{section.minutes} min</span>
+              <span className="shrink-0 text-xs text-[var(--muted)]">{t("minutes", { n: section.minutes })}</span>
             </div>
             <ul className="mt-1.5 space-y-1.5 pl-5">
               {section.questions.map((q) => (
@@ -79,7 +93,7 @@ export default function InterviewGuideCard({ guide, onClose, className }: Interv
 
       {guide.unknowns.length > 0 && (
         <div className="mt-4 rounded-md border border-[var(--warning)] bg-[var(--warning-soft)] px-3 py-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--warning)]">Im Gespräch klären</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--warning)]">{t("clarify")}</p>
           <ul className="mt-1 space-y-1 pl-4">
             {guide.unknowns.map((u) => (
               <li key={u} className="list-disc text-xs text-[var(--foreground)]">
@@ -92,12 +106,12 @@ export default function InterviewGuideCard({ guide, onClose, className }: Interv
 
       <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-[var(--border)] pt-3">
         <Button variant="secondary" size="sm" onClick={download}>
-          Als Markdown herunterladen
+          {t("download")}
         </Button>
         <LinkButton href={`/prep/${encodeURIComponent(guide.profileId)}`} variant="ghost" size="sm">
-          Vorbereitung öffnen
+          {t("openPrep")}
         </LinkButton>
-        <span className="text-xs text-[var(--muted)]">Fragen beziehen sich nur auf Angaben aus dem Profil.</span>
+        <span className="text-xs text-[var(--muted)]">{t("note")}</span>
       </div>
     </Card>
   );
