@@ -31,7 +31,7 @@ export const COMBINED_SERIES_COLOR = "var(--foreground)";
 const RINGS = [2, 4, 6, 8, 10];
 const MAX = 10;
 /** Zusätzliche Breite links/rechts für die Achsen-Labels („Umsetzung“, „Design / Visuell“). */
-const LABEL_GUTTER = 84;
+const LABEL_GUTTER = 90;
 /** Vertikaler Abstand für Labels oben/unten. */
 const VERTICAL_PADDING = 48;
 /** Abstand der Labels vom äußeren Ring. */
