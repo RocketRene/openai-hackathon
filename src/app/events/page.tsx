@@ -1,12 +1,13 @@
 /**
  * /events – Übersicht aller Konferenzen/Meetups als Kontaktquelle.
- * Server-Component; Daten ausschließlich über src/lib/data.ts. Texte DE/EN über <T>.
+ * Server-Component; Daten ausschließlich über src/lib/data.ts. Texte DE/EN über <T> bzw. Localized*.
  */
 import type { Metadata } from "next";
 
 import { EventCard } from "@/components/events/EventCard";
 import { EventHero } from "@/components/events/EventHero";
-import { Badge, EmptyState, PageHeader, SectionTitle } from "@/components/ui";
+import { LocalizedEmptyState, LocalizedPageHeader } from "@/components/events/Localized";
+import { Badge, SectionTitle } from "@/components/ui";
 import { T } from "@/lib/i18n";
 import { getEvents, getProfilesForEvent } from "@/lib/data";
 
@@ -28,15 +29,13 @@ export default function EventsPage() {
 
   return (
     <div>
-      <PageHeader
-        kicker={<T de="Kontaktquellen" en="Contact sources" />}
+      <LocalizedPageHeader
         title="Events"
-        subtitle={
-          <T
-            de="Konferenzen und Meetups als Quelle deiner Kontakte – wer war da, und wen solltest du kennen?"
-            en="Conferences and meetups as the source of your contacts – who was there, and who should you know?"
-          />
-        }
+        eyebrow={{ de: "Kontaktquellen", en: "Contact sources" }}
+        subtitle={{
+          de: "Konferenzen und Meetups als Quelle deiner Kontakte – wer war da, und wen solltest du kennen?",
+          en: "Conferences and meetups as the source of your contacts – who was there, and who should you know?",
+        }}
         action={
           <>
             <Badge className="tabular-nums">
@@ -50,14 +49,12 @@ export default function EventsPage() {
       />
 
       {events.length === 0 ? (
-        <EmptyState
-          title={<T de="Keine Events vorhanden" en="No events yet" />}
-          body={
-            <T
-              de="In src/data/events.json sind noch keine Events hinterlegt."
-              en="No events have been added to src/data/events.json yet."
-            />
-          }
+        <LocalizedEmptyState
+          title={{ de: "Keine Events vorhanden", en: "No events yet" }}
+          body={{
+            de: "In src/data/events.json sind noch keine Events hinterlegt.",
+            en: "No events have been added to src/data/events.json yet.",
+          }}
         />
       ) : (
         <div className="space-y-10">

@@ -1,6 +1,6 @@
 /**
  * /events/[slug] – Event-Detail: Kopf, KPI-Reihe, Rollen-Filter, Verteilungen, Teilnehmerliste.
- * Server-Component; Daten ausschließlich über src/lib/data.ts. Texte DE/EN über <T>.
+ * Server-Component; Daten ausschließlich über src/lib/data.ts. Texte DE/EN über <T> bzw. Localized*.
  */
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -10,7 +10,9 @@ import { AttendeeStats } from "@/components/events/AttendeeStats";
 import { EventMeta, eventCandidatesHref } from "@/components/events/EventCard";
 import { EventTypeLabel, FounderRoleLabel, NetworkRoleLabel } from "@/components/events/EventLabels";
 import { ArrowLeftIcon, ArrowRightIcon, FilterIcon } from "@/components/events/icons";
-import { Avatar, Badge, Card, EmptyState, LinkButton, PageHeader, SectionTitle, Stat } from "@/components/ui";
+import { EVENT_LABELS, networkRoleLabel } from "@/components/events/labels";
+import { LocalizedEmptyState, LocalizedStat } from "@/components/events/Localized";
+import { Avatar, Badge, Card, Kicker, LinkButton, SectionTitle } from "@/components/ui";
 import { T } from "@/lib/i18n";
 import { getEvent, getEvents, getProfilesForEvent } from "@/lib/data";
 import type { NetworkRole } from "@/lib/types";
@@ -23,7 +25,7 @@ const STAT_ROLES: NetworkRole[] = ["cofounder", "investor", "mentor"];
 
 /** Chip-Optik (wie <Chip>, aber als Link – die Filter führen in die Kandidatensuche). */
 const CHIP_LINK_CLASS =
-  "inline-flex h-8 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--accent)]/40 hover:bg-[var(--surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]";
+  "inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--surface)] px-3.5 text-xs font-medium text-[var(--foreground)] transition-[background-color,border-color,color] duration-150 hover:border-[var(--surface-3)] hover:bg-[var(--surface-2)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]";
 
 type Params = Promise<{ slug: string }>;
 
@@ -73,50 +75,40 @@ export default async function EventDetailPage({ params }: { params: Params }) {
         </Link>
       </nav>
 
-      <PageHeader
-        kicker={<EventTypeLabel type={event.type} />}
-        title={event.name}
-        subtitle={
-          <>
-            <EventMeta date={event.date} location={event.location} url={event.url} className="text-base" />
-            <span className="mt-3 block">{event.description}</span>
-          </>
-        }
-        action={
+      {/* Kopf – gleiche Anatomie wie <PageHeader>, aber mit Icon-Zeile und ReactNode-Kicker */}
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div className="max-w-2xl">
+          <Kicker>
+            <EventTypeLabel type={event.type} />
+          </Kicker>
+          <h1 className="text-display text-[var(--foreground)]">{event.name}</h1>
+          <EventMeta date={event.date} location={event.location} url={event.url} size="base" className="mt-3" />
+          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)] sm:text-base">{event.description}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <LinkButton href={candidatesHref}>
             <FilterIcon />
             <T de="In Kandidaten filtern" en="Filter in candidates" />
           </LinkButton>
-        }
-      />
+        </div>
+      </header>
 
       {/* KPI-Reihe */}
       <div className="mb-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Stat
+        <LocalizedStat
           value={total}
-          label={<T de="Teilnehmer:innen" en="Attendees" />}
-          hint={
-            <>
-              <span className="tabular-nums">{withLinkedin}</span> <T de="mit LinkedIn-Profil" en="with LinkedIn profile" />
-            </>
-          }
+          label={EVENT_LABELS.attendees}
+          hint={{ de: `${withLinkedin} mit LinkedIn-Profil`, en: `${withLinkedin} with LinkedIn profile` }}
           href={candidatesHref}
         />
         {STAT_ROLES.map((role) => {
           const count = roleCounts.get(role) ?? 0;
           return (
-            <Stat
+            <LocalizedStat
               key={role}
               value={count}
-              label={<NetworkRoleLabel role={role} plural />}
-              hint={
-                <>
-                  <span className="tabular-nums">
-                    <T de={`${share(count)} %`} en={`${share(count)}%`} />
-                  </span>{" "}
-                  <T de="der Teilnehmer:innen" en="of attendees" />
-                </>
-              }
+              label={networkRoleLabel(role, true)}
+              hint={{ de: `${share(count)} % der Teilnehmer:innen`, en: `${share(count)}% of attendees` }}
               href={roleHref(role)}
             />
           );
@@ -169,7 +161,7 @@ export default async function EventDetailPage({ params }: { params: Params }) {
       <Card>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">
+            <h3 className="text-[15px] font-semibold tracking-tight text-[var(--foreground)]">
               <T de="Teilnehmer:innen" en="Attendees" />{" "}
               <span className="tabular-nums text-[var(--muted)]">({total})</span>
             </h3>
@@ -193,14 +185,12 @@ export default async function EventDetailPage({ params }: { params: Params }) {
         </div>
 
         {total === 0 ? (
-          <EmptyState
-            title={<T de="Noch keine Teilnehmer:innen" en="No attendees yet" />}
-            body={
-              <T
-                de="Für dieses Event wurden noch keine Profile importiert."
-                en="No profiles have been imported for this event yet."
-              />
-            }
+          <LocalizedEmptyState
+            title={{ de: "Noch keine Teilnehmer:innen", en: "No attendees yet" }}
+            body={{
+              de: "Für dieses Event wurden noch keine Profile importiert.",
+              en: "No profiles have been imported for this event yet.",
+            }}
             action={
               <LinkButton href="/candidates" variant="secondary">
                 <T de="Alle Kandidaten ansehen" en="View all candidates" />
@@ -214,7 +204,7 @@ export default async function EventDetailPage({ params }: { params: Params }) {
                 <li key={profile.id}>
                   <Link
                     href={`/candidates/${encodeURIComponent(profile.id)}`}
-                    className="group -mx-2 flex items-center gap-3 rounded-[var(--radius-sm)] px-2 py-3 transition-colors hover:bg-[var(--surface-2)]"
+                    className="group -mx-2 flex items-center gap-3 rounded-[var(--radius)] px-2 py-3 transition-colors hover:bg-[var(--surface-2)]"
                   >
                     <Avatar src={profile.photoUrl} name={profile.name} size={36} />
                     <div className="min-w-0 flex-1">

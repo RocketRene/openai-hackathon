@@ -5,11 +5,12 @@
  */
 import type { ReactNode } from "react";
 
-import { Card, EmptyState } from "@/components/ui";
+import { Card } from "@/components/ui";
 import { T } from "@/lib/i18n";
 import type { Profile } from "@/lib/types";
 
 import { FounderRoleLabel, NetworkRoleLabel, PersonalityLabel } from "./EventLabels";
+import { LocalizedEmptyState } from "./Localized";
 
 const TAG_PREFIX = /^idealab:/i;
 
@@ -85,14 +86,12 @@ export function AttendeeStats({ profiles }: { profiles: Profile[] }) {
 
   if (total === 0) {
     return (
-      <EmptyState
-        title={<T de="Noch keine Teilnehmer:innen importiert" en="No attendees imported yet" />}
-        body={
-          <T
-            de="Statistiken erscheinen, sobald Profile diesem Event zugeordnet sind."
-            en="Statistics appear as soon as profiles are assigned to this event."
-          />
-        }
+      <LocalizedEmptyState
+        title={{ de: "Noch keine Teilnehmer:innen importiert", en: "No attendees imported yet" }}
+        body={{
+          de: "Statistiken erscheinen, sobald Profile diesem Event zugeordnet sind.",
+          en: "Statistics appear as soon as profiles are assigned to this event.",
+        }}
       />
     );
   }

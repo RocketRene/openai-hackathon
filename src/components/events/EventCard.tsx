@@ -32,15 +32,23 @@ export function EventMeta({
   date,
   location,
   url,
+  size = "sm",
   className,
 }: {
   date: string;
   location: string;
   url?: string;
+  size?: "sm" | "base";
   className?: string;
 }) {
   return (
-    <span className={cx("flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--muted)]", className)}>
+    <span
+      className={cx(
+        "flex flex-wrap items-center gap-x-4 gap-y-1 text-[var(--muted)]",
+        size === "base" ? "text-base" : "text-sm",
+        className,
+      )}
+    >
       <span className="inline-flex items-center gap-1.5">
         <CalendarIcon />
         {date}
@@ -75,12 +83,7 @@ export function EventCard({ event, attendeeCount, className }: EventCardProps) {
   const candidatesHref = eventCandidatesHref(event.slug);
 
   return (
-    <Card
-      className={cx(
-        "fr-fade-in flex flex-col gap-4 transition hover:border-[var(--accent)]/40 hover:shadow-[var(--shadow-md)]",
-        className,
-      )}
-    >
+    <Card interactive className={cx("fr-fade-in flex flex-col gap-4", className)}>
       <div className="flex items-center justify-between gap-2">
         <Badge tone="accent">
           <EventTypeLabel type={event.type} />
