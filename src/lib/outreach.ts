@@ -32,6 +32,8 @@ import {
 } from "./types";
 
 export type OutreachChannel = OutreachDraft["channel"];
+/** Sprache der erzeugten Nachricht (lokal definiert – src/lib/i18n.tsx ist "use client"). */
+export type OutreachLocale = "de" | "en";
 
 /** Harte Grenze für LinkedIn-Connection-Notes. */
 export const LINKEDIN_MAX_CHARS = 300;
@@ -65,6 +67,73 @@ const STAGE_LABELS: Record<Stage, string> = {
   seed: "Seed",
   "series-a": "Series A",
   growth: "Growth",
+};
+
+/* ------------------------------------------------------------------ */
+/* Vokabular (englisch) – für locale "en"                              */
+/* ------------------------------------------------------------------ */
+
+const NETWORK_ROLE_LABELS_EN: Record<NetworkRole, string> = {
+  cofounder: "co-founder",
+  investor: "investor",
+  mentor: "mentor",
+  talent: "early team member",
+  expert: "expert",
+};
+
+const FOUNDER_ROLE_LABELS_EN: Record<FounderRole, string> = {
+  tech: "tech",
+  commercial: "commercial",
+  product: "product",
+  design: "design",
+  operations: "operations",
+  "domain-expert": "domain expertise",
+};
+
+const STAGE_LABELS_EN: Record<Stage, string> = {
+  idea: "idea stage",
+  "pre-seed": "pre-seed",
+  seed: "seed",
+  "series-a": "Series A",
+  growth: "growth",
+};
+
+const DIM_LABELS_EN: Record<FounderDimKey, string> = {
+  vision: "vision",
+  design: "design",
+  tech: "tech",
+  detail: "detail",
+  execution: "execution",
+};
+
+const PERSONALITY_LABELS_EN: Record<PersonalityType, string> = {
+  visionary: "a visionary",
+  builder: "a builder",
+  operator: "an operator",
+  connector: "a connector",
+  analyst: "an analyst",
+};
+
+/** Die lookingFor-Tags der Profile als englische Objekte. */
+const LOOKING_FOR_EN: Record<string, string> = {
+  "technical cofounder": "a technical co-founder",
+  "commercial cofounder": "a commercial co-founder",
+  "product cofounder": "a product co-founder",
+  "design cofounder": "a design co-founder",
+  "operations cofounder": "an operations co-founder",
+  "pre-seed investment": "pre-seed investment",
+  "seed investment": "seed investment",
+  "angel investment": "angel investment",
+  mentor: "a mentor",
+  mentees: "mentees",
+  "advisor role": "an advisor role",
+  "job as engineer": "an engineering role",
+  "job as product manager": "a product role",
+  "job as designer": "a design role",
+  "startups to invest in": "startups to invest in",
+  dealflow: "dealflow",
+  partnerships: "partnerships",
+  "first hires": "first hires",
 };
 
 const VERTICAL_LABELS: Record<string, string> = {
@@ -130,6 +199,18 @@ function joinDe(items: string[]): string {
   return `${list.slice(0, -1).join(", ")} und ${list[list.length - 1]}`;
 }
 
+/** "a", "a and b", "a, b and c" */
+function joinEn(items: string[]): string {
+  const list = items.filter(Boolean);
+  if (list.length === 0) return "";
+  if (list.length === 1) return list[0];
+  return `${list.slice(0, -1).join(", ")} and ${list[list.length - 1]}`;
+}
+
+function joinFor(locale: OutreachLocale): (items: string[]) => string {
+  return locale === "en" ? joinEn : joinDe;
+}
+
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
@@ -169,6 +250,31 @@ function lookingForDe(tag: string): string {
   return LOOKING_FOR_DE[key] ?? `„${tag.trim()}“`;
 }
 
+function lookingForEn(tag: string): string {
+  const key = tag.trim().toLowerCase();
+  return LOOKING_FOR_EN[key] ?? `"${tag.trim()}"`;
+}
+
+function lookingForLabel(locale: OutreachLocale, tag: string): string {
+  return locale === "en" ? lookingForEn(tag) : lookingForDe(tag);
+}
+
+function stageLabel(locale: OutreachLocale, stage: Stage): string {
+  return locale === "en" ? STAGE_LABELS_EN[stage] : STAGE_LABELS[stage];
+}
+
+function founderRoleLabel(locale: OutreachLocale, role: FounderRole): string {
+  return locale === "en" ? FOUNDER_ROLE_LABELS_EN[role] ?? role : FOUNDER_ROLE_LABELS[role] ?? role;
+}
+
+function networkRoleLabel(locale: OutreachLocale, role: NetworkRole): string {
+  return locale === "en" ? NETWORK_ROLE_LABELS_EN[role] ?? role : NETWORK_ROLE_LABELS[role] ?? role;
+}
+
+function dimLabel(locale: OutreachLocale, dim: FounderDimKey): string {
+  return locale === "en" ? DIM_LABELS_EN[dim] : FOUNDER_DIM_LABELS[dim];
+}
+
 /**
  * Kürzt eine LinkedIn-Note hart auf LINKEDIN_MAX_CHARS – bevorzugt an einer Satzgrenze,
  * sonst an einer Wortgrenze mit "…". Wird auch für LLM-Output genutzt.
@@ -191,6 +297,7 @@ interface OutreachContext {
   profile: Profile;
   type: PersonalityType;
   channel: OutreachChannel;
+  locale: OutreachLocale;
   /** Vorname der Zielperson */
   to: string;
   /** Vorname der Nutzer:in ("" wenn unbekannt) */
@@ -220,15 +327,60 @@ function resolveEvents(profile: Profile): Event[] {
   return (profile.events ?? []).map((slug) => getEvent(slug)).filter((e): e is Event => Boolean(e));
 }
 
-function profileHook(profile: Profile): string | null {
+function profileHook(locale: OutreachLocale, profile: Profile): string | null {
   const exp = profile.experience ?? [];
   const current = exp.find((e) => !e.end) ?? exp[0];
+  if (locale === "en") {
+    if (current?.title && current?.company) return `your experience as ${current.title} at ${current.company}`;
+    if (profile.headline) return `your profile ("${shorten(profile.headline, 60)}")`;
+    return null;
+  }
   if (current?.title && current?.company) return `deine Erfahrung als ${current.title} bei ${current.company}`;
   if (profile.headline) return `dein Profil („${shorten(profile.headline, 60)}“)`;
   return null;
 }
 
-function buildAsk(user: UserContext, profile: Profile): { long: string; short: string } {
+function buildAskEn(user: UserContext, profile: Profile): { long: string; short: string } {
+  const roles = (user.lookingForRoles ?? []).map((r) => FOUNDER_ROLE_LABELS_EN[r] ?? r);
+  const vertical = user.verticals?.[0] ? verticalLabel(user.verticals[0]) : null;
+  switch (profile.networkRole) {
+    case "investor": {
+      switch (user.stage) {
+        case "pre-seed":
+        case "seed":
+          return { long: `investors for our ${STAGE_LABELS_EN[user.stage]} round`, short: "an investor conversation" };
+        case "series-a":
+          return { long: "investors for our Series A", short: "a Series A conversation" };
+        case "growth":
+          return { long: "growth investors", short: "a growth conversation" };
+        default:
+          return { long: "first, early conversations with angels and pre-seed investors", short: "an angel conversation" };
+      }
+    }
+    case "mentor":
+      return {
+        long: vertical ? `a mentor who really knows ${vertical}` : "a mentor with founding experience of their own",
+        short: "a mentor",
+      };
+    case "talent":
+      return roles.length
+        ? { long: `first team members in ${joinEn(roles)}`, short: `${roles[0]} talent` }
+        : { long: "first team members", short: "talent for the team" };
+    case "expert":
+      return {
+        long: vertical ? `conversations with people who really understand ${vertical}` : "conversations with experienced experts",
+        short: "an expert exchange",
+      };
+    case "cofounder":
+    default:
+      return roles.length
+        ? { long: `a co-founder on the ${joinEn(roles)} side`, short: `a ${roles[0]} co-founder` }
+        : { long: "a co-founder", short: "a co-founder" };
+  }
+}
+
+function buildAsk(locale: OutreachLocale, user: UserContext, profile: Profile): { long: string; short: string } {
+  if (locale === "en") return buildAskEn(user, profile);
   const roles = (user.lookingForRoles ?? []).map((r) => FOUNDER_ROLE_LABELS[r] ?? r);
   const vertical = user.verticals?.[0] ? verticalLabel(user.verticals[0]) : null;
   switch (profile.networkRole) {
@@ -285,15 +437,25 @@ function strongestComplement(user: FounderDims, other: FounderDims): FounderDimK
   return best;
 }
 
-function buildComplement(user: UserContext, profile: Profile, match: MatchResult): string | null {
+function buildComplement(locale: OutreachLocale, user: UserContext, profile: Profile, match: MatchResult): string | null {
+  const en = locale === "en";
   const roleReason = match.reasons.find((r) => r.label === "Fehlende Team-Rolle");
   if (roleReason && profile.founderRole) {
+    if (en) {
+      const mine = user.founderRole ? ` – I come from the ${founderRoleLabel(locale, user.founderRole)} side` : "";
+      return `Your ${founderRoleLabel(locale, profile.founderRole)} side is exactly what my team is missing right now${mine}.`;
+    }
     const mine = user.founderRole ? ` – ich komme von der ${FOUNDER_ROLE_LABELS[user.founderRole]}-Seite` : "";
     return `Deine ${FOUNDER_ROLE_LABELS[profile.founderRole]}-Seite ist genau das, was in meinem Team gerade fehlt${mine}.`;
   }
   const dim = strongestComplement(user.dims, profile.dims);
   if (dim) {
     const mine = topDim(user.dims);
+    if (en) {
+      return mine !== dim
+        ? `You're strong in ${dimLabel(locale, dim)}, I'm more on the ${dimLabel(locale, mine)} side – that complements pretty well.`
+        : `You're strong in ${dimLabel(locale, dim)} – exactly the side I want to strengthen.`;
+    }
     return mine !== dim
       ? `Du bist stark in ${FOUNDER_DIM_LABELS[dim]}, ich eher in ${FOUNDER_DIM_LABELS[mine]} – das ergänzt sich ziemlich gut.`
       : `Du bist stark in ${FOUNDER_DIM_LABELS[dim]} – genau die Seite, die ich verstärken will.`;
@@ -301,16 +463,35 @@ function buildComplement(user: UserContext, profile: Profile, match: MatchResult
   return null;
 }
 
-function buildReciprocal(profile: Profile, match: MatchResult, type: PersonalityType): string | null {
-  const wants = (profile.lookingFor ?? []).slice(0, 2).map(lookingForDe);
+function buildReciprocal(locale: OutreachLocale, profile: Profile, match: MatchResult, type: PersonalityType): string | null {
+  const wants = (profile.lookingFor ?? []).slice(0, 2).map((tag) => lookingForLabel(locale, tag));
   if (!wants.length) return null;
   const fits = match.reasons.some((r) => r.label === "Sucht jemanden wie dich");
+  if (locale === "en") {
+    if (fits) return `You're looking for ${joinEn(wants)} – that matches pretty closely what I bring.`;
+    if (type === "connector") return `You're looking for ${joinEn(wants)} – maybe I can introduce you to someone from my network.`;
+    return null;
+  }
   if (fits) return `Du suchst ${joinDe(wants)} – das passt ziemlich genau zu dem, was ich mitbringe.`;
   if (type === "connector") return `Du suchst ${joinDe(wants)} – vielleicht kann ich dir über mein Netzwerk jemanden vorstellen.`;
   return null;
 }
 
-function buildLookingSentence(profile: Profile, ask: { long: string }): string {
+function buildLookingSentence(locale: OutreachLocale, profile: Profile, ask: { long: string }): string {
+  if (locale === "en") {
+    switch (profile.networkRole) {
+      case "investor":
+        return `Right now I'm looking for ${ask.long} – and for people who say honestly what's still missing.`;
+      case "mentor":
+        return `Right now I'm looking for ${ask.long}.`;
+      case "expert":
+        return `I'm looking for ${ask.long}.`;
+      case "talent":
+      case "cofounder":
+      default:
+        return `Specifically, I'm looking for ${ask.long}.`;
+    }
+  }
   switch (profile.networkRole) {
     case "investor":
       return `Ich suche gerade ${ask.long} – und Menschen, die ehrlich sagen, was noch fehlt.`;
@@ -325,14 +506,16 @@ function buildLookingSentence(profile: Profile, ask: { long: string }): string {
   }
 }
 
-function buildContext(user: UserContext, profile: Profile, channel: OutreachChannel): OutreachContext {
+function buildContext(user: UserContext, profile: Profile, channel: OutreachChannel, locale: OutreachLocale = "de"): OutreachContext {
+  const en = locale === "en";
+  const join = joinFor(locale);
   const type: PersonalityType = profile.personality?.type ?? "builder";
   const match = scoreMatch(user, profile);
   const events = resolveEvents(profile);
   const userVerticals = (user.verticals ?? []).map((v) => v.toLowerCase());
   const sharedVerticals = (profile.verticals ?? []).filter((v) => userVerticals.includes(v.toLowerCase())).map(verticalLabel);
   const idea = user.idea?.trim() ?? "";
-  const ask = buildAsk(user, profile);
+  const ask = buildAsk(locale, user, profile);
   const strengths = (user.strengths ?? []).filter(Boolean).slice(0, 3);
   const eventNames = events.map((e) => e.name);
 
@@ -341,23 +524,32 @@ function buildContext(user: UserContext, profile: Profile, channel: OutreachChan
     profile,
     type,
     channel,
-    to: firstName(profile.name) || "du",
+    locale,
+    to: firstName(profile.name) || (en ? "there" : "du"),
     from: user.name ? firstName(user.name) : "",
     match,
     events,
     sharedVerticals,
-    ideaShort: idea ? shorten(trimPunct(idea), 48) : "mein Startup",
+    ideaShort: idea ? shorten(trimPunct(idea), 48) : en ? "my startup" : "mein Startup",
     ideaMedium: idea ? shorten(trimPunct(idea), 100) : null,
-    ideaSentence: idea ? sentence(`Woran ich gerade arbeite: ${trimPunct(idea)}`) : null,
+    ideaSentence: idea ? sentence(en ? `What I'm working on right now: ${trimPunct(idea)}` : `Woran ich gerade arbeite: ${trimPunct(idea)}`) : null,
     ask,
-    hook: profileHook(profile),
-    complement: buildComplement(user, profile, match),
-    reciprocal: buildReciprocal(profile, match, type),
-    strengths: strengths.length ? `Was ich mitbringe: ${joinDe(strengths)}.` : null,
-    stageLabel: user.stage ? STAGE_LABELS[user.stage] : null,
-    eventSentence: eventNames.length ? `Ich habe gesehen, dass du bei ${joinDe(eventNames.slice(0, 2))} dabei bist – ich bin auch dort.` : null,
-    verticalSentence: sharedVerticals.length ? `Wir bewegen uns beide in ${joinDe(sharedVerticals)}.` : null,
-    lookingSentence: buildLookingSentence(profile, ask),
+    hook: profileHook(locale, profile),
+    complement: buildComplement(locale, user, profile, match),
+    reciprocal: buildReciprocal(locale, profile, match, type),
+    strengths: strengths.length ? (en ? `What I bring: ${join(strengths)}.` : `Was ich mitbringe: ${join(strengths)}.`) : null,
+    stageLabel: user.stage ? stageLabel(locale, user.stage) : null,
+    eventSentence: eventNames.length
+      ? en
+        ? `I saw you're attending ${join(eventNames.slice(0, 2))} – I'll be there too.`
+        : `Ich habe gesehen, dass du bei ${join(eventNames.slice(0, 2))} dabei bist – ich bin auch dort.`
+      : null,
+    verticalSentence: sharedVerticals.length
+      ? en
+        ? `We're both working in ${join(sharedVerticals)}.`
+        : `Wir bewegen uns beide in ${join(sharedVerticals)}.`
+      : null,
+    lookingSentence: buildLookingSentence(locale, profile, ask),
   };
 }
 
@@ -728,19 +920,300 @@ const analyst: StyleBuilder = (ctx) => {
 
 const STYLES: Record<PersonalityType, StyleBuilder> = { visionary, builder, operator, connector, analyst };
 
+/* ------------------------------------------------------------------ */
+/* Stile je Persönlichkeitstyp – englische Varianten (locale "en")      */
+/* ------------------------------------------------------------------ */
+
+const visionaryEn: StyleBuilder = (ctx) => {
+  const theme =
+    ctx.sharedVerticals[0] ??
+    (ctx.user.verticals[0] ? verticalLabel(ctx.user.verticals[0]) : null) ??
+    (ctx.profile.verticals[0] ? verticalLabel(ctx.profile.verticals[0]) : "our market");
+  const mainEvent = ctx.events[0];
+  return {
+    email: {
+      subject: shorten(`Big picture: rethinking ${theme} – got 20 minutes?`, 90),
+      paragraphs: [
+        compact([
+          s(`I believe ${theme} is heading for a real shift – and that's exactly where I want to start.`, true),
+          s(ctx.ideaSentence, true),
+          s(ctx.hook ? `${capitalize(ctx.hook)} tells me you think big – that's why I'm writing to you.` : null),
+        ]),
+        compact([s(ctx.complement), s(ctx.eventSentence), s(ctx.verticalSentence)]),
+        compact([
+          s(ctx.lookingSentence, true),
+          s("Let's talk about the big version of this: where could it stand in five years if we get it right?", true),
+          s(`20 minutes is enough – happy to do it ${mainEvent ? `right at ${mainEvent.name}` : "on a call"}.`, true),
+        ]),
+      ],
+      fillers: compact([
+        s(ctx.strengths),
+        s(ctx.reciprocal),
+        s(ctx.stageLabel ? `We're still early (${ctx.stageLabel}) – exactly the moment when the direction gets set.` : null),
+        f("I'm less interested in the next step than in the question of which playing field we want to own in a few years.", 2),
+      ]),
+      signoff: "Best regards",
+    },
+    linkedin: linkedinVariants(
+      ctx,
+      `I believe ${theme} is heading for a shift – and I'm building exactly on that${ctx.ideaMedium ? ` (${ctx.ideaMedium})` : ""}.`,
+      mainEvent ? `We're both at ${mainEvent.name}.` : null,
+      `Up for discussing the big picture? I'm looking for ${ctx.ask.long}.`,
+      `Up for 20 minutes of big picture? I'm looking for ${ctx.ask.short}.`,
+    ),
+    notes: [
+      `${ctx.profile.name} is ${PERSONALITY_LABELS_EN.visionary}: the message opens with the big picture (market shift, five-year horizon) before any details.`,
+      "It closes with an open \"where to\" question instead of a narrow meeting request – visionaries respond to possibility spaces, not calendar slots.",
+    ],
+  };
+};
+
+const builderEn: StyleBuilder = (ctx) => {
+  const mainEvent = ctx.events[0];
+  const strengths = (ctx.user.strengths ?? []).slice(0, 2);
+  const status = `Status: ${ctx.stageLabel ?? "early"}${strengths.length ? `, I build myself (${joinEn(strengths)})` : ""}.`;
+  const opener = ctx.ideaSentence
+    ? `Straight to the point – ${ctx.ideaSentence.charAt(0).toLowerCase()}${ctx.ideaSentence.slice(1)}`
+    : "Straight to the point: I'm building a startup and looking for reinforcement.";
+  return {
+    email: {
+      subject: shorten(`What I'm building right now: ${ctx.ideaShort}`, 90),
+      paragraphs: [
+        compact([
+          s(opener, true),
+          s(status, true),
+          s(ctx.hook ? `${capitalize(ctx.hook)} – exactly the hands-on experience I'm interested in.` : null),
+        ]),
+        compact([s(ctx.complement), s(ctx.verticalSentence), s(ctx.eventSentence)]),
+        compact([
+          s(ctx.lookingSentence, true),
+          s("I'd love to show you the current state – a 15-minute demo, and you tell me what you'd build differently.", true),
+          s(mainEvent ? `Does ${mainEvent.name} work, or would you rather do a quick call?` : "Would a quick call this week or next work for you?", true),
+        ]),
+      ],
+      fillers: compact([
+        s(ctx.reciprocal),
+        f("No pitch deck, no vision slides – I'd rather show you what already works and what doesn't yet.", 2),
+        s(ctx.strengths),
+      ]),
+      signoff: "Best",
+    },
+    linkedin: linkedinVariants(
+      ctx,
+      ctx.ideaMedium ? sentence(`here's what I'm building: ${ctx.ideaMedium}`) : "I'm building a startup and looking for reinforcement.",
+      mainEvent ? `Are you at ${mainEvent.name} too?` : null,
+      `I'm looking for ${ctx.ask.long} and would love to show you a 15-min demo – your feedback would be gold.`,
+      `I'm looking for ${ctx.ask.short} – 15-min demo?`,
+    ),
+    notes: [
+      `${ctx.profile.name} is ${PERSONALITY_LABELS_EN.builder}: the first sentence says what exactly is being built and where it stands – no vision prose.`,
+      "The ask is a demo instead of \"let's chat\", because builders respond to substance and hands-on feedback.",
+    ],
+  };
+};
+
+const operatorEn: StyleBuilder = (ctx) => {
+  const idea = ctx.user.idea?.trim() ? ` – the venture: ${trimPunct(ctx.user.idea)}` : "";
+  const focus = ctx.sharedVerticals.length ? `, focus ${joinEn(ctx.sharedVerticals)}` : "";
+  return {
+    email: {
+      subject: shorten(`Looking for ${ctx.ask.short} – 15 minutes next week?`, 90),
+      paragraphs: [
+        compact([
+          s(`I'll get straight to the point: I'm looking for ${ctx.ask.long}${idea}.`, true),
+          s(ctx.hook ? `Why you: ${ctx.hook}.` : null),
+        ]),
+        compact([
+          s(ctx.complement),
+          s(ctx.stageLabel ? `Status: ${ctx.stageLabel}${focus}.` : ctx.verticalSentence),
+          s(ctx.eventSentence),
+        ]),
+        compact([
+          s("My proposal: a 15-minute call next week, Tuesday or Thursday.", true),
+          s("I'll send you a one-pager beforehand with status, numbers and open points.", true),
+          s("Goal: find out whether role, pace and expectations fit – and if so, agree on the next step."),
+          s("Does one of the two days work for you?", true),
+        ]),
+      ],
+      fillers: compact([
+        s(ctx.strengths),
+        s(ctx.reciprocal),
+        f("If it doesn't fit, a short no is enough – no problem.", 2),
+        s(ctx.ideaSentence ? null : "Happy to send details about the venture upfront so the call gets straight into the substance."),
+      ]),
+      signoff: "Best regards",
+    },
+    linkedin: linkedinVariants(
+      ctx,
+      `I'm looking for ${ctx.ask.long}${ctx.ideaMedium ? ` (${ctx.ideaMedium})` : ""}.`,
+      ctx.events[0] ? `I'm at ${ctx.events[0].name} too.` : null,
+      "15 minutes next week for a concrete proposal? I'll send a one-pager with status and open points beforehand.",
+      "15 min next week for a concrete proposal?",
+    ),
+    notes: [
+      `${ctx.profile.name} is ${PERSONALITY_LABELS_EN.operator}: the ask is in the first sentence, the next step has concrete days and a document upfront.`,
+      "No embellishment and no open questions – operators should be able to answer with a single word.",
+    ],
+  };
+};
+
+const connectorEn: StyleBuilder = (ctx) => {
+  const mainEvent = ctx.events[0];
+  const community = ctx.sharedVerticals[0] ?? (ctx.profile.verticals[0] ? verticalLabel(ctx.profile.verticals[0]) : "startup");
+  const opener = mainEvent
+    ? `We're both at ${mainEvent.name} – I saw your profile in the attendee list and immediately thought: I should talk to you.`
+    : `Your profile caught my eye in the ${community} community – and I immediately thought: I should talk to you.`;
+  const otherEvents = ctx.events.slice(1).map((e) => e.name);
+  return {
+    email: {
+      subject: shorten(mainEvent ? `${mainEvent.name}: quick hello?` : `Quick hello? (${community})`, 90),
+      paragraphs: [
+        compact([
+          s(opener, true),
+          s(ctx.hook ? `${capitalize(ctx.hook)} sounds like exactly the kind of path I'd love to hear more about.` : null),
+        ]),
+        compact([
+          s(ctx.verticalSentence ? `${trimPunct(ctx.verticalSentence)} – small world.` : null),
+          s(ctx.reciprocal),
+          s(ctx.complement),
+          s(ctx.ideaSentence),
+        ]),
+        compact([
+          s(ctx.lookingSentence, true),
+          s(`Let's ${mainEvent ? `grab a coffee at ${mainEvent.name}` : "grab a (virtual) coffee"} – no agenda, just getting to know each other.`, true),
+          s("Would be great if it works out!", true),
+        ]),
+      ],
+      fillers: compact([
+        f(otherEvents.length ? `If it doesn't work out there: you're also at ${joinEn(otherEvents)} – we'll run into each other there at the latest.` : null, 2),
+        f("And if I can help you with anything – just say so, I'm happy to share my network.", 2),
+        s(ctx.strengths),
+      ]),
+      signoff: "Warm regards",
+    },
+    linkedin: linkedinVariants(
+      ctx,
+      mainEvent ? `we're both at ${mainEvent.name} and I found your profile really interesting.` : `your profile caught my eye in the ${community} community.`,
+      ctx.sharedVerticals.length ? `We share ${joinEn(ctx.sharedVerticals)} as a topic.` : null,
+      `Up for a coffee${mainEvent ? " on site" : ""}? I'm looking for ${ctx.ask.long} and love exchanging ideas.`,
+      `Up for a coffee? I'm looking for ${ctx.ask.short}.`,
+    ),
+    notes: [
+      `${ctx.profile.name} is ${PERSONALITY_LABELS_EN.connector}: the message opens with the shared event and the relationship, not with the idea.`,
+      "The tone is warm and personal, the ask a coffee without an agenda instead of a business meeting – connectors decide based on people, not pitches.",
+    ],
+  };
+};
+
+const analystEn: StyleBuilder = (ctx) => {
+  const { match, profile, user } = ctx;
+  const facts: string[] = [];
+  for (const r of match.reasons) {
+    switch (r.label) {
+      case "Gesuchte Rolle":
+        facts.push(`You're exactly the ${networkRoleLabel("en", profile.networkRole)} I'm looking for.`);
+        break;
+      case "Fehlende Team-Rolle":
+        if (profile.founderRole) facts.push(`Your ${FOUNDER_ROLE_LABELS_EN[profile.founderRole]} side is completely missing in my team so far.`);
+        break;
+      case "Gleiches Vertical":
+        if (ctx.sharedVerticals.length) facts.push(`We share ${joinEn(ctx.sharedVerticals)} as a vertical.`);
+        break;
+      case "Komplementäre Stärken":
+        facts.push(`Our strength profiles complement each other at ${match.complementarity}% (compared across five dimensions).`);
+        break;
+      case "Sucht jemanden wie dich":
+        facts.push(
+          `You're looking for ${joinEn((profile.lookingFor ?? []).slice(0, 2).map(lookingForEn))} – that matches my profile${user.founderRole ? ` (${FOUNDER_ROLE_LABELS_EN[user.founderRole]})` : ""}.`,
+        );
+        break;
+      case "Gleiche Phase":
+        if (profile.stage) facts.push(`We're both in the same phase (${STAGE_LABELS_EN[profile.stage]}).`);
+        break;
+      default:
+        break;
+    }
+  }
+  if (ctx.events[0]) facts.push(`We're both at ${ctx.events[0].name} – meeting there costs no travel.`);
+  if (ctx.hook) facts.push(`${capitalize(ctx.hook)} fits what I need.`);
+  const top = facts.slice(0, 3);
+  const numbered = top.map((f, i) => `${i + 1}) ${f}`).join(" ");
+  const countWord = ["One reason", "Two reasons", "Three reasons"][Math.max(0, top.length - 1)];
+  const reasonsSentence = top.length ? `${countWord} why I'm writing to you: ${numbered}` : null;
+  const strengths = (user.strengths ?? []).slice(0, 3);
+  const idea = user.idea?.trim()
+    ? sentence(`Short and fact-based – what I'm working on right now: ${trimPunct(user.idea)}`)
+    : "Short and fact-based: I'm building a startup.";
+  return {
+    email: {
+      subject: shorten(
+        top.length ? `${capitalize(ctx.ask.short)} – ${top.length} facts on why I'm writing` : `${capitalize(ctx.ask.short)}: quick fact check?`,
+        90,
+      ),
+      paragraphs: [
+        compact([
+          s(idea, true),
+          s(ctx.stageLabel ? `Status: ${ctx.stageLabel}${strengths.length ? `, core competencies ${joinEn(strengths)}` : ""}.` : null),
+        ]),
+        compact([s(reasonsSentence, true), s(`Match score according to the profile comparison: ${match.score}/100.`)]),
+        compact([
+          s(ctx.lookingSentence, true),
+          s(
+            "If these points make sense to you, I'll send you a one-pager with status, key figures and open questions – and we check in 20 minutes whether it holds up.",
+            true,
+          ),
+          s("If not, a short no is completely fine."),
+        ]),
+      ],
+      fillers: compact([
+        s(ctx.eventSentence),
+        f("What I don't know yet: whether our ideas about pace, role and risk match – that's exactly what I'd like to check in a structured way.", 2),
+      ]),
+      signoff: "Kind regards",
+    },
+    linkedin: linkedinVariants(
+      ctx,
+      `${match.score}/100 according to my profile comparison: ${trimPunct(top[0] ?? "our profiles complement each other")}.`,
+      ctx.events[0] ? `Both at ${ctx.events[0].name}.` : null,
+      `I'm looking for ${ctx.ask.long} – 20 minutes for a fact check?`,
+      `I'm looking for ${ctx.ask.short} – 20-min fact check?`,
+    ),
+    notes: [
+      `${ctx.profile.name} is ${PERSONALITY_LABELS_EN.analyst}: the message delivers numbered reasons, percentages and the match score instead of superlatives.`,
+      "The ask is a fact check (one-pager, 20 minutes) instead of a get-to-know chat – analysts want evidence first, relationship second.",
+    ],
+  };
+};
+
+const STYLES_EN: Record<PersonalityType, StyleBuilder> = {
+  visionary: visionaryEn,
+  builder: builderEn,
+  operator: operatorEn,
+  connector: connectorEn,
+  analyst: analystEn,
+};
+
 function buildNotes(ctx: OutreachContext, core: string[]): string[] {
   const notes = core.map(sentence);
+  const en = ctx.locale === "en";
+  const lengthNote =
+    ctx.channel === "linkedin"
+      ? en
+        ? "As a connection note, the message stays under 300 characters and ends with a concrete question."
+        : "Als Connection-Note bleibt die Nachricht unter 300 Zeichen und endet mit einer konkreten Frage."
+      : en
+        ? "The email stays within 90–160 words: long enough for context, short enough for a phone screen."
+        : "Die E-Mail bleibt bei 90–160 Wörtern: lang genug für Kontext, kurz genug fürs Handy.";
+  if (en) {
+    // Tipps/Don'ts aus dem Persönlichkeitsprofil liegen nur auf Deutsch vor – im englischen Entwurf nicht zitieren.
+    notes.push(lengthNote);
+    return notes.slice(0, 4);
+  }
   const tips = ctx.profile.personality?.outreachTips ?? [];
   const avoid = ctx.profile.personality?.avoid ?? [];
   if (tips[0]) notes.push(sentence(`Aus dem Persönlichkeitsprofil übernommen: ${trimPunct(tips[0])}`));
   if (avoid[0]) notes.push(sentence(`Bewusst vermieden: ${trimPunct(avoid[0])}`));
-  if (notes.length < 2) {
-    notes.push(
-      ctx.channel === "linkedin"
-        ? "Als Connection-Note bleibt die Nachricht unter 300 Zeichen und endet mit einer konkreten Frage."
-        : "Die E-Mail bleibt bei 90–160 Wörtern: lang genug für Kontext, kurz genug fürs Handy.",
-    );
-  }
+  if (notes.length < 2) notes.push(lengthNote);
   return notes.slice(0, 4);
 }
 
@@ -751,10 +1224,17 @@ function buildNotes(ctx: OutreachContext, core: string[]): string[] {
 /**
  * Regelbasierter Entwurf (Fallback ohne OPENAI_API_KEY, läuft auch im Browser).
  * LinkedIn: ≤ 300 Zeichen, kein Betreff. E-Mail: Betreff + 90–160 Wörter.
+ * `locale` wählt die Sprache der Nachricht und der personalityNotes (Default "de").
  */
-export function buildOutreachTemplate(user: UserContext, profile: Profile, channel: OutreachChannel): OutreachDraft {
-  const ctx = buildContext(user, profile, channel);
-  const plan = (STYLES[ctx.type] ?? builder)(ctx);
+export function buildOutreachTemplate(
+  user: UserContext,
+  profile: Profile,
+  channel: OutreachChannel,
+  locale: OutreachLocale = "de",
+): OutreachDraft {
+  const ctx = buildContext(user, profile, channel, locale);
+  const styles = locale === "en" ? STYLES_EN : STYLES;
+  const plan = (styles[ctx.type] ?? styles.builder)(ctx);
   const personalityNotes = buildNotes(ctx, plan.notes);
 
   if (channel === "linkedin") {
@@ -777,14 +1257,17 @@ export function buildOutreachTemplate(user: UserContext, profile: Profile, chann
   };
 }
 
-/** System-Prompt für den LLM-Pfad (/api/outreach). */
-export function outreachSystemPrompt(): string {
+/** System-Prompt für den LLM-Pfad (/api/outreach). `locale` "en" → Nachricht und Notes auf Englisch. */
+export function outreachSystemPrompt(locale: OutreachLocale = "de"): string {
+  const en = locale === "en";
   return [
-    "Du bist Outreach-Copywriter:in für Gründer:innen im deutschsprachigen Startup-Ökosystem.",
+    `Du bist Outreach-Copywriter:in für Gründer:innen im ${en ? "internationalen" : "deutschsprachigen"} Startup-Ökosystem.`,
     "Du schreibst im Namen der Nutzer:in (Absender:in) eine erste Kontaktnachricht an eine Zielperson, die sie noch nicht kennt.",
     "",
     "Regeln:",
-    "- Deutsch, Du-Form, Startup-Ton: direkt, warm, ohne Floskeln, ohne Emojis, ohne Buzzword-Stapel. Keine Platzhalter wie [Name].",
+    en
+      ? "- Antworte auf Englisch: subject, body und personalityNotes vollständig auf Englisch (natürlich und idiomatisch, keine wörtliche Übersetzung aus dem Deutschen). Startup-Ton: direkt, warm, ohne Floskeln, ohne Emojis, ohne Buzzword-Stapel. Keine Platzhalter wie [Name]."
+      : "- Deutsch, Du-Form, Startup-Ton: direkt, warm, ohne Floskeln, ohne Emojis, ohne Buzzword-Stapel. Keine Platzhalter wie [Name].",
     "- Nutze ausschließlich Fakten aus dem Kontext. Nichts erfinden: keine Zahlen, keine gemeinsamen Bekannten, keine Projekte oder Erfolge, die nicht im Kontext stehen.",
     "- Personalisiere sichtbar: gemeinsame Events, gemeinsame Verticals, warum sich die Profile ergänzen (Match-Gründe), was die Absender:in sucht.",
     "- Passe Ton, Länge, Einstieg und Abschluss an den Persönlichkeitstyp der Zielperson an:",
@@ -796,14 +1279,14 @@ export function outreachSystemPrompt(): string {
     "- Beachte die Outreach-Tipps und Don'ts aus dem Persönlichkeitsprofil der Zielperson.",
     `- Kanal "linkedin": Connection-Note mit maximal ${LINKEDIN_MAX_CHARS} Zeichen (harte Grenze, zähle mit), ein Absatz, kein Betreff (subject = null).`,
     `- Kanal "email": subject (max. 70 Zeichen, konkret, kein Clickbait) und body mit ${EMAIL_MIN_WORDS}–${EMAIL_MAX_WORDS} Wörtern, Anrede „Hi <Vorname>,“, Absätze durch Leerzeilen, Grußformel mit dem Vornamen der Absender:in (falls bekannt).`,
-    "- personalityNotes: 2–4 kurze deutsche Sätze, die erklären, warum die Nachricht so formuliert ist (Persönlichkeitstyp, Ton, Länge, Ask).",
+    `- personalityNotes: 2–4 kurze ${en ? "englische" : "deutsche"} Sätze, die erklären, warum die Nachricht so formuliert ist (Persönlichkeitstyp, Ton, Länge, Ask).`,
     "Antworte ausschließlich mit JSON nach dem vorgegebenen Schema.",
   ].join("\n");
 }
 
-/** User-Prompt für den LLM-Pfad: strukturierter Kontext + Aufgabe. */
-export function outreachUserPrompt(user: UserContext, profile: Profile, channel: OutreachChannel): string {
-  const ctx = buildContext(user, profile, channel);
+/** User-Prompt für den LLM-Pfad: strukturierter Kontext + Aufgabe. `locale` "en" → Aufgabe verlangt Englisch. */
+export function outreachUserPrompt(user: UserContext, profile: Profile, channel: OutreachChannel, locale: OutreachLocale = "de"): string {
+  const ctx = buildContext(user, profile, channel, locale);
   const p = profile.personality;
   const list = (items: string[] | undefined) => (items && items.length ? items.join(", ") : "–");
   const experience = (profile.experience ?? [])
@@ -869,6 +1352,7 @@ export function outreachUserPrompt(user: UserContext, profile: Profile, channel:
       : `Schreibe eine E-Mail: subject (≤ 70 Zeichen) und body (${EMAIL_MIN_WORDS}–${EMAIL_MAX_WORDS} Wörter, Anrede „Hi ${ctx.to},“, 2–4 kurze Absätze, Grußformel${ctx.from ? ` mit „${ctx.from}“` : " ohne Namen"}).`,
     `Formuliere im Stil für den Typ „${ctx.type}“. Beziehe dich konkret auf mindestens zwei der folgenden Punkte: gemeinsame Events, gemeinsame Verticals, komplementäre Stärken/Rollen, was die Zielperson sucht.`,
     "Gib zusätzlich personalityNotes (2–4 Sätze) zurück.",
+    locale === "en" ? "Antworte auf Englisch: subject, body und personalityNotes komplett in englischer Sprache." : null,
   ];
 
   return lines.filter((line): line is string => line !== null).join("\n");
@@ -889,7 +1373,7 @@ export const OUTREACH_JSON_SCHEMA: Record<string, unknown> = {
     },
     personalityNotes: {
       type: "array",
-      description: "2–4 kurze deutsche Sätze: warum die Nachricht so formuliert ist.",
+      description: "2–4 kurze Sätze in der Sprache der Nachricht: warum die Nachricht so formuliert ist.",
       items: { type: "string" },
     },
   },

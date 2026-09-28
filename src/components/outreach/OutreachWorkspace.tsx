@@ -3,18 +3,20 @@
  * Outreach-Arbeitsfläche als Zwei-Spalten-Workspace (ab lg):
  * links priorisierte Kontakte (Top-10 aus dem Matching) mit Rollen-Filter, Kanalwahl und
  * "Nachricht erzeugen"; rechts der Composer mit dem ausgewählten Entwurf.
- * Entwürfe kommen per POST /api/outreach, `?profile=` pinnt einen Kontakt nach oben.
+ * Entwürfe kommen per POST /api/outreach (inkl. `locale`), `?profile=` pinnt einen Kontakt nach oben.
  *
+ * Zweisprachig (DE/EN) über ein lokales DICT + useT; die Sprache geht als `locale` an die API.
  * Muss in <Suspense> gerendert werden (useSearchParams).
  */
 import { useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { getProfiles } from "@/lib/data";
+import { pick, useLocale, useT, type Dict, type Locale } from "@/lib/i18n";
 import { rankCandidates } from "@/lib/matching";
 import type { MatchResult, NetworkRole, OutreachDraft, Profile, UserContext } from "@/lib/types";
 import { useUserContext } from "@/lib/user-context";
 import { Avatar, Badge, Button, Card, Chip, EmptyState, LinkButton, Skeleton, cx } from "@/components/ui";
-import OutreachDraftCard, { CHANNEL_LABELS, ComposerHeader, ComposerSkeleton, personalityLabel } from "./OutreachDraftCard";
+import OutreachDraftCard, { ComposerHeader, ComposerSkeleton, channelLabel, personalityLabel } from "./OutreachDraftCard";
 
 type Channel = OutreachDraft["channel"];
 type RoleFilter = NetworkRole | "all";
@@ -22,17 +24,73 @@ type RoleFilter = NetworkRole | "all";
 const TOP_N = 10;
 const BATCH_N = 5;
 
-const NETWORK_ROLE_LABELS: Record<NetworkRole, string> = {
-  cofounder: "Co-Founder",
-  investor: "Investor:innen",
-  mentor: "Mentor:innen",
-  talent: "Talente",
-  expert: "Expert:innen",
+const NETWORK_ROLE_LABELS: Record<NetworkRole, { de: string; en: string }> = {
+  cofounder: { de: "Co-Founder", en: "Co-founders" },
+  investor: { de: "Investor:innen", en: "Investors" },
+  mentor: { de: "Mentor:innen", en: "Mentors" },
+  talent: { de: "Talente", en: "Talent" },
+  expert: { de: "Expert:innen", en: "Experts" },
 };
 
 const NETWORK_ROLE_ORDER: NetworkRole[] = ["cofounder", "investor", "mentor", "expert", "talent"];
 
 const CHANNELS: Channel[] = ["email", "linkedin"];
+
+const DICT = {
+  httpError: {
+    de: "Die Nachricht konnte nicht erzeugt werden (HTTP {status}).",
+    en: "The message could not be generated (HTTP {status}).",
+  },
+  invalidResponse: { de: "Ungültige Antwort von /api/outreach.", en: "Invalid response from /api/outreach." },
+  unknownError: { de: "Unbekannter Fehler.", en: "Unknown error." },
+  scoreTitle: { de: "Match-Score {value} / 100", en: "Match score {value} / 100" },
+  scoreAria: { de: "Match-Score {value} von 100", en: "Match score {value} of 100" },
+  channelGroup: { de: "Kanal – gewählt: {label}", en: "Channel – selected: {label}" },
+  noEmail: { de: "Keine E-Mail-Adresse hinterlegt", en: "No email address on file" },
+  noLinkedIn: { de: "Kein LinkedIn-Profil hinterlegt", en: "No LinkedIn profile on file" },
+  selectedSr: { de: ", gewählt", en: ", selected" },
+  openInComposer: { de: "Im Composer öffnen", en: "Open in composer" },
+  openedInComposer: { de: "Im Composer geöffnet", en: "Opened in composer" },
+  preselected: { de: "Vorausgewählt", en: "Preselected" },
+  draft: { de: "Entwurf", en: "Draft" },
+  generating: { de: "Erzeuge …", en: "Generating …" },
+  regenerate: { de: "Neu erzeugen", en: "Regenerate" },
+  generate: { de: "Nachricht erzeugen", en: "Generate message" },
+  emptyCtxTitle: { de: "Noch kein Nutzer-Kontext vorhanden", en: "No user context yet" },
+  emptyCtxBody: {
+    de: "Damit wir Kontakte priorisieren und Nachrichten personalisieren können, brauchen wir dein Profil: Rolle, Idee, was du suchst.",
+    en: "To prioritize contacts and personalize messages we need your profile: role, idea, what you're looking for.",
+  },
+  loadDemo: { de: "Demo-Kontext laden", en: "Load demo context" },
+  startOnboarding: { de: "Onboarding starten", en: "Start onboarding" },
+  batchProgress: { de: "Erzeuge … {done}/{total}", en: "Generating … {done}/{total}" },
+  generateTop: { de: "Top {n} erzeugen", en: "Generate top {n}" },
+  prioritized: { de: "Priorisierte Kontakte", en: "Prioritized contacts" },
+  for: { de: "Für", en: "For" },
+  you: { de: "dich", en: "you" },
+  sortedByScore: { de: "sortiert nach Match-Score", en: "sorted by match score" },
+  draftOne: { de: "Entwurf", en: "draft" },
+  draftMany: { de: "Entwürfe", en: "drafts" },
+  filterByRole: { de: "Nach Rolle filtern", en: "Filter by role" },
+  all: { de: "Alle", en: "All" },
+  noContactsTitle: { de: "Keine Kontakte gefunden", en: "No contacts found" },
+  noContactsBody: {
+    de: "Für diesen Filter gibt es aktuell keine passenden Profile.",
+    en: "There are currently no matching profiles for this filter.",
+  },
+  resetFilter: { de: "Filter zurücksetzen", en: "Reset filter" },
+  pickContactTitle: { de: "Wähle links einen Kontakt", en: "Pick a contact on the left" },
+  pickContactBody: {
+    de: "Klicke auf eine Person oder erzeuge direkt eine Nachricht – der Entwurf erscheint hier zum Bearbeiten, Kopieren und Versenden.",
+    en: "Click a person or generate a message right away – the draft appears here for editing, copying and sending.",
+  },
+  retry: { de: "Erneut versuchen", en: "Retry" },
+  instead: { de: "Stattdessen {channel} erzeugen", en: "Generate {channel} instead" },
+  noDraftFor: { de: "Noch kein Entwurf für {name}", en: "No draft for {name} yet" },
+  tunedBefore: { de: "Die Nachricht wird auf den Persönlichkeitstyp", en: "The message will be tuned to the" },
+  tunedAfter: { de: "abgestimmt.", en: "personality type." },
+  generateChannel: { de: "{channel}-Nachricht erzeugen", en: "Generate {channel} message" },
+} satisfies Dict;
 
 interface RowState {
   channel?: Channel;
@@ -52,15 +110,15 @@ function defaultChannelFor(profile: Profile | undefined): Channel {
   return "email";
 }
 
-async function requestDraft(profileId: string, userContext: UserContext, channel: Channel): Promise<OutreachDraft> {
+async function requestDraft(profileId: string, userContext: UserContext, channel: Channel, locale: Locale): Promise<OutreachDraft> {
   const res = await fetch("/api/outreach", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ profileId, userContext, channel }),
+    body: JSON.stringify({ profileId, userContext, channel, locale }),
   });
 
   if (!res.ok) {
-    let message = `Die Nachricht konnte nicht erzeugt werden (HTTP ${res.status}).`;
+    let message = pick(locale, DICT.httpError.de, DICT.httpError.en).replace("{status}", String(res.status));
     try {
       const data = (await res.json()) as { error?: string };
       if (data?.error) message = data.error;
@@ -72,7 +130,7 @@ async function requestDraft(profileId: string, userContext: UserContext, channel
 
   const draft = (await res.json()) as Partial<OutreachDraft>;
   if (!draft || typeof draft.body !== "string") {
-    throw new Error("Ungültige Antwort von /api/outreach.");
+    throw new Error(pick(locale, DICT.invalidResponse.de, DICT.invalidResponse.en));
   }
   return {
     profileId: draft.profileId ?? profileId,
@@ -89,6 +147,7 @@ async function requestDraft(profileId: string, userContext: UserContext, channel
 /* ------------------------------------------------------------------ */
 
 function ScorePill({ score }: { score: number }) {
+  const t = useT(DICT);
   const value = Math.round(score);
   const tone =
     value >= 75
@@ -99,8 +158,8 @@ function ScorePill({ score }: { score: number }) {
   return (
     <span
       className={cx("inline-flex h-7 min-w-10 shrink-0 items-center justify-center rounded-full px-2 text-xs font-semibold tabular-nums", tone)}
-      title={`Match-Score ${value} / 100`}
-      aria-label={`Match-Score ${value} von 100`}
+      title={t("scoreTitle", { value })}
+      aria-label={t("scoreAria", { value })}
     >
       {value}
     </span>
@@ -153,23 +212,25 @@ function ChannelChips({
   disabled?: boolean;
   profile: Profile;
 }) {
+  const [locale] = useLocale();
+  const t = useT(DICT);
   return (
     <div
       role="group"
-      aria-label={`Kanal – gewählt: ${CHANNEL_LABELS[value]}`}
+      aria-label={t("channelGroup", { label: channelLabel(value, locale) })}
       className={cx("flex items-center gap-1.5", disabled && "pointer-events-none opacity-50")}
       aria-disabled={disabled || undefined}
     >
       {CHANNELS.map((channel) => {
         const active = value === channel;
         const available = channel === "email" ? Boolean(profile.email) : Boolean(profile.linkedinUrl);
-        const hint = available ? undefined : channel === "email" ? "Keine E-Mail-Adresse hinterlegt" : "Kein LinkedIn-Profil hinterlegt";
+        const hint = available ? undefined : channel === "email" ? t("noEmail") : t("noLinkedIn");
         return (
           <span key={channel} title={hint} className="inline-flex">
             <Chip active={active} onClick={() => onChange(channel)}>
-              <span className={cx(!available && !active && "opacity-60")}>{CHANNEL_LABELS[channel]}</span>
+              <span className={cx(!available && !active && "opacity-60")}>{channelLabel(channel, locale)}</span>
               {!available && <span aria-hidden className="ml-1 text-[10px] font-normal opacity-60">∅</span>}
-              <span className="sr-only">{active ? ", gewählt" : ""}{!available ? `, ${hint}` : ""}</span>
+              <span className="sr-only">{active ? t("selectedSr") : ""}{!available ? `, ${hint}` : ""}</span>
             </Chip>
           </span>
         );
@@ -207,6 +268,8 @@ function ContactRow({
   onChannel: (next: Channel) => void;
   onGenerate: () => void;
 }) {
+  const [locale] = useLocale();
+  const t = useT(DICT);
   return (
     <li
       className={cx(
@@ -224,21 +287,21 @@ function ContactRow({
           onClick={onSelect}
           aria-pressed={selected}
           className="flex min-w-0 flex-1 items-start gap-3 rounded-[var(--radius-sm)] text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-          title={selected ? "Im Composer geöffnet" : "Im Composer öffnen"}
+          title={selected ? t("openedInComposer") : t("openInComposer")}
         >
           <Avatar src={profile.photoUrl} name={profile.name} size={40} />
           <span className="min-w-0 flex-1">
             <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="truncate text-sm font-semibold tracking-tight text-[var(--foreground)]">{profile.name}</span>
-              <Badge tone="accent">{personalityLabel(profile)}</Badge>
-              {pinned && <Badge tone="success">Vorausgewählt</Badge>}
-              {row.draft && !row.loading && <Badge tone="neutral">Entwurf</Badge>}
+              <Badge tone="accent">{personalityLabel(profile, locale)}</Badge>
+              {pinned && <Badge tone="success">{t("preselected")}</Badge>}
+              {row.draft && !row.loading && <Badge tone="neutral">{t("draft")}</Badge>}
             </span>
             <span className="mt-0.5 block truncate text-xs text-[var(--muted)]" title={profile.headline}>
               {profile.headline}
             </span>
             <span className="mt-0.5 block text-[11px] text-[var(--muted)]">
-              {NETWORK_ROLE_LABELS[profile.networkRole] ?? profile.networkRole}
+              {NETWORK_ROLE_LABELS[profile.networkRole]?.[locale] ?? profile.networkRole}
               {profile.location ? ` · ${profile.location}` : ""}
             </span>
           </span>
@@ -256,7 +319,7 @@ function ContactRow({
           type="button"
         >
           {row.loading && <Spinner />}
-          {row.loading ? "Erzeuge …" : row.draft ? "Neu erzeugen" : "Nachricht erzeugen"}
+          {row.loading ? t("generating") : row.draft ? t("regenerate") : t("generate")}
         </Button>
       </div>
 
@@ -334,6 +397,8 @@ export default function OutreachWorkspace() {
   const searchParams = useSearchParams();
   const preselectedId = searchParams.get("profile");
   const { userContext, ready, loadDemo } = useUserContext();
+  const [locale] = useLocale();
+  const t = useT(DICT);
 
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("all");
   const [rows, setRows] = useState<Record<string, RowState>>({});
@@ -394,7 +459,7 @@ export default function OutreachWorkspace() {
         [profileId]: { ...(prev[profileId] ?? EMPTY_ROW), channel, loading: true, error: undefined },
       }));
       try {
-        const draft = await requestDraft(profileId, userContext, channel);
+        const draft = await requestDraft(profileId, userContext, channel, locale);
         setRows((prev) => {
           const current = prev[profileId] ?? EMPTY_ROW;
           return {
@@ -403,14 +468,14 @@ export default function OutreachWorkspace() {
           };
         });
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Unbekannter Fehler.";
+        const message = err instanceof Error ? err.message : pick(locale, DICT.unknownError.de, DICT.unknownError.en);
         setRows((prev) => ({
           ...prev,
           [profileId]: { ...(prev[profileId] ?? EMPTY_ROW), channel, loading: false, error: message },
         }));
       }
     },
-    [userContext, selectContact],
+    [userContext, selectContact, locale],
   );
 
   const batchRunning = batch !== null;
@@ -446,15 +511,15 @@ export default function OutreachWorkspace() {
     return (
       <EmptyState
         icon={<IconUser />}
-        title="Noch kein Nutzer-Kontext vorhanden"
-        body="Damit wir Kontakte priorisieren und Nachrichten personalisieren können, brauchen wir dein Profil: Rolle, Idee, was du suchst."
+        title={t("emptyCtxTitle")}
+        body={t("emptyCtxBody")}
         action={
           <>
             <Button onClick={loadDemo} type="button">
-              Demo-Kontext laden
+              {t("loadDemo")}
             </Button>
             <LinkButton href="/onboarding" variant="secondary">
-              Onboarding starten
+              {t("startOnboarding")}
             </LinkButton>
           </>
         }
@@ -464,11 +529,14 @@ export default function OutreachWorkspace() {
 
   const anyLoading = batchRunning || Object.values(rows).some((r) => r.loading);
   const generatedCount = Object.values(rows).filter((r) => r.draft).length;
-  const batchLabel = batch ? `Erzeuge … ${Math.min(batch.done + 1, batch.total)}/${batch.total}` : `Top ${Math.min(BATCH_N, prioritized.length) || BATCH_N} erzeugen`;
+  const batchLabel = batch
+    ? t("batchProgress", { done: Math.min(batch.done + 1, batch.total), total: batch.total })
+    : t("generateTop", { n: Math.min(BATCH_N, prioritized.length) || BATCH_N });
 
   const selectedProfile = selectedId ? profileById.get(selectedId) : undefined;
   const selectedRow = selectedId ? (rows[selectedId] ?? EMPTY_ROW) : EMPTY_ROW;
   const selectedChannel = selectedRow.channel ?? defaultChannelFor(selectedProfile);
+  const otherChannel: Channel = selectedChannel === "email" ? "linkedin" : "email";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
@@ -479,13 +547,13 @@ export default function OutreachWorkspace() {
         <div className="border-b border-[var(--border)] px-5 py-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Priorisierte Kontakte</h2>
+              <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">{t("prioritized")}</h2>
               <p className="mt-0.5 text-xs text-[var(--muted)]">
-                Für <span className="font-medium text-[var(--foreground)]">{userContext.name || "dich"}</span> sortiert nach Match-Score
+                {t("for")} <span className="font-medium text-[var(--foreground)]">{userContext.name || t("you")}</span> {t("sortedByScore")}
                 {generatedCount > 0 && (
                   <>
                     {" · "}
-                    <span className="font-medium text-[var(--foreground)]">{generatedCount}</span> {generatedCount === 1 ? "Entwurf" : "Entwürfe"}
+                    <span className="font-medium text-[var(--foreground)]">{generatedCount}</span> {generatedCount === 1 ? t("draftOne") : t("draftMany")}
                   </>
                 )}
               </p>
@@ -512,14 +580,14 @@ export default function OutreachWorkspace() {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2 px-5 pt-4" role="group" aria-label="Nach Rolle filtern">
+        <div className="flex flex-wrap gap-2 px-5 pt-4" role="group" aria-label={t("filterByRole")}>
           <Chip active={roleFilter === "all"} onClick={() => setRoleFilter("all")}>
-            Alle
+            {t("all")}
             <span className="ml-1.5 tabular-nums opacity-70">{ranked.length}</span>
           </Chip>
           {NETWORK_ROLE_ORDER.filter((role) => (roleCounts[role] ?? 0) > 0).map((role) => (
             <Chip key={role} active={roleFilter === role} onClick={() => setRoleFilter(role)}>
-              {NETWORK_ROLE_LABELS[role]}
+              {NETWORK_ROLE_LABELS[role][locale]}
               <span className="ml-1.5 tabular-nums opacity-70">{roleCounts[role]}</span>
             </Chip>
           ))}
@@ -529,12 +597,12 @@ export default function OutreachWorkspace() {
           {prioritized.length === 0 ? (
             <EmptyState
               icon={<IconInbox />}
-              title="Keine Kontakte gefunden"
-              body="Für diesen Filter gibt es aktuell keine passenden Profile."
+              title={t("noContactsTitle")}
+              body={t("noContactsBody")}
               action={
                 roleFilter !== "all" && (
                   <Button size="sm" variant="secondary" onClick={() => setRoleFilter("all")} type="button">
-                    Filter zurücksetzen
+                    {t("resetFilter")}
                   </Button>
                 )
               }
@@ -579,8 +647,8 @@ export default function OutreachWorkspace() {
         {!selectedProfile ? (
           <EmptyState
             icon={<IconInbox />}
-            title="Wähle links einen Kontakt"
-            body="Klicke auf eine Person oder erzeuge direkt eine Nachricht – der Entwurf erscheint hier zum Bearbeiten, Kopieren und Versenden."
+            title={t("pickContactTitle")}
+            body={t("pickContactBody")}
             action={
               prioritized.length > 0 && (
                 <Button size="sm" onClick={generateTop} disabled={anyLoading} type="button">
@@ -600,7 +668,7 @@ export default function OutreachWorkspace() {
           />
         ) : (
           <Card padding="none" className="overflow-hidden fr-fade-in">
-            <ComposerHeader profile={selectedProfile} badges={<Badge tone="neutral">{CHANNEL_LABELS[selectedChannel]}</Badge>} />
+            <ComposerHeader profile={selectedProfile} badges={<Badge tone="neutral">{channelLabel(selectedChannel, locale)}</Badge>} />
             {selectedRow.loading ? (
               <ComposerSkeleton channel={selectedChannel} />
             ) : selectedRow.error ? (
@@ -610,16 +678,16 @@ export default function OutreachWorkspace() {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Button size="sm" onClick={() => generate(selectedProfile.id, selectedChannel)} disabled={batchRunning} type="button">
-                    Erneut versuchen
+                    {t("retry")}
                   </Button>
                   <Button
                     size="sm"
                     variant="secondary"
-                    onClick={() => generate(selectedProfile.id, selectedChannel === "email" ? "linkedin" : "email")}
+                    onClick={() => generate(selectedProfile.id, otherChannel)}
                     disabled={batchRunning}
                     type="button"
                   >
-                    Stattdessen {selectedChannel === "email" ? "LinkedIn" : "E-Mail"} erzeugen
+                    {t("instead", { channel: channelLabel(otherChannel, locale) })}
                   </Button>
                 </div>
               </div>
@@ -628,15 +696,15 @@ export default function OutreachWorkspace() {
                 <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-soft)] text-[var(--accent)]">
                   <IconSparkle />
                 </div>
-                <p className="text-sm font-semibold text-[var(--foreground)]">Noch kein Entwurf für {selectedProfile.name}</p>
+                <p className="text-sm font-semibold text-[var(--foreground)]">{t("noDraftFor", { name: selectedProfile.name })}</p>
                 <p className="mx-auto mt-1 max-w-sm text-sm text-[var(--muted)]">
-                  Die Nachricht wird auf den Persönlichkeitstyp{" "}
-                  <span className="font-medium text-[var(--foreground)]">{personalityLabel(selectedProfile)}</span> abgestimmt.
+                  {t("tunedBefore")}{" "}
+                  <span className="font-medium text-[var(--foreground)]">{personalityLabel(selectedProfile, locale)}</span> {t("tunedAfter")}
                 </p>
                 <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
                   <Button size="sm" onClick={() => generate(selectedProfile.id, selectedChannel)} disabled={batchRunning} type="button">
                     <IconSparkle />
-                    {CHANNEL_LABELS[selectedChannel]}-Nachricht erzeugen
+                    {t("generateChannel", { channel: channelLabel(selectedChannel, locale) })}
                   </Button>
                 </div>
               </div>
