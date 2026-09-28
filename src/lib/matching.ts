@@ -6,10 +6,15 @@
  * Score-Modell: Jede Reason trägt `weight` Punkte bei (Budget je Pfad ≤ 100), Risiken können
  * Punkte abziehen. score = clamp(Σ weight − Abzüge). Pfad = networkRole des Profils, sofern die
  * Nutzer:in diese Rolle sucht; sonst gibt es nur die allgemeinen Signale (Vertical, Text, Skills, Event).
+ *
+ * Sprache: Alle Texte (reasons, risks, explainMatch, Tier-Labels) liegen als {de, en} vor und werden
+ * über `options.locale` (Default "de") ausgewählt. Gewichte und Scores sind sprachunabhängig.
+ * Die Datei bleibt pur: kein Import aus data.ts oder i18n.tsx, der Locale-Typ ist lokal definiert.
  */
 import {
   FOUNDER_DIM_KEYS,
   FOUNDER_DIM_LABELS,
+  type FounderDimKey,
   type FounderDims,
   type FounderRole,
   type MatchReason,
@@ -24,9 +29,14 @@ import {
 /* Öffentliche Zusatz-Typen                                            */
 /* ------------------------------------------------------------------ */
 
+/** Lokal definiert (kein Import aus i18n.tsx), strukturell identisch mit `Locale` dort. */
+export type MatchLocale = "de" | "en";
+
 export interface MatchOptions {
   /** Event-Slugs, bei denen die Nutzer:in selbst ist (UserContext hat kein Event-Feld). */
   userEvents?: string[];
+  /** Sprache der Texte in reasons/risks. Default "de". Scores bleiben unabhängig davon gleich. */
+  locale?: MatchLocale;
 }
 
 export const DEFAULT_USER_EVENTS: string[] = ["idealab-2026"];
@@ -40,35 +50,68 @@ export const MATCH_TIER_LABELS: Record<MatchTier, string> = {
   schwach: "Schwacher Match",
 };
 
+export const MATCH_TIER_LABELS_EN: Record<MatchTier, string> = {
+  top: "Top match",
+  gut: "Good match",
+  möglich: "Possible match",
+  schwach: "Weak match",
+};
+
+/** Tier-Label in der gewünschten Sprache (Default Deutsch). */
+export function matchTierLabel(tier: MatchTier, locale: MatchLocale = "de"): string {
+  return (locale === "en" ? MATCH_TIER_LABELS_EN : MATCH_TIER_LABELS)[tier];
+}
+
 /* ------------------------------------------------------------------ */
 /* Labels & Konstanten                                                 */
 /* ------------------------------------------------------------------ */
 
-const NETWORK_ROLE_LABELS: Record<NetworkRole, string> = {
-  cofounder: "Co-Founder",
-  investor: "Investor:in",
-  mentor: "Mentor:in",
-  talent: "Talent",
-  expert: "Expert:in",
+/** Zweisprachiges Textpaar. */
+type Bi = { de: string; en: string };
+
+const NETWORK_ROLE_LABELS: Record<NetworkRole, Bi> = {
+  cofounder: { de: "Co-Founder", en: "Co-founder" },
+  investor: { de: "Investor:in", en: "Investor" },
+  mentor: { de: "Mentor:in", en: "Mentor" },
+  talent: { de: "Talent", en: "Talent" },
+  expert: { de: "Expert:in", en: "Expert" },
 };
 
-const FOUNDER_ROLE_LABELS: Record<FounderRole, string> = {
-  tech: "Tech",
-  commercial: "Commercial",
-  product: "Produkt",
-  design: "Design",
-  operations: "Operations",
-  "domain-expert": "Domain-Expert:in",
+/** Englisch im Satz mit Artikel ("is an investor"); Deutsch kommt ohne Artikel aus ("ist Investor:in"). */
+const NETWORK_ROLE_IN_SENTENCE_EN: Record<NetworkRole, string> = {
+  cofounder: "a co-founder",
+  investor: "an investor",
+  mentor: "a mentor",
+  talent: "a talent",
+  expert: "an expert",
+};
+
+const FOUNDER_ROLE_LABELS: Record<FounderRole, Bi> = {
+  tech: { de: "Tech", en: "Tech" },
+  commercial: { de: "Commercial", en: "Commercial" },
+  product: { de: "Produkt", en: "Product" },
+  design: { de: "Design", en: "Design" },
+  operations: { de: "Operations", en: "Operations" },
+  "domain-expert": { de: "Domain-Expert:in", en: "Domain expert" },
 };
 
 const STAGE_ORDER: Stage[] = ["idea", "pre-seed", "seed", "series-a", "growth"];
 
-const STAGE_LABELS: Record<Stage, string> = {
-  idea: "Idee",
-  "pre-seed": "Pre-Seed",
-  seed: "Seed",
-  "series-a": "Series A",
-  growth: "Growth",
+const STAGE_LABELS: Record<Stage, Bi> = {
+  idea: { de: "Idee", en: "Idea" },
+  "pre-seed": { de: "Pre-Seed", en: "Pre-seed" },
+  seed: { de: "Seed", en: "Seed" },
+  "series-a": { de: "Series A", en: "Series A" },
+  growth: { de: "Growth", en: "Growth" },
+};
+
+/** Deutsch aus dem Shared Contract (bleibt synchron), Englisch lokal. */
+const DIM_LABELS: Record<FounderDimKey, Bi> = {
+  vision: { de: FOUNDER_DIM_LABELS.vision, en: "Vision" },
+  design: { de: FOUNDER_DIM_LABELS.design, en: "Design / Visual" },
+  tech: { de: FOUNDER_DIM_LABELS.tech, en: "Tech" },
+  detail: { de: FOUNDER_DIM_LABELS.detail, en: "Detail" },
+  execution: { de: FOUNDER_DIM_LABELS.execution, en: "Execution" },
 };
 
 const NEUTRAL_DIMS: FounderDims = { vision: 5, design: 5, tech: 5, detail: 5, execution: 5 };
@@ -126,29 +169,34 @@ const STOPWORDS = new Set(
 /** Kurze Tokens, die trotzdem Bedeutung tragen. */
 const SHORT_ALLOW = new Set(["ai", "ki", "vc", "ux", "ui", "ml", "hr", "ar", "vr", "3d", "ip", "iot"]);
 
-/** Skill-Konzepte: fasst Synonyme zusammen, damit "AI/LLM" und "Machine Learning" als Überschneidung zählen. */
-const SKILL_CONCEPTS: { label: string; phrases: string[] }[] = [
-  { label: "AI/ML", phrases: ["ai", "ki", "ml", "llm", "llms", "genai", "machine learning", "deep learning", "artificial intelligence", "künstliche intelligenz", "generative ai", "nlp", "data science", "computer vision"] },
-  { label: "Backend", phrases: ["backend", "back end", "api", "apis", "node", "python", "java", "rust", "databases", "sql", "postgres", "server", "software engineering", "software development", "softwareentwicklung"] },
-  { label: "Frontend", phrases: ["frontend", "front end", "react", "next js", "vue", "angular", "typescript", "javascript", "web development", "webentwicklung"] },
-  { label: "Mobile", phrases: ["mobile", "ios", "android", "flutter", "react native", "swift", "kotlin"] },
-  { label: "Cloud/DevOps", phrases: ["cloud", "aws", "azure", "gcp", "devops", "kubernetes", "docker", "infrastructure"] },
-  { label: "Data/Analytics", phrases: ["data", "analytics", "data analysis", "tableau", "power bi", "statistics", "statistik", "excel"] },
-  { label: "Prototyping/MVP", phrases: ["prototyping", "prototype", "prototypen", "mvp", "rapid prototyping", "no code", "low code", "hackathon"] },
-  { label: "Produkt", phrases: ["product", "product management", "produktmanagement", "product owner", "roadmap", "user research", "agile", "scrum"] },
-  { label: "Design/UX", phrases: ["design", "ux", "ui", "figma", "user experience", "product design", "branding", "visual design"] },
-  { label: "Sales/BizDev", phrases: ["sales", "vertrieb", "business development", "bizdev", "b2b sales", "account management", "key account", "partnerships", "negotiation", "verhandlung"] },
-  { label: "Marketing/Growth", phrases: ["marketing", "growth", "seo", "content", "social media", "performance marketing", "brand", "go to market", "gtm"] },
-  { label: "Finance/Fundraising", phrases: ["finance", "finanzen", "fundraising", "venture capital", "vc", "investment", "investments", "controlling", "accounting", "financial modeling", "private equity", "due diligence"] },
-  { label: "Operations", phrases: ["operations", "ops", "supply chain", "logistics", "logistik", "prozesse", "process management", "project management", "projektmanagement"] },
-  { label: "Leadership", phrases: ["leadership", "führung", "team building", "management", "hiring", "recruiting"] },
-  { label: "Strategie/Consulting", phrases: ["strategy", "strategie", "consulting", "beratung", "business strategy", "corporate strategy"] },
-  { label: "Legal/Compliance", phrases: ["legal", "recht", "law", "compliance", "regulatory", "datenschutz", "gdpr"] },
-  { label: "Hardware/Robotics", phrases: ["hardware", "robotics", "robotik", "embedded", "iot", "mechanical engineering", "maschinenbau", "electronics"] },
-  { label: "Umsetzungsstärke", phrases: ["execution", "umsetzung", "schnelle umsetzung", "delivery", "shipping", "hands on", "getting things done"] },
-  { label: "Kommunikation", phrases: ["communication", "kommunikation", "public speaking", "pitching", "storytelling", "presentation"] },
-  { label: "Research/Science", phrases: ["research", "forschung", "science", "phd", "biotech", "chemistry", "physics", "medicine", "medizin"] },
+/**
+ * Skill-Konzepte: fasst Synonyme zusammen, damit "AI/LLM" und "Machine Learning" als Überschneidung zählen.
+ * `label` ist der deutsche Anzeigename und zugleich der interne Schlüssel, `en` das englische Pendant.
+ */
+const SKILL_CONCEPTS: { label: string; en: string; phrases: string[] }[] = [
+  { label: "AI/ML", en: "AI/ML", phrases: ["ai", "ki", "ml", "llm", "llms", "genai", "machine learning", "deep learning", "artificial intelligence", "künstliche intelligenz", "generative ai", "nlp", "data science", "computer vision"] },
+  { label: "Backend", en: "Backend", phrases: ["backend", "back end", "api", "apis", "node", "python", "java", "rust", "databases", "sql", "postgres", "server", "software engineering", "software development", "softwareentwicklung"] },
+  { label: "Frontend", en: "Frontend", phrases: ["frontend", "front end", "react", "next js", "vue", "angular", "typescript", "javascript", "web development", "webentwicklung"] },
+  { label: "Mobile", en: "Mobile", phrases: ["mobile", "ios", "android", "flutter", "react native", "swift", "kotlin"] },
+  { label: "Cloud/DevOps", en: "Cloud/DevOps", phrases: ["cloud", "aws", "azure", "gcp", "devops", "kubernetes", "docker", "infrastructure"] },
+  { label: "Data/Analytics", en: "Data/Analytics", phrases: ["data", "analytics", "data analysis", "tableau", "power bi", "statistics", "statistik", "excel"] },
+  { label: "Prototyping/MVP", en: "Prototyping/MVP", phrases: ["prototyping", "prototype", "prototypen", "mvp", "rapid prototyping", "no code", "low code", "hackathon"] },
+  { label: "Produkt", en: "Product", phrases: ["product", "product management", "produktmanagement", "product owner", "roadmap", "user research", "agile", "scrum"] },
+  { label: "Design/UX", en: "Design/UX", phrases: ["design", "ux", "ui", "figma", "user experience", "product design", "branding", "visual design"] },
+  { label: "Sales/BizDev", en: "Sales/BizDev", phrases: ["sales", "vertrieb", "business development", "bizdev", "b2b sales", "account management", "key account", "partnerships", "negotiation", "verhandlung"] },
+  { label: "Marketing/Growth", en: "Marketing/Growth", phrases: ["marketing", "growth", "seo", "content", "social media", "performance marketing", "brand", "go to market", "gtm"] },
+  { label: "Finance/Fundraising", en: "Finance/Fundraising", phrases: ["finance", "finanzen", "fundraising", "venture capital", "vc", "investment", "investments", "controlling", "accounting", "financial modeling", "private equity", "due diligence"] },
+  { label: "Operations", en: "Operations", phrases: ["operations", "ops", "supply chain", "logistics", "logistik", "prozesse", "process management", "project management", "projektmanagement"] },
+  { label: "Leadership", en: "Leadership", phrases: ["leadership", "führung", "team building", "management", "hiring", "recruiting"] },
+  { label: "Strategie/Consulting", en: "Strategy/Consulting", phrases: ["strategy", "strategie", "consulting", "beratung", "business strategy", "corporate strategy"] },
+  { label: "Legal/Compliance", en: "Legal/Compliance", phrases: ["legal", "recht", "law", "compliance", "regulatory", "datenschutz", "gdpr"] },
+  { label: "Hardware/Robotics", en: "Hardware/Robotics", phrases: ["hardware", "robotics", "robotik", "embedded", "iot", "mechanical engineering", "maschinenbau", "electronics"] },
+  { label: "Umsetzungsstärke", en: "Execution", phrases: ["execution", "umsetzung", "schnelle umsetzung", "delivery", "shipping", "hands on", "getting things done"] },
+  { label: "Kommunikation", en: "Communication", phrases: ["communication", "kommunikation", "public speaking", "pitching", "storytelling", "presentation"] },
+  { label: "Research/Science", en: "Research/Science", phrases: ["research", "forschung", "science", "phd", "biotech", "chemistry", "physics", "medicine", "medizin"] },
 ];
+
+const SKILL_CONCEPT_EN = new Map(SKILL_CONCEPTS.map((c) => [c.label, c.en] as const));
 
 /* ------------------------------------------------------------------ */
 /* Kleine Helfer                                                       */
@@ -167,8 +215,8 @@ function norm(s: string) {
   return s.trim().toLowerCase();
 }
 
-function firstName(name: string) {
-  return (name ?? "").trim().split(/\s+/)[0] || name || "Diese Person";
+function firstName(name: string, locale: MatchLocale = "de") {
+  return (name ?? "").trim().split(/\s+/)[0] || name || (locale === "en" ? "This person" : "Diese Person");
 }
 
 function stageIndex(s?: Stage | null): number {
@@ -182,8 +230,8 @@ function humanizeSlug(slug: string) {
     .join(" ");
 }
 
-function joinLabels<K extends string>(keys: K[], labels: Record<K, string>) {
-  return keys.map((k) => labels[k] ?? k).join(", ");
+function joinLabels<K extends string>(keys: K[], labels: Record<K, Bi>, locale: MatchLocale) {
+  return keys.map((k) => labels[k]?.[locale] ?? k).join(", ");
 }
 
 /** Wörter normalisieren: klein, nur Buchstaben/Zahlen, mit Leerzeichen gepolstert (für Phrasen-Suche). */
@@ -218,7 +266,7 @@ function sharedTerms(a: Set<string>, b: Set<string>): string[] {
   return hits;
 }
 
-/** Welche Skill-Konzepte kommen in einer Liste von Skills/Stärken vor? */
+/** Welche Skill-Konzepte kommen in einer Liste von Skills/Stärken vor? (Schlüssel = deutsches Label) */
 function conceptsOf(items: string[]): Set<string> {
   const padded = items.map(padWords);
   const found = new Set<string>();
@@ -228,15 +276,19 @@ function conceptsOf(items: string[]): Set<string> {
   return found;
 }
 
-/** Gemeinsame Skills/Stärken als lesbare Labels (Konzepte zuerst, dann rohe Wörter). */
-function skillOverlap(strengths: string[], skills: string[]): string[] {
+/**
+ * Gemeinsame Skills/Stärken als lesbare Labels (Konzepte zuerst, dann rohe Wörter).
+ * Die Menge ist sprachunabhängig; nur die Konzept-Labels werden am Ende übersetzt.
+ */
+function skillOverlap(strengths: string[], skills: string[], locale: MatchLocale): string[] {
   if (!strengths.length || !skills.length) return [];
   const a = conceptsOf(strengths);
   const b = conceptsOf(skills);
-  const labels = Array.from(a).filter((c) => b.has(c));
+  const concepts = Array.from(a).filter((c) => b.has(c));
   const coveredWords = new Set(
-    SKILL_CONCEPTS.filter((c) => labels.includes(c.label)).flatMap((c) => c.phrases.flatMap((p) => p.split(" "))),
+    SKILL_CONCEPTS.filter((c) => concepts.includes(c.label)).flatMap((c) => c.phrases.flatMap((p) => p.split(" "))),
   );
+  const labels = concepts.map((c) => (locale === "en" ? SKILL_CONCEPT_EN.get(c) ?? c : c));
   const rawA = tokenize(strengths.join(" "));
   const rawB = tokenize(skills.join(" "));
   for (const t of rawA) {
@@ -282,6 +334,12 @@ export function complementarity(user: FounderDims, other: FounderDims): number {
 }
 
 export function scoreMatch(user: UserContext, profile: Profile, options?: MatchOptions): MatchResult {
+  const locale: MatchLocale = options?.locale ?? "de";
+  /** Textauswahl nach Sprache – Gewichte bleiben davon unberührt. */
+  const tx = (de: string, en: string) => (locale === "en" ? en : de);
+  const lbl = <K extends string>(labels: Record<K, Bi>, k: K) => labels[k]?.[locale] ?? k;
+  const join = <K extends string>(keys: K[], labels: Record<K, Bi>) => joinLabels(keys, labels, locale);
+
   const reasons: MatchReason[] = [];
   const risks: string[] = [];
   let penalty = 0;
@@ -295,7 +353,7 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   };
 
   // Eingaben normalisieren (API-Bodies können unvollständig sein).
-  const first = firstName(profile.name);
+  const first = firstName(profile.name, locale);
   const lookingFor = list<NetworkRole>(user.lookingFor);
   const lookingForRoles = list<FounderRole>(user.lookingForRoles);
   const userVerticals = list(user.verticals).map(norm);
@@ -305,7 +363,8 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   const profileDims = profile.dims ?? NEUTRAL_DIMS;
   const userEvents = options?.userEvents ?? DEFAULT_USER_EVENTS;
   const role = profile.networkRole;
-  const roleLabel = NETWORK_ROLE_LABELS[role] ?? role;
+  const roleLabel = lbl(NETWORK_ROLE_LABELS, role);
+  const roleEn = NETWORK_ROLE_IN_SENTENCE_EN[role] ?? role;
   const titles = experienceTitles(profile);
   const comp = complementarity(userDims, profileDims);
 
@@ -313,11 +372,27 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   const wanted = lookingFor.includes(role);
   const related = !wanted && isMentorLike(role) && lookingFor.some(isMentorLike);
   if (wanted) {
-    add("Gesuchte Rolle", `${first} ist ${roleLabel} – genau die Art Kontakt, die du suchst.`, 20);
+    add(
+      tx("Gesuchte Rolle", "Role you're looking for"),
+      tx(`${first} ist ${roleLabel} – genau die Art Kontakt, die du suchst.`, `${first} is ${roleEn} – exactly the kind of contact you're looking for.`),
+      20,
+    );
   } else if (related) {
-    add("Gesuchte Rolle", `${first} ist ${roleLabel} – nah an dem, was du suchst (${joinLabels(lookingFor.filter(isMentorLike), NETWORK_ROLE_LABELS)}).`, 12);
+    const near = join(lookingFor.filter(isMentorLike), NETWORK_ROLE_LABELS);
+    add(
+      tx("Gesuchte Rolle", "Role you're looking for"),
+      tx(`${first} ist ${roleLabel} – nah an dem, was du suchst (${near}).`, `${first} is ${roleEn} – close to what you're looking for (${near}).`),
+      12,
+    );
   } else {
-    risk(`Ist ${roleLabel}, du suchst aktuell ${joinLabels(lookingFor, NETWORK_ROLE_LABELS) || "noch nichts Konkretes"}.`, 5);
+    const seeking = join(lookingFor, NETWORK_ROLE_LABELS);
+    risk(
+      tx(
+        `Ist ${roleLabel}, du suchst aktuell ${seeking || "noch nichts Konkretes"}.`,
+        seeking ? `Is ${roleEn}, but you're currently looking for ${seeking}.` : `Is ${roleEn}, but you haven't said what you're looking for yet.`,
+      ),
+      5,
+    );
   }
   const path: NetworkRole | null = wanted || related ? role : null;
 
@@ -325,113 +400,183 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   if (path === "cofounder") {
     const fr = profile.founderRole;
     if (fr && lookingForRoles.includes(fr)) {
-      add("Fehlende Team-Rolle", `Deckt die Rolle ${FOUNDER_ROLE_LABELS[fr]} ab, die dir im Team fehlt.`, 20);
+      const r = lbl(FOUNDER_ROLE_LABELS, fr);
+      add(tx("Fehlende Team-Rolle", "Missing team role"), tx(`Deckt die Rolle ${r} ab, die dir im Team fehlt.`, `Covers the ${r} role your team is missing.`), 20);
     } else if (fr && fr === user.founderRole) {
-      risk(`Gleiche Rolle wie du (${FOUNDER_ROLE_LABELS[fr]}) – Überschneidung statt Ergänzung.`, 10);
+      const r = lbl(FOUNDER_ROLE_LABELS, fr);
+      risk(tx(`Gleiche Rolle wie du (${r}) – Überschneidung statt Ergänzung.`, `Same role as you (${r}) – overlap rather than complement.`), 10);
     } else if (fr) {
-      const mine = user.founderRole ? FOUNDER_ROLE_LABELS[user.founderRole] : "dir";
+      const r = lbl(FOUNDER_ROLE_LABELS, fr);
+      const mine = user.founderRole ? lbl(FOUNDER_ROLE_LABELS, user.founderRole) : tx("dir", "you");
       if (lookingForRoles.length) {
-        add("Andere Perspektive", `Nicht deine gesuchte Rolle (${joinLabels(lookingForRoles, FOUNDER_ROLE_LABELS)}), aber als ${FOUNDER_ROLE_LABELS[fr]} eine Ergänzung zu ${mine}.`, 6);
+        const wantedRoles = join(lookingForRoles, FOUNDER_ROLE_LABELS);
+        add(
+          tx("Andere Perspektive", "Different perspective"),
+          tx(`Nicht deine gesuchte Rolle (${wantedRoles}), aber als ${r} eine Ergänzung zu ${mine}.`, `Not the role you're looking for (${wantedRoles}), but ${r} still complements ${mine}.`),
+          6,
+        );
       } else {
-        add("Andere Perspektive", `Bringt als ${FOUNDER_ROLE_LABELS[fr]} eine andere Perspektive als ${mine} ein.`, 10);
+        add(
+          tx("Andere Perspektive", "Different perspective"),
+          tx(`Bringt als ${r} eine andere Perspektive als ${mine} ein.`, `As ${r}, brings a different perspective than ${mine}.`),
+          10,
+        );
       }
     } else {
-      risk("Team-Rolle im Profil unklar – im Gespräch klären.");
+      risk(tx("Team-Rolle im Profil unklar – im Gespräch klären.", "Team role unclear in the profile – clarify in conversation."));
     }
 
-    addComplementarity(add, comp, userDims, profileDims, 0.12);
+    addComplementarity(add, comp, userDims, profileDims, 0.12, locale);
     // Nur warnen, wenn auch die Rolle keine Lücke füllt – sonst widerspricht das dem Top-Match.
     const fillsGap = !!fr && lookingForRoles.includes(fr);
-    if (comp < 25 && !fillsGap) risk("Ähnliches Stärkenprofil wie du – wenig Ergänzung bei den Dimensionen.");
+    if (comp < 25 && !fillsGap) {
+      risk(tx("Ähnliches Stärkenprofil wie du – wenig Ergänzung bei den Dimensionen.", "Similar strengths profile to yours – little complementarity across the dimensions."));
+    }
 
     // Sucht das Profil umgekehrt jemanden wie die Nutzer:in?
     const words = user.founderRole ? ROLE_WORDS[user.founderRole] : [];
     if (profileLookingFor.some((lf) => words.some((w) => lf.includes(w)))) {
-      add("Sucht jemanden wie dich", `Sucht: ${profileLookingFor.join(", ")}.`, 8);
+      add(tx("Sucht jemanden wie dich", "Looking for someone like you"), tx(`Sucht: ${profileLookingFor.join(", ")}.`, `Looking for: ${profileLookingFor.join(", ")}.`), 8);
     } else if (profileLookingFor.some((lf) => /co-?founder|mitgründer/.test(lf))) {
-      add("Sucht Co-Founder", `Sucht Mitgründer:innen, Rolle offen (${profileLookingFor.join(", ")}).`, 4);
+      add(
+        tx("Sucht Co-Founder", "Looking for a co-founder"),
+        tx(`Sucht Mitgründer:innen, Rolle offen (${profileLookingFor.join(", ")}).`, `Looking for co-founders, role open (${profileLookingFor.join(", ")}).`),
+        4,
+      );
     }
 
     // Phase
     const d = Math.abs(stageIndex(user.stage) - stageIndex(profile.stage));
     if (user.stage && profile.stage) {
-      if (d === 0) add("Gleiche Phase", `Beide in Phase ${STAGE_LABELS[profile.stage]}.`, 4);
-      else if (d === 1) add("Ähnliche Phase", `Phasen liegen nah beieinander (${STAGE_LABELS[profile.stage]} vs. ${STAGE_LABELS[user.stage]}).`, 2);
+      const ps = lbl(STAGE_LABELS, profile.stage);
+      const us = lbl(STAGE_LABELS, user.stage);
+      if (d === 0) add(tx("Gleiche Phase", "Same stage"), tx(`Beide in Phase ${ps}.`, `You're both at the ${ps} stage.`), 4);
+      else if (d === 1) add(tx("Ähnliche Phase", "Similar stage"), tx(`Phasen liegen nah beieinander (${ps} vs. ${us}).`, `Stages are close together (${ps} vs. ${us}).`), 2);
     }
 
     // Eigene Idee im Gepäck?
     const seeksTeam = profileLookingFor.some((lf) => /co-?founder|mitgründer/.test(lf));
     if (seeksTeam && stageIndex(profile.stage) <= 1 && !user.openToIdeas) {
-      risk("Sucht selbst noch ein Team für die eigene Idee – ihr müsstet euch auf eine Idee einigen.", 4);
+      risk(
+        tx(
+          "Sucht selbst noch ein Team für die eigene Idee – ihr müsstet euch auf eine Idee einigen.",
+          "Still looking for a team for their own idea – you'd have to agree on one idea.",
+        ),
+        4,
+      );
     }
 
-    if (titles.length >= 3) add("Erfahrung", `${titles.length} berufliche Stationen im Profil.`, 2);
+    if (titles.length >= 3) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 2);
   } else if (path === "investor") {
     const us = user.stage;
     const ps = profile.stage;
     if (!us || !ps) {
-      add("Phase offen", "Investitionsphase ist nicht hinterlegt – kein Ausschlusskriterium.", 8);
+      add(tx("Phase offen", "Stage open"), tx("Investitionsphase ist nicht hinterlegt – kein Ausschlusskriterium.", "Investment stage not specified – not a deal-breaker."), 8);
     } else {
       const d = stageIndex(ps) - stageIndex(us); // > 0: investiert später, als du bist
-      if (d === 0) add("Passende Phase", `Investiert in ${STAGE_LABELS[ps]} – genau deine Phase.`, 20);
-      else if (Math.abs(d) === 1) add("Passende Phase", `Investiert in ${STAGE_LABELS[ps]}, du bist bei ${STAGE_LABELS[us]} – nah genug für ein erstes Gespräch.`, 14);
-      else if (d > 0) risk(`Investiert erst ab ${STAGE_LABELS[ps]} – du bist bei ${STAGE_LABELS[us]}, also wahrscheinlich zu früh.`, d >= 3 ? 10 : 6);
-      else risk(`Investiert in ${STAGE_LABELS[ps]}, du bist schon bei ${STAGE_LABELS[us]} – passt nicht zur Ticketgröße.`, -d >= 3 ? 10 : 6);
+      const psL = lbl(STAGE_LABELS, ps);
+      const usL = lbl(STAGE_LABELS, us);
+      if (d === 0) add(tx("Passende Phase", "Matching stage"), tx(`Investiert in ${psL} – genau deine Phase.`, `Invests at ${psL} – exactly your stage.`), 20);
+      else if (Math.abs(d) === 1) {
+        add(
+          tx("Passende Phase", "Matching stage"),
+          tx(`Investiert in ${psL}, du bist bei ${usL} – nah genug für ein erstes Gespräch.`, `Invests at ${psL}, you're at ${usL} – close enough for a first conversation.`),
+          14,
+        );
+      } else if (d > 0) {
+        risk(
+          tx(`Investiert erst ab ${psL} – du bist bei ${usL}, also wahrscheinlich zu früh.`, `Only invests from ${psL} onwards – you're at ${usL}, so probably too early.`),
+          d >= 3 ? 10 : 6,
+        );
+      } else {
+        risk(
+          tx(`Investiert in ${psL}, du bist schon bei ${usL} – passt nicht zur Ticketgröße.`, `Invests at ${psL}, you're already at ${usL} – doesn't match the ticket size.`),
+          -d >= 3 ? 10 : 6,
+        );
+      }
     }
 
-    addComplementarity(add, comp, userDims, profileDims, 0.04);
+    addComplementarity(add, comp, userDims, profileDims, 0.04, locale);
 
     if (profileLookingFor.some((lf) => /invest|dealflow|deal flow|startups/.test(lf))) {
-      add("Sucht Dealflow", `Ist aktiv auf der Suche nach Startups (${profileLookingFor.join(", ")}).`, 8);
+      add(
+        tx("Sucht Dealflow", "Looking for deal flow"),
+        tx(`Ist aktiv auf der Suche nach Startups (${profileLookingFor.join(", ")}).`, `Actively looking for startups (${profileLookingFor.join(", ")}).`),
+        8,
+      );
     }
 
     const investTitles = titles.filter((t) => INVEST_TITLE_RE.test(t));
-    if (investTitles.length) add("Investment-Erfahrung", `Investment-Hintergrund im Lebenslauf (${investTitles.slice(0, 2).join(", ")}).`, 6);
-    else if (titles.length >= 4) add("Erfahrung", `${titles.length} berufliche Stationen im Profil.`, 3);
+    if (investTitles.length) {
+      const shown = investTitles.slice(0, 2).join(", ");
+      add(tx("Investment-Erfahrung", "Investment experience"), tx(`Investment-Hintergrund im Lebenslauf (${shown}).`, `Investment background on the CV (${shown}).`), 6);
+    } else if (titles.length >= 4) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 3);
   } else if (path === "mentor" || path === "expert") {
     const founderTitles = titles.filter((t) => FOUNDER_TITLE_RE.test(t));
     const leadTitles = titles.filter((t) => LEAD_TITLE_RE.test(t));
     if (founderTitles.length) {
-      add("Gründungserfahrung", `Hat selbst gegründet oder geführt (${founderTitles.slice(0, 2).join(", ")}) – weiß, wo du stehst.`, 12);
+      const shown = founderTitles.slice(0, 2).join(", ");
+      add(
+        tx("Gründungserfahrung", "Founding experience"),
+        tx(`Hat selbst gegründet oder geführt (${shown}) – weiß, wo du stehst.`, `Has founded or led a company themselves (${shown}) – knows where you stand.`),
+        12,
+      );
     } else if (leadTitles.length) {
-      add("Führungserfahrung", `Führungserfahrung (${leadTitles[0]}) – kann auf Augenhöhe Feedback geben.`, 8);
+      add(
+        tx("Führungserfahrung", "Leadership experience"),
+        tx(`Führungserfahrung (${leadTitles[0]}) – kann auf Augenhöhe Feedback geben.`, `Leadership experience (${leadTitles[0]}) – can give feedback as a peer.`),
+        8,
+      );
     } else {
-      risk("Keine erkennbare Gründungs- oder Führungserfahrung im Lebenslauf.");
+      risk(tx("Keine erkennbare Gründungs- oder Führungserfahrung im Lebenslauf.", "No visible founding or leadership experience on the CV."));
     }
 
     const covered = FOUNDER_DIM_KEYS.filter((k) => userDims[k] <= 5 && profileDims[k] >= 7);
     if (covered.length) {
-      add("Deckt deine Lücken", `Stark in ${joinLabels(covered, FOUNDER_DIM_LABELS)} – da schätzt du dich selbst schwächer ein.`, 8);
+      const dims = join(covered, DIM_LABELS);
+      add(tx("Deckt deine Lücken", "Covers your gaps"), tx(`Stark in ${dims} – da schätzt du dich selbst schwächer ein.`, `Strong in ${dims} – where you rate yourself weaker.`), 8);
     }
 
-    addComplementarity(add, comp, userDims, profileDims, 0.1);
+    addComplementarity(add, comp, userDims, profileDims, 0.1, locale);
 
     if (profileLookingFor.some((lf) => /mentee|advisor|beirat|mentoring/.test(lf))) {
-      add("Bietet Mentoring an", `Sucht aktiv Mentees bzw. eine Advisor-Rolle (${profileLookingFor.join(", ")}).`, 8);
+      add(
+        tx("Bietet Mentoring an", "Offers mentoring"),
+        tx(`Sucht aktiv Mentees bzw. eine Advisor-Rolle (${profileLookingFor.join(", ")}).`, `Actively looking for mentees or an advisor role (${profileLookingFor.join(", ")}).`),
+        8,
+      );
     }
 
-    if (titles.length >= 4) add("Erfahrung", `${titles.length} berufliche Stationen im Profil.`, 4);
+    if (titles.length >= 4) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 4);
   } else if (path === "talent") {
     const fr = profile.founderRole;
     const jobRoles = jobRolesOf(profileLookingFor);
     const hit = fr && lookingForRoles.includes(fr) ? fr : jobRoles.find((r) => lookingForRoles.includes(r));
     const sameArea = !!user.founderRole && (fr === user.founderRole || jobRoles.includes(user.founderRole));
     if (hit) {
-      add("Passende Position", `Als ${FOUNDER_ROLE_LABELS[hit]} passt ${first} auf eine Rolle, die du besetzen willst.`, 20);
+      const r = lbl(FOUNDER_ROLE_LABELS, hit);
+      add(tx("Passende Position", "Matching position"), tx(`Als ${r} passt ${first} auf eine Rolle, die du besetzen willst.`, `As ${r}, ${first} fits a position you want to fill.`), 20);
     } else if (sameArea && user.founderRole) {
-      add("Verstärkt deinen Bereich", `Würde deinen Bereich (${FOUNDER_ROLE_LABELS[user.founderRole]}) verstärken – eine typische erste Einstellung.`, 12);
+      const r = lbl(FOUNDER_ROLE_LABELS, user.founderRole);
+      add(
+        tx("Verstärkt deinen Bereich", "Strengthens your area"),
+        tx(`Würde deinen Bereich (${r}) verstärken – eine typische erste Einstellung.`, `Would strengthen your area (${r}) – a typical first hire.`),
+        12,
+      );
     } else if (fr && lookingForRoles.length) {
-      risk(`Rolle (${FOUNDER_ROLE_LABELS[fr]}) passt nicht zu deinen offenen Positionen (${joinLabels(lookingForRoles, FOUNDER_ROLE_LABELS)}).`);
+      const r = lbl(FOUNDER_ROLE_LABELS, fr);
+      const open = join(lookingForRoles, FOUNDER_ROLE_LABELS);
+      risk(tx(`Rolle (${r}) passt nicht zu deinen offenen Positionen (${open}).`, `Role (${r}) doesn't match your open positions (${open}).`));
     }
 
-    addComplementarity(add, comp, userDims, profileDims, 0.08);
+    addComplementarity(add, comp, userDims, profileDims, 0.08, locale);
 
     if (profileLookingFor.some((lf) => /job|stelle|position|hire/.test(lf))) {
-      add("Sucht einen Job", `Ist offen für eine Stelle (${profileLookingFor.join(", ")}).`, 8);
+      add(tx("Sucht einen Job", "Looking for a job"), tx(`Ist offen für eine Stelle (${profileLookingFor.join(", ")}).`, `Open to a position (${profileLookingFor.join(", ")}).`), 8);
     }
 
-    if (titles.length >= 4) add("Erfahrung", `${titles.length} berufliche Stationen im Profil.`, 6);
-    else if (titles.length >= 2) add("Erfahrung", `${titles.length} berufliche Stationen im Profil.`, 3);
+    if (titles.length >= 4) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 6);
+    else if (titles.length >= 2) add(tx("Erfahrung", "Experience"), experienceDetail(titles.length, locale), 3);
   }
 
   // 3) Vertical – für Investor:innen (Thesen-Fokus) stärker gewichtet
@@ -439,16 +584,19 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   const investorPath = path === "investor";
   if (sharedVerticals.length > 0) {
     const w = investorPath ? (sharedVerticals.length > 1 ? 23 : 14) : sharedVerticals.length > 1 ? 15 : 10;
+    const shared = sharedVerticals.join(", ");
     add(
-      "Gleiches Vertical",
-      investorPath ? `Investiert in dein Vertical (${sharedVerticals.join(", ")}).` : `Gemeinsam: ${sharedVerticals.join(", ")}.`,
+      tx("Gleiches Vertical", "Same vertical"),
+      investorPath ? tx(`Investiert in dein Vertical (${shared}).`, `Invests in your vertical (${shared}).`) : tx(`Gemeinsam: ${shared}.`, `In common: ${shared}.`),
       w,
     );
   } else if (userVerticals.length && profileVerticals.length) {
+    const pv = profileVerticals.join(", ");
+    const uv = userVerticals.join(", ");
     if (investorPath) {
-      risk(`Investiert in ${profileVerticals.join(", ")}, nicht in dein Vertical (${userVerticals.join(", ")}).`, 8);
+      risk(tx(`Investiert in ${pv}, nicht in dein Vertical (${uv}).`, `Invests in ${pv}, not in your vertical (${uv}).`), 8);
     } else if (!user.openToIdeas) {
-      risk(`Kein gemeinsames Vertical (${profileVerticals.join(", ")} vs. ${userVerticals.join(", ")}).`, 6);
+      risk(tx(`Kein gemeinsames Vertical (${pv} vs. ${uv}).`, `No shared vertical (${pv} vs. ${uv}).`), 6);
     }
   }
 
@@ -459,28 +607,31 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
     const terms = sharedTerms(ideaTokens, profileTokens);
     if (terms.length) {
       const w = Math.min(8, Math.round(2 * terms.length + 3 * (terms.length / ideaTokens.size)));
-      add("Thematische Nähe", `Deine Idee und das Profil teilen Begriffe: ${terms.slice(0, 4).join(", ")}.`, w);
+      const shown = terms.slice(0, 4).join(", ");
+      add(tx("Thematische Nähe", "Thematic overlap"), tx(`Deine Idee und das Profil teilen Begriffe: ${shown}.`, `Your idea and the profile share terms: ${shown}.`), w);
     }
   }
 
   // 5) Gemeinsame Skills/Stärken (Konzept-Synonyme)
-  const skills = skillOverlap(list(user.strengths), list(profile.skills));
+  const skills = skillOverlap(list(user.strengths), list(profile.skills), locale);
   if (skills.length) {
-    add("Gemeinsame Skills", `Ihr teilt: ${skills.slice(0, 3).join(", ")}.`, Math.min(6, 2 * skills.length));
+    const shown = skills.slice(0, 3).join(", ");
+    add(tx("Gemeinsame Skills", "Shared skills"), tx(`Ihr teilt: ${shown}.`, `You share: ${shown}.`), Math.min(6, 2 * skills.length));
   }
 
   // 6) Gemeinsames Event – man kann sich tatsächlich treffen
   const profileEvents = list(profile.events);
   const sharedEvents = profileEvents.filter((e) => userEvents.includes(e));
   if (sharedEvents.length) {
-    add("Gleiches Event", `Ihr seid beide bei ${sharedEvents.map(humanizeSlug).join(", ")} – ihr könnt euch direkt treffen.`, 5);
+    const where = sharedEvents.map(humanizeSlug).join(", ");
+    add(tx("Gleiches Event", "Same event"), tx(`Ihr seid beide bei ${where} – ihr könnt euch direkt treffen.`, `You're both at ${where} – you can meet in person.`), 5);
   } else if (userEvents.length && profileEvents.length) {
-    risk("Kein gemeinsames Event – ein Treffen müsstet ihr separat organisieren.");
+    risk(tx("Kein gemeinsames Event – ein Treffen müsstet ihr separat organisieren.", "No shared event – you'd need to arrange a meeting separately."));
   }
 
   // 7) Datenlage
   if ((profile.about ?? "").trim().length < 40 && list(profile.skills).length < 3) {
-    risk("Wenig Profil-Informationen (kaum About/Skills) – Score ist unsicher.");
+    risk(tx("Wenig Profil-Informationen (kaum About/Skills) – Score ist unsicher.", "Sparse profile (little about/skills) – the score is uncertain."));
   }
 
   const raw = reasons.reduce((sum, r) => sum + r.weight, 0) - penalty;
@@ -493,6 +644,11 @@ export function scoreMatch(user: UserContext, profile: Profile, options?: MatchO
   };
 }
 
+/** "N berufliche Stationen im Profil." in beiden Sprachen. */
+function experienceDetail(count: number, locale: MatchLocale) {
+  return locale === "en" ? `${count} professional roles listed on the profile.` : `${count} berufliche Stationen im Profil.`;
+}
+
 /** Komplementaritäts-Reason mit pfadabhängigem Faktor; nennt die zwei größten Zugewinne. */
 function addComplementarity(
   add: (label: string, detail: string, weight: number) => void,
@@ -500,16 +656,19 @@ function addComplementarity(
   userDims: FounderDims,
   profileDims: FounderDims,
   factor: number,
+  locale: MatchLocale = "de",
 ) {
   const w = Math.round(comp * factor);
   if (w < 2) return;
   const gains = FOUNDER_DIM_KEYS.filter((k) => userDims[k] < 10 && profileDims[k] > userDims[k])
     .sort((a, b) => profileDims[b] - userDims[b] - (profileDims[a] - userDims[a]))
     .slice(0, 2);
-  const where = gains.length ? ` (${joinLabels(gains, FOUNDER_DIM_LABELS)})` : "";
-  add("Komplementäre Stärken", `Ergänzt deine schwächeren Dimensionen zu ${comp} %${where}.`, w);
+  const where = gains.length ? ` (${joinLabels(gains, DIM_LABELS, locale)})` : "";
+  if (locale === "en") add("Complementary strengths", `Covers ${comp}% of your weaker dimensions${where}.`, w);
+  else add("Komplementäre Stärken", `Ergänzt deine schwächeren Dimensionen zu ${comp} %${where}.`, w);
 }
 
+/** Reicht `options` (inkl. `locale`) unverändert an scoreMatch durch. */
 export function rankCandidates(user: UserContext, profiles: Profile[], options?: MatchOptions): MatchResult[] {
   return profiles
     .map((p) => scoreMatch(user, p, options))
@@ -527,34 +686,55 @@ export function matchTier(score: number): MatchTier {
   return "schwach";
 }
 
-const TIER_PHRASE: Record<MatchTier, string> = {
-  top: "ein Top-Match",
-  gut: "ein guter Match",
-  möglich: "ein möglicher Match",
-  schwach: "eher ein schwacher Match",
+const TIER_PHRASE: Record<MatchTier, Bi> = {
+  top: { de: "ein Top-Match", en: "a top match" },
+  gut: { de: "ein guter Match", en: "a good match" },
+  möglich: { de: "ein möglicher Match", en: "a possible match" },
+  schwach: { de: "eher ein schwacher Match", en: "more of a weak match" },
 };
 
-const TIER_ADVICE: Record<MatchTier, (first: string) => string> = {
-  top: (first) => `Sprich ${first} direkt an – am besten noch auf dem Event.`,
-  gut: () => "Ein Gespräch lohnt sich – kläre die offenen Punkte früh.",
-  möglich: () => "Eher zweite Priorität – ansprechen, wenn Zeit bleibt.",
-  schwach: () => "Für dein aktuelles Ziel wahrscheinlich nicht der richtige Kontakt.",
+const TIER_ADVICE: Record<MatchTier, Record<MatchLocale, (first: string) => string>> = {
+  top: {
+    de: (first) => `Sprich ${first} direkt an – am besten noch auf dem Event.`,
+    en: (first) => `Reach out to ${first} directly – ideally right at the event.`,
+  },
+  gut: {
+    de: () => "Ein Gespräch lohnt sich – kläre die offenen Punkte früh.",
+    en: () => "A conversation is worth it – clarify the open points early.",
+  },
+  möglich: {
+    de: () => "Eher zweite Priorität – ansprechen, wenn Zeit bleibt.",
+    en: () => "Second priority – reach out if time allows.",
+  },
+  schwach: {
+    de: () => "Für dein aktuelles Ziel wahrscheinlich nicht der richtige Kontakt.",
+    en: () => "Probably not the right contact for your current goal.",
+  },
 };
 
-/** 2–4 deutsche Sätze: Einstufung, stärkster Grund, wichtigstes Risiko (oder zweiter Grund), Empfehlung. */
-export function explainMatch(result: MatchResult, user: UserContext, profile: Profile): string {
+/**
+ * 2–4 Sätze: Einstufung, stärkster Grund, wichtigstes Risiko (oder zweiter Grund), Empfehlung.
+ * `locale` (Default "de") steuert Rahmen- und Empfehlungssätze; Grund- und Risiko-Texte stammen aus
+ * `result` – dafür also scoreMatch/rankCandidates mit derselben `locale` aufrufen.
+ */
+export function explainMatch(result: MatchResult, user: UserContext, profile: Profile, locale: MatchLocale = "de"): string {
+  const en = locale === "en";
   const tier = matchTier(result.score);
-  const first = firstName(profile.name);
+  const first = firstName(profile.name, locale);
   const [top, second] = result.reasons;
   const idea = (user.idea ?? "").trim();
-  const sentences: string[] = [`${profile.name} ist für dich ${TIER_PHRASE[tier]} (${result.score}/100).`];
+  const ideaShort = idea.length > 60 ? idea.slice(0, 57).trimEnd() + "…" : idea;
+  const sentences: string[] = [
+    en ? `${profile.name} is ${TIER_PHRASE[tier].en} for you (${result.score}/100).` : `${profile.name} ist für dich ${TIER_PHRASE[tier].de} (${result.score}/100).`,
+  ];
 
   if (top) sentences.push(top.detail);
-  else sentences.push(`Konkrete Anknüpfungspunkte zu deinem Vorhaben${idea ? ` („${idea.length > 60 ? idea.slice(0, 57).trimEnd() + "…" : idea}“)` : ""} fehlen bisher.`);
+  else if (en) sentences.push(`So far there are no concrete links to your venture${idea ? ` (“${ideaShort}”)` : ""}.`);
+  else sentences.push(`Konkrete Anknüpfungspunkte zu deinem Vorhaben${idea ? ` („${ideaShort}“)` : ""} fehlen bisher.`);
 
-  if (result.risks[0]) sentences.push(`Achtung: ${result.risks[0]}`);
+  if (result.risks[0]) sentences.push(en ? `Heads-up: ${result.risks[0]}` : `Achtung: ${result.risks[0]}`);
   else if (second) sentences.push(second.detail);
 
-  sentences.push(TIER_ADVICE[tier](first));
+  sentences.push(TIER_ADVICE[tier][locale](first));
   return sentences.join(" ");
 }
