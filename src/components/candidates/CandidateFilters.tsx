@@ -1,14 +1,14 @@
 "use client";
 /**
- * Filterleiste der Kandidatenliste: Suche (debounced), Chips/Segmente für kleine Wertemengen,
- * Selects für Vertical und Event, aktive Filter als entfernbare Chips, „Alle zurücksetzen".
+ * Filter-Toolbar der Kandidatenliste: Suche (debounced, „/“ fokussiert), kompakte Selects,
+ * Rollen als Chip-Reihe, aktive Filter als entfernbare Pills, rechts ein Slot (Trefferzahl, Sortierung).
  * Kontrolliert: Zustand kommt von außen (CandidateList hält ihn in der URL).
  * Enthält auch die URL <-> Filter-Konvertierung, damit Liste und Filter dasselbe Vokabular nutzen.
  */
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { getEvents, getVerticals } from "@/lib/data";
 import { PERSONALITY_LABELS, type FounderRole, type NetworkRole, type PersonalityType, type ProfileFilters } from "@/lib/types";
-import { Button, Chip, Input, Select, cx } from "@/components/ui";
+import { Button, Chip, cx } from "@/components/ui";
 import { FOUNDER_ROLE_LABELS, NETWORK_ROLE_LABELS, SOURCE_LABELS, formatVertical, type ProfileSource } from "./CandidateCard";
 
 /** Quelle-Filter: nur echte IdeaLab-Daten oder nur Demo-Daten (undefined = alle). */
@@ -29,8 +29,6 @@ export const FILTER_KEYS = [
   "personality",
   "source",
 ] as const satisfies readonly (keyof CandidateFilterState)[];
-
-type FilterKey = (typeof FILTER_KEYS)[number];
 
 const NETWORK_ROLES = Object.keys(NETWORK_ROLE_LABELS) as NetworkRole[];
 const FOUNDER_ROLES = Object.keys(FOUNDER_ROLE_LABELS) as FounderRole[];
@@ -79,21 +77,30 @@ export function countActiveFilters(filters: CandidateFilterState): number {
 /* Suchfeld                                                            */
 /* ------------------------------------------------------------------ */
 
-function SearchIcon() {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden>
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
-  );
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
 }
 
 /**
  * Suchfeld mit Debounce. Eigener Text-State, damit Tippen sofort sichtbar ist;
  * nach 200 ms Ruhe wird der Wert nach außen gemeldet. Externe Änderungen
  * (Reset, Navigation) werden übernommen – das Echo der eigenen Eingabe nicht.
+ * Tastenkürzel „/“ fokussiert das Feld, „Escape“ leert es.
  */
-function SearchInput({ id, value, onChange }: { id: string; value: string; onChange: (query: string) => void }) {
+function SearchInput({
+  id,
+  value,
+  onChange,
+  className,
+}: {
+  id: string;
+  value: string;
+  onChange: (query: string) => void;
+  className?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(value);
   const [seen, setSeen] = useState(value);
   const [emitted, setEmitted] = useState(value);
@@ -115,229 +122,296 @@ function SearchInput({ id, value, onChange }: { id: string; value: string; onCha
     return () => window.clearTimeout(timer);
   }, [text, emitted, onChange]);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey || isTypingTarget(event.target)) return;
+      event.preventDefault();
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const clear = () => {
+    setText("");
+    setEmitted("");
+    onChange("");
+    inputRef.current?.focus();
+  };
+
   return (
-    <div className="relative">
-      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]">
-        <SearchIcon />
+    <div className={cx("relative min-w-0", className)}>
+      <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base leading-none text-[var(--muted)]">
+        ⌕
       </span>
-      <Input
+      <input
+        ref={inputRef}
         id={id}
         type="search"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Name, Skill, Firma, Ort oder Vertical suchen …"
+        onKeyDown={(e) => {
+          if (e.key === "Escape" && text) {
+            e.preventDefault();
+            clear();
+          }
+        }}
+        placeholder="Name, Skill, Firma, Ort, Vertical …"
         autoComplete="off"
+        spellCheck={false}
         aria-label="Kandidaten durchsuchen"
-        className="h-12 pl-10 text-base"
+        className="h-10 w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] pl-9 pr-12 text-sm text-[var(--foreground)] shadow-[var(--shadow-sm)] outline-none transition placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--ring)] [&::-webkit-search-cancel-button]:appearance-none"
       />
+      {text ? (
+        <button
+          type="button"
+          onClick={clear}
+          aria-label="Suche leeren"
+          className="absolute right-2 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-sm leading-none text-[var(--muted)] transition hover:bg-[var(--surface-2)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+        >
+          ×
+        </button>
+      ) : (
+        <kbd
+          aria-hidden
+          className="pointer-events-none absolute right-2.5 top-1/2 hidden h-5 -translate-y-1/2 items-center rounded border border-[var(--border)] bg-[var(--surface-2)] px-1.5 font-mono text-[10px] text-[var(--muted)] sm:inline-flex"
+        >
+          /
+        </kbd>
+      )}
     </div>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Chip-Gruppe                                                         */
+/* Kompaktes Select – die „Alle …“-Option dient als sichtbares Label     */
 /* ------------------------------------------------------------------ */
 
-function ChipGroup<T extends string>({
+function ToolbarSelect({
+  id,
   label,
-  options,
   value,
   onChange,
+  children,
 }: {
+  id: string;
   label: string;
-  options: { value: T; label: string }[];
-  value: T | undefined;
-  onChange: (next: T | undefined) => void;
+  value: string;
+  onChange: (value: string) => void;
+  children: ReactNode;
 }) {
   return (
-    <fieldset className="min-w-0">
-      <legend className="mb-1.5 text-xs font-medium text-[var(--muted)]">{label}</legend>
-      <div className="flex flex-wrap gap-1.5">
-        <Chip active={value === undefined} onClick={() => onChange(undefined)}>
-          Alle
-        </Chip>
-        {options.map((option) => (
-          <Chip
-            key={option.value}
-            active={value === option.value}
-            onClick={() => onChange(value === option.value ? undefined : option.value)}
-          >
-            {option.label}
-          </Chip>
-        ))}
-      </div>
-    </fieldset>
+    <select
+      id={id}
+      aria-label={label}
+      title={label}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={cx(
+        "h-9 min-w-0 cursor-pointer rounded-[var(--radius)] border px-2.5 text-xs font-medium shadow-[var(--shadow-sm)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--ring)]",
+        value
+          ? "border-[var(--accent)]/40 bg-[var(--accent-soft)] text-[var(--accent)]"
+          : "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:bg-[var(--surface-2)]",
+      )}
+    >
+      {children}
+    </select>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Aktive Filter                                                       */
+/* Aktive Filter als Pills                                             */
 /* ------------------------------------------------------------------ */
 
-function activeFilterLabel(key: FilterKey, value: string, eventNames: Map<string, string>): string {
-  switch (key) {
-    case "query":
-      return `„${value}“`;
-    case "networkRole":
-      return NETWORK_ROLE_LABELS[value as NetworkRole] ?? value;
-    case "founderRole":
-      return FOUNDER_ROLE_LABELS[value as FounderRole] ?? value;
-    case "vertical":
-      return formatVertical(value);
-    case "event":
-      return eventNames.get(value) ?? value;
-    case "personality":
-      return PERSONALITY_LABELS[value as PersonalityType] ?? value;
-    case "source":
-      return SOURCE_FILTER_LABELS[value as SourceFilter] ?? value;
-  }
+interface ActiveFilter {
+  key: keyof CandidateFilterState;
+  label: string;
 }
 
-/** Aktive Filter als entfernbare Chips + „Alle zurücksetzen". Rendert nichts, wenn keine aktiv sind. */
-export function ActiveFilterChips({ filters, onChange }: { filters: CandidateFilterState; onChange: (next: CandidateFilterState) => void }) {
-  const active = FILTER_KEYS.filter((key) => Boolean(filters[key]));
-  if (active.length === 0) return null;
-  const eventNames = new Map(getEvents().map((e) => [e.slug, e.name] as const));
+function describeActiveFilters(filters: CandidateFilterState, eventNames: Map<string, string>): ActiveFilter[] {
+  const out: ActiveFilter[] = [];
+  if (filters.query) out.push({ key: "query", label: `„${filters.query}“` });
+  if (filters.networkRole) out.push({ key: "networkRole", label: NETWORK_ROLE_LABELS[filters.networkRole] });
+  if (filters.founderRole) out.push({ key: "founderRole", label: `Team-Rolle: ${FOUNDER_ROLE_LABELS[filters.founderRole]}` });
+  if (filters.vertical) out.push({ key: "vertical", label: formatVertical(filters.vertical) });
+  if (filters.event) out.push({ key: "event", label: eventNames.get(filters.event) ?? filters.event });
+  if (filters.personality) out.push({ key: "personality", label: PERSONALITY_LABELS[filters.personality] });
+  if (filters.source) out.push({ key: "source", label: `Quelle: ${SOURCE_FILTER_LABELS[filters.source]}` });
+  return out;
+}
 
+function FilterPill({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5" aria-label="Aktive Filter">
-      {active.map((key) => (
-        <button
-          key={key}
-          type="button"
-          onClick={() => onChange({ ...filters, [key]: undefined })}
-          aria-label={`Filter ${activeFilterLabel(key, filters[key] as string, eventNames)} entfernen`}
-          className="inline-flex h-7 items-center gap-1 rounded-full bg-[var(--accent-soft)] pl-2.5 pr-1.5 text-xs font-medium text-[var(--accent)] transition hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-        >
-          {activeFilterLabel(key, filters[key] as string, eventNames)}
-          <span aria-hidden className="flex h-4 w-4 items-center justify-center rounded-full text-[13px] leading-none">
-            ×
-          </span>
-        </button>
-      ))}
-      <Button type="button" variant="ghost" size="sm" onClick={() => onChange({})}>
-        Alle zurücksetzen
-      </Button>
-    </div>
+    <button
+      type="button"
+      onClick={onRemove}
+      aria-label={`Filter entfernen: ${label}`}
+      className="inline-flex h-7 max-w-full items-center gap-1 rounded-full border border-[var(--accent)]/30 bg-[var(--accent-soft)] pl-2.5 pr-1.5 text-xs font-medium text-[var(--accent)] transition hover:border-[var(--accent)]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+    >
+      <span className="truncate">{label}</span>
+      <span aria-hidden className="flex h-4 w-4 items-center justify-center rounded-full text-sm leading-none opacity-70">
+        ×
+      </span>
+    </button>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Filterleiste                                                        */
+/* Toolbar                                                             */
 /* ------------------------------------------------------------------ */
 
 export interface CandidateFiltersProps {
   filters: CandidateFilterState;
   onChange: (next: CandidateFilterState) => void;
   className?: string;
+  /** Rechts neben der Chip-Reihe: z. B. Trefferzahl und Sortier-Umschalter. */
+  trailing?: ReactNode;
 }
 
-export function CandidateFilters({ filters, onChange, className }: CandidateFiltersProps) {
+export function CandidateFilters({ filters, onChange, className, trailing }: CandidateFiltersProps) {
   const id = useId();
-  const verticals = getVerticals();
-  const events = getEvents();
-  const activeCount = countActiveFilters(filters) - (filters.query ? 1 : 0);
-  const [open, setOpen] = useState(false);
+  const verticals = useMemo(() => getVerticals(), []);
+  const events = useMemo(() => getEvents(), []);
+  const eventNames = useMemo(() => new Map(events.map((e) => [e.slug, e.name] as const)), [events]);
+  const [moreOpen, setMoreOpen] = useState(false);
+
+  const active = describeActiveFilters(filters, eventNames);
+  const activeCount = active.length;
+  const selectCount = [filters.founderRole, filters.vertical, filters.event, filters.personality, filters.source].filter(Boolean).length;
 
   const update = (patch: Partial<CandidateFilterState>) => onChange({ ...filters, ...patch });
   const orUndefined = (value: string) => value || undefined;
 
   return (
-    <section aria-label="Suche und Filter" className={cx("space-y-3", className)}>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <div className="min-w-0 flex-1">
-          <SearchInput id={`${id}-query`} value={filters.query ?? ""} onChange={(query) => update({ query: orUndefined(query.trim()) })} />
-        </div>
-        <Button
-          type="button"
-          variant="secondary"
-          className="h-12 shrink-0 sm:w-auto lg:hidden"
-          aria-expanded={open}
-          aria-controls={`${id}-panel`}
-          onClick={() => setOpen((o) => !o)}
-        >
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden>
-            <path d="M4 6h16M7 12h10M10 18h4" />
-          </svg>
-          Filter
-          {activeCount > 0 && (
-            <span className="rounded-full bg-[var(--accent)] px-1.5 text-[11px] font-semibold text-[var(--accent-contrast)]">
-              {activeCount}
+    <section
+      aria-label="Filter"
+      className={cx("rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-3 shadow-[var(--shadow-sm)]", className)}
+    >
+      {/* Zeile 1: Suche prominent + kompakte Selects (mobil einklappbar) */}
+      <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+        <div className="flex items-center gap-2 lg:w-[22rem] lg:shrink-0 xl:w-[26rem]">
+          <SearchInput
+            id={`${id}-query`}
+            className="flex-1"
+            value={filters.query ?? ""}
+            onChange={(query) => update({ query: orUndefined(query.trim()) })}
+          />
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            className="shrink-0 md:hidden"
+            aria-expanded={moreOpen}
+            aria-controls={`${id}-more`}
+            onClick={() => setMoreOpen((open) => !open)}
+          >
+            Filter{selectCount > 0 ? ` · ${selectCount}` : ""}
+            <span aria-hidden className="text-[10px]">
+              {moreOpen ? "▲" : "▼"}
             </span>
-          )}
-        </Button>
-      </div>
+          </Button>
+        </div>
 
-      <div
-        id={`${id}-panel`}
-        className={cx(
-          "rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-4 shadow-[var(--shadow-sm)]",
-          !open && "hidden lg:block",
-        )}
-      >
-        <div className="grid gap-5 lg:grid-cols-2">
-          <ChipGroup
-            label="Rolle im Ökosystem"
-            options={NETWORK_ROLES.map((role) => ({ value: role, label: NETWORK_ROLE_LABELS[role] }))}
-            value={filters.networkRole}
-            onChange={(networkRole) => update({ networkRole })}
-          />
-          <ChipGroup
+        <div
+          id={`${id}-more`}
+          className={cx("grid-cols-2 gap-2 sm:grid-cols-3 lg:flex lg:flex-1 lg:flex-wrap", moreOpen ? "grid" : "hidden md:grid")}
+        >
+          <ToolbarSelect
+            id={`${id}-founderRole`}
             label="Team-Rolle"
-            options={FOUNDER_ROLES.map((role) => ({ value: role, label: FOUNDER_ROLE_LABELS[role] }))}
-            value={filters.founderRole}
-            onChange={(founderRole) => update({ founderRole })}
-          />
-          <ChipGroup
+            value={filters.founderRole ?? ""}
+            onChange={(value) => update({ founderRole: orUndefined(value) as FounderRole | undefined })}
+          >
+            <option value="">Alle Team-Rollen</option>
+            {FOUNDER_ROLES.map((role) => (
+              <option key={role} value={role}>
+                {FOUNDER_ROLE_LABELS[role]}
+              </option>
+            ))}
+          </ToolbarSelect>
+
+          <ToolbarSelect id={`${id}-vertical`} label="Vertical" value={filters.vertical ?? ""} onChange={(value) => update({ vertical: orUndefined(value) })}>
+            <option value="">Alle Verticals</option>
+            {filters.vertical && !verticals.includes(filters.vertical) && <option value={filters.vertical}>{formatVertical(filters.vertical)}</option>}
+            {verticals.map((vertical) => (
+              <option key={vertical} value={vertical}>
+                {formatVertical(vertical)}
+              </option>
+            ))}
+          </ToolbarSelect>
+
+          <ToolbarSelect id={`${id}-event`} label="Event" value={filters.event ?? ""} onChange={(value) => update({ event: orUndefined(value) })}>
+            <option value="">Alle Events</option>
+            {filters.event && !eventNames.has(filters.event) && <option value={filters.event}>{filters.event}</option>}
+            {events.map((event) => (
+              <option key={event.slug} value={event.slug}>
+                {event.name}
+              </option>
+            ))}
+          </ToolbarSelect>
+
+          <ToolbarSelect
+            id={`${id}-personality`}
             label="Persönlichkeitstyp"
-            options={PERSONALITIES.map((type) => ({ value: type, label: PERSONALITY_LABELS[type] }))}
-            value={filters.personality}
-            onChange={(personality) => update({ personality })}
-          />
-          <ChipGroup
+            value={filters.personality ?? ""}
+            onChange={(value) => update({ personality: orUndefined(value) as PersonalityType | undefined })}
+          >
+            <option value="">Alle Typen</option>
+            {PERSONALITIES.map((type) => (
+              <option key={type} value={type}>
+                {PERSONALITY_LABELS[type]}
+              </option>
+            ))}
+          </ToolbarSelect>
+
+          <ToolbarSelect
+            id={`${id}-source`}
             label="Quelle"
-            options={SOURCES.map((source) => ({ value: source, label: SOURCE_FILTER_LABELS[source] }))}
-            value={filters.source}
-            onChange={(source) => update({ source })}
-          />
-
-          <div>
-            <label htmlFor={`${id}-vertical`} className="mb-1.5 block text-xs font-medium text-[var(--muted)]">
-              Vertical
-            </label>
-            <Select id={`${id}-vertical`} value={filters.vertical ?? ""} onChange={(e) => update({ vertical: orUndefined(e.target.value) })}>
-              <option value="">Alle Verticals</option>
-              {filters.vertical && !verticals.includes(filters.vertical) && (
-                <option value={filters.vertical}>{formatVertical(filters.vertical)}</option>
-              )}
-              {verticals.map((vertical) => (
-                <option key={vertical} value={vertical}>
-                  {formatVertical(vertical)}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          <div>
-            <label htmlFor={`${id}-event`} className="mb-1.5 block text-xs font-medium text-[var(--muted)]">
-              Event
-            </label>
-            <Select id={`${id}-event`} value={filters.event ?? ""} onChange={(e) => update({ event: orUndefined(e.target.value) })}>
-              <option value="">Alle Events</option>
-              {filters.event && !events.some((event) => event.slug === filters.event) && (
-                <option value={filters.event}>{filters.event}</option>
-              )}
-              {events.map((event) => (
-                <option key={event.slug} value={event.slug}>
-                  {event.name}
-                </option>
-              ))}
-            </Select>
-          </div>
+            value={filters.source ?? ""}
+            onChange={(value) => update({ source: orUndefined(value) as SourceFilter | undefined })}
+          >
+            <option value="">Alle Quellen</option>
+            {SOURCES.map((source) => (
+              <option key={source} value={source}>
+                {SOURCE_FILTER_LABELS[source]}
+              </option>
+            ))}
+          </ToolbarSelect>
         </div>
       </div>
 
-      <ActiveFilterChips filters={filters} onChange={onChange} />
+      {/* Zeile 2: Rollen-Chips links, Trefferzahl + Sortierung rechts */}
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[var(--border)] pt-3">
+        <div role="group" aria-label="Rolle im Ökosystem" className="flex flex-wrap gap-1.5">
+          <Chip active={!filters.networkRole} onClick={() => filters.networkRole && update({ networkRole: undefined })}>
+            Alle
+          </Chip>
+          {NETWORK_ROLES.map((role) => (
+            <Chip
+              key={role}
+              active={filters.networkRole === role}
+              onClick={() => update({ networkRole: filters.networkRole === role ? undefined : role })}
+            >
+              {NETWORK_ROLE_LABELS[role]}
+            </Chip>
+          ))}
+        </div>
+        {trailing && <div className="flex flex-wrap items-center gap-3">{trailing}</div>}
+      </div>
+
+      {/* Zeile 3: aktive Filter als entfernbare Pills */}
+      {activeCount > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-[var(--border)] pt-3">
+          <span className="mr-1 text-xs text-[var(--muted)]">{activeCount === 1 ? "1 Filter aktiv" : `${activeCount} Filter aktiv`}</span>
+          {active.map((item) => (
+            <FilterPill key={item.key} label={item.label} onRemove={() => update({ [item.key]: undefined })} />
+          ))}
+          <Button type="button" variant="ghost" size="sm" className="ml-auto" onClick={() => onChange({})}>
+            Alle zurücksetzen
+          </Button>
+        </div>
+      )}
     </section>
   );
 }

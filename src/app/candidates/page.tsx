@@ -14,8 +14,8 @@ export default function CandidatesPage() {
   return (
     <div>
       <PageHeader
-        kicker="Kandidaten"
-        title="Wen willst du treffen?"
+        kicker="Netzwerk"
+        title="Kandidaten"
         subtitle={`${profiles.length.toLocaleString("de-DE")} Profile – ${real.toLocaleString("de-DE")} davon von der IdeaLab 2026 – nach Rolle, Vertical, Event und Persönlichkeitstyp durchsuchbar und für dich priorisiert.`}
       />
       <CandidateList />
