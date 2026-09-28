@@ -1,9 +1,10 @@
 /**
- * POST /api/tips – Body { userContext, teamMemberIds?: string[] } → Tip[]
+ * POST /api/tips – Body { userContext, teamMemberIds?: string[], locale?: "de" | "en" } → Tip[]
  * ---------------------------------------------------------------
  * Mit OPENAI_API_KEY verfeinert das LLM (Responses API, Structured Outputs) die regelbasierten Tipps.
  * Ohne Key oder bei Fehlern kommt die Regel-Basis zurück. Antwortet immer 200 mit einem Array.
  * Header "X-Tips-Source": "llm" | "rules" verrät dem Client, welcher Pfad gelaufen ist.
+ * `locale` steuert die Sprache der Regel-Texte und der LLM-Ausgabe (Default "de").
  */
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
@@ -12,6 +13,7 @@ import {
   TIPS_JSON_SCHEMA,
   combineDims,
   generateTips,
+  normalizeTipLocale,
   normalizeTips,
   normalizeUserContext,
   tipsSystemPrompt,
@@ -33,7 +35,7 @@ function isReasoningModel(model: string) {
 }
 
 export async function POST(req: Request) {
-  let body: { userContext?: unknown; teamMemberIds?: unknown } = {};
+  let body: { userContext?: unknown; teamMemberIds?: unknown; locale?: unknown } = {};
   try {
     const parsed: unknown = await req.json();
     if (parsed && typeof parsed === "object") body = parsed as typeof body;
@@ -41,6 +43,7 @@ export async function POST(req: Request) {
     body = {};
   }
 
+  const locale = normalizeTipLocale(body.locale);
   const user = normalizeUserContext(body.userContext);
   const teamMemberIds = Array.isArray(body.teamMemberIds)
     ? body.teamMemberIds.filter((id): id is string => typeof id === "string")
@@ -49,7 +52,7 @@ export async function POST(req: Request) {
   const teamDims: FounderDims | undefined = members.length
     ? combineDims([user.dims, ...members.map((m) => m.dims)])
     : undefined;
-  const baseTips = generateTips(user, { teamDims });
+  const baseTips = generateTips(user, { teamDims, locale });
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) return respond(baseTips, "rules");
@@ -59,8 +62,8 @@ export async function POST(req: Request) {
     const client = new OpenAI({ apiKey, timeout: 45_000, maxRetries: 1 });
     const response = await client.responses.create({
       model,
-      instructions: tipsSystemPrompt(),
-      input: tipsUserPrompt(user, { teamDims, baseTips }),
+      instructions: tipsSystemPrompt(locale),
+      input: tipsUserPrompt(user, { teamDims, baseTips, locale }),
       ...(isReasoningModel(model) ? { reasoning: { effort: "low" as const } } : {}),
       text: {
         format: { type: "json_schema", name: "founder_tips", schema: TIPS_JSON_SCHEMA, strict: true },
