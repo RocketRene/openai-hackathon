@@ -6,12 +6,15 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import type { AgentMode, ChatMessage, ChatRequest, ChatResponse, UiAction } from "@/lib/types";
 import { useUserContext } from "@/lib/user-context";
-import { Button, Card, Textarea, cx } from "@/components/ui";
+import { getProfile } from "@/lib/data";
+import { Badge, Button, Card, Chip, Textarea, cx } from "@/components/ui";
 
 export interface ChatPanelProps {
   mode: AgentMode;
   /** Bei prep-simulation: welche Person der Agent spielt. */
   candidateId?: string;
+  /** Zuletzt gezeigte Person („Gerade im Gespräch“) – für den Quick-Chip „Bereite ein Interview mit … vor“. */
+  currentCandidateId?: string;
   onUiAction: (action: UiAction) => void;
   /** Lokale Begrüßung des Assistenten (ohne API-Aufruf). */
   initialAssistantMessage?: string;
@@ -25,15 +28,23 @@ export interface ChatPanelProps {
 }
 
 export const DEFAULT_GREETING =
-  "Hi! Ich bin dein Voya. Erzähl mir kurz: Welche Rolle hast du und wen suchst du?";
+  "Hi, ich bin Voya. Lass uns jemanden finden, mit dem du wirklich etwas aufbauen willst.\n\nWas möchtest du gründen – und welche Stärke soll dein Co-Founder mitbringen, die dir selbst noch fehlt?";
 
-const QUICK_PROMPTS = [
-  "Interview starten",
-  "Zeig mir passende Kandidaten",
-  "Guck dir mal den Max an",
-  "Wer sind Investoren für Pre-Seed?",
-  "Bereite mich auf das Gespräch mit Lena vor",
-];
+const MODE_LABELS: Record<AgentMode, string> = {
+  interview: "Suchprofil",
+  "prep-simulation": "Simulation",
+  general: "Frei",
+};
+
+const INTERVIEW_CHIP_PREFIX = "Bereite ein Interview mit ";
+const INPUT_ID = "voya-chat-input";
+
+/** Quick-Chip: entweder eine fertige Nachricht oder die Interview-Aktion (nutzt die gezeigte Person). */
+type QuickPrompt = { label: string; message: string } | { label: string; action: "interview" };
+
+function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] || name;
+}
 
 async function readErrorMessage(res: Response): Promise<string> {
   try {
@@ -48,6 +59,7 @@ async function readErrorMessage(res: Response): Promise<string> {
 export default function ChatPanel({
   mode,
   candidateId,
+  currentCandidateId,
   onUiAction,
   initialAssistantMessage,
   messages: controlledMessages,
@@ -144,14 +156,47 @@ export default function ChatPanel({
     }
   };
 
+  /** Ohne gezeigte Person: Satzanfang ins Eingabefeld, den Namen ergänzt die Nutzer:in. */
+  const prefillInterview = useCallback(() => {
+    setInput(INTERVIEW_CHIP_PREFIX);
+    document.getElementById(INPUT_ID)?.focus();
+  }, []);
+
+  // Quick-Chips im Voya-Ton – reine Daten; mit der gerade gezeigten Person, falls vorhanden.
+  const current = currentCandidateId ? getProfile(currentCandidateId) : undefined;
+  const interviewChip = current ? `${INTERVIEW_CHIP_PREFIX}${firstName(current.name)} vor` : `${INTERVIEW_CHIP_PREFIX}… vor`;
+  const quickPrompts: QuickPrompt[] =
+    mode === "prep-simulation"
+      ? [
+          { label: "Los geht's – eröffne das Gespräch", message: "Los geht's – eröffne das Gespräch in deiner Rolle." },
+          { label: "Feedback", message: "Feedback: Wie habe ich mich geschlagen?" },
+        ]
+      : [
+          { label: "Was fehlt mir noch im Suchprofil?", message: "Was fehlt mir noch im Suchprofil?" },
+          { label: "Zeig mir passende Menschen", message: "Zeig mir passende Kandidat:innen für mein Suchprofil." },
+          { label: interviewChip, action: "interview" },
+          { label: "Wer investiert in Pre-Seed?", message: "Wer sind Investoren für Pre-Seed?" },
+          { label: "Guck dir mal die Lena an", message: "Guck dir mal die Lena an" },
+        ];
+
+  const onQuickPrompt = useCallback(
+    (q: QuickPrompt) => {
+      if ("message" in q) {
+        send(q.message);
+      } else if (current) {
+        send(`Bereite ein Interview mit ${current.name} vor.`);
+      } else {
+        prefillInterview();
+      }
+    },
+    [send, current, prefillInterview],
+  );
+
   return (
     <Card
-      title="Text-Chat"
-      action={
-        <span className="text-xs text-[var(--muted)]">
-          Modus: <span className="font-medium text-[var(--foreground)]">{mode}</span>
-        </span>
-      }
+      title="Mit Voya schreiben"
+      description={mode === "prep-simulation" ? "Simulation – keine echten Aussagen der Person." : "Voya kann sich irren. Prüfe wichtige Angaben im Profil."}
+      action={<Badge tone="accent">{MODE_LABELS[mode] ?? mode}</Badge>}
     >
       <div
         ref={listRef}
@@ -175,17 +220,11 @@ export default function ChatPanel({
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {QUICK_PROMPTS.map((q) => (
-          <button
-            key={q}
-            type="button"
-            onClick={() => send(q)}
-            disabled={loading}
-            className="rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1 text-xs text-[var(--foreground)] transition hover:bg-[var(--surface-3)] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {q}
-          </button>
+      <div className="mt-3 flex flex-wrap gap-2" aria-label="Vorschläge">
+        {quickPrompts.map((q) => (
+          <Chip key={q.label} onClick={() => onQuickPrompt(q)} className={cx(loading && "pointer-events-none opacity-50")}>
+            {q.label}
+          </Chip>
         ))}
       </div>
 
@@ -197,12 +236,13 @@ export default function ChatPanel({
         }}
       >
         <Textarea
+          id={INPUT_ID}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={onKeyDown}
           rows={2}
-          placeholder="Schreib dem Agenten … (Enter sendet, Shift+Enter für Zeilenumbruch)"
-          aria-label="Nachricht an den Agenten"
+          placeholder="Oder schreib mir deine Gedanken … (Enter sendet, Shift+Enter für Zeilenumbruch)"
+          aria-label="Nachricht an Voya"
           disabled={loading}
           className="resize-none"
         />

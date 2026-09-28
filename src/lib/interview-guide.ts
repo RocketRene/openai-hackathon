@@ -314,3 +314,28 @@ export function summarizeInterviewGuide(guide: InterviewGuide): string {
     .map((u) => u.split(":")[0])
     .join(", ")}.`;
 }
+
+/** Dateiname für den Download, z. B. `interview-lena-hoffmann.md`. */
+export function interviewGuideFilename(guide: InterviewGuide): string {
+  const slug = guide.profileId.replace(/[^a-z0-9-]+/gi, "-").toLowerCase() || "leitfaden";
+  return `interview-${slug}.md`;
+}
+
+/** Browser-Helfer: lädt `content` als Markdown-Datei herunter. Serverseitig (und unter node --test) ein No-op. */
+export function downloadMarkdown(filename: string, content: string): void {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  try {
+    const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch {
+    /* Download nicht möglich (z. B. eingeschränkte Umgebung) – bewusst still. */
+  }
+}

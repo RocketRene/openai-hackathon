@@ -24,8 +24,8 @@ import LiveCandidatePanel from "./LiveCandidatePanel";
 const MAX_SHOWN_PROFILES = 5;
 
 const MODES: { value: AgentMode; label: string; hint: string }[] = [
-  { value: "interview", label: "Interview", hint: "Der Agent fragt dich aus und schlägt danach Kandidaten vor." },
-  { value: "general", label: "Frei", hint: "Freies Gespräch: Kandidaten, Investoren, Events, Tipps." },
+  { value: "interview", label: "Suchprofil", hint: "Voya klärt Schritt für Schritt dein Suchprofil und findet dann passende Menschen." },
+  { value: "general", label: "Frei", hint: "Freies Gespräch: Menschen, Investoren, Events, Interview-Vorbereitung." },
 ];
 
 const NETWORK_ROLE_LABELS: Record<string, string> = {
@@ -118,6 +118,11 @@ export default function AssistantWorkspace() {
     if (block && block.start + block.count > next.length) voiceBlock.current = null;
   }, []);
 
+  /** Kompaktes Profil im Panel angeklickt → nach vorn („Gerade im Gespräch“). */
+  const bringToFront = useCallback((id: string) => {
+    setShownProfileIds((prev) => [id, ...prev.filter((x) => x !== id)].slice(0, MAX_SHOWN_PROFILES));
+  }, []);
+
   const activeMode = MODES.find((m) => m.value === mode) ?? MODES[0];
 
   return (
@@ -125,8 +130,8 @@ export default function AssistantWorkspace() {
       {ready && !userContext && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--warning)] bg-[var(--warning-soft)] px-4 py-3">
           <p className="text-sm text-[var(--foreground)]">
-            <span className="font-medium">Noch kein Profil</span> – der Agent interviewt dich. Oder lade einen Demo-Kontext, um
-            direkt Kandidaten zu sehen.
+            <span className="font-medium">Noch kein Suchprofil</span> – Voya klärt es mit dir im Gespräch. Oder lade einen Demo-Kontext,
+            um direkt passende Menschen zu sehen.
           </p>
           <div className="flex flex-wrap gap-2">
             <Button variant="secondary" size="sm" onClick={loadDemo}>
@@ -198,7 +203,13 @@ export default function AssistantWorkspace() {
             visibleCandidateIds={shownProfileIds}
           />
 
-          <ChatPanel mode={mode} onUiAction={handleUiAction} messages={messages} onMessagesChange={handleMessagesChange} />
+          <ChatPanel
+            mode={mode}
+            onUiAction={handleUiAction}
+            messages={messages}
+            onMessagesChange={handleMessagesChange}
+            currentCandidateId={shownProfileIds[0]}
+          />
         </div>
 
         {/* Rechte Spalte: Suchprofil, Interviewleitfaden, Live-Kandidaten */}
@@ -210,7 +221,7 @@ export default function AssistantWorkspace() {
           <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-sm font-semibold text-[var(--foreground)]">
-                Live-Kandidaten{" "}
+                Gerade im Gespräch{" "}
                 {shownProfileIds.length > 0 && (
                   <span className="ml-1 rounded-full bg-[var(--accent-soft)] px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
                     {shownProfileIds.length}
@@ -223,7 +234,7 @@ export default function AssistantWorkspace() {
                 </Button>
               )}
             </div>
-            <LiveCandidatePanel profileIds={shownProfileIds} />
+            <LiveCandidatePanel profileIds={shownProfileIds} onFocus={bringToFront} />
           </div>
         </div>
       </div>
