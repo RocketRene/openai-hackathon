@@ -8,7 +8,7 @@
 import Link from "next/link";
 import { useMemo, type ReactNode } from "react";
 import { formatVertical } from "@/components/candidates/CandidateCard";
-import { Avatar, Badge, Button, Card, EmptyState, LinkButton, Skeleton, Stat, cx } from "@/components/ui";
+import { Avatar, Badge, Button, Card, EmptyState, LinkButton, PageHeader, Skeleton, Stat, cx } from "@/components/ui";
 import { getEvent, getProfile } from "@/lib/data";
 import { COMMON, useT, type Dict } from "@/lib/i18n";
 import { matchTier, scoreMatch, type MatchTier } from "@/lib/matching";
@@ -17,6 +17,12 @@ import { FOUNDER_DIM_KEYS, type FounderDimKey, type MatchResult, type Profile } 
 import { useUserContext } from "@/lib/user-context";
 
 const DICT: Dict = {
+  kicker: { de: "Kandidat:innen", en: "Candidates" },
+  title: { de: "Shortlist", en: "Shortlist" },
+  subtitle: {
+    de: "Deine gemerkten Kontakte nebeneinander – Match, Stärken und nächste Schritte auf einen Blick.",
+    en: "Your saved contacts side by side – match, strengths and next steps at a glance.",
+  },
   loading: { de: "Shortlist wird geladen …", en: "Loading shortlist …" },
   statCount: { de: "Gemerkte Kontakte", en: "Saved contacts" },
   hintScores: { de: "Match-Scores aus deinem Onboarding", en: "Match scores from your onboarding" },
@@ -392,6 +398,15 @@ function ProfileCard({
 }
 
 /* ------------------------------------------------------------------ */
+/* Seitenkopf (Client, weil PageHeader nur Strings nimmt und die Sprache ein Hook ist) */
+/* ------------------------------------------------------------------ */
+
+export function ShortlistHeader() {
+  const t = useT(DICT);
+  return <PageHeader kicker={t("kicker")} title={t("title")} subtitle={t("subtitle")} />;
+}
+
+/* ------------------------------------------------------------------ */
 /* Hauptkomponente                                                     */
 /* ------------------------------------------------------------------ */
 
@@ -427,15 +442,15 @@ export function ShortlistCompare() {
     return (
       <div aria-busy="true" aria-label={t("loading")}>
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <Skeleton className="h-[92px] w-44 rounded-[var(--radius)]" />
+          <Skeleton className="h-[92px] w-44 rounded-[var(--radius-lg)]" />
           <div className="flex gap-2">
-            <Skeleton className="h-10 w-36" />
-            <Skeleton className="h-10 w-28" />
+            <Skeleton className="h-10 w-36 rounded-[var(--radius)]" />
+            <Skeleton className="h-10 w-28 rounded-[var(--radius)]" />
           </div>
         </div>
         <div className="grid gap-4 md:grid-cols-2">
-          <Skeleton className="h-96 rounded-[var(--radius)]" />
-          <Skeleton className="h-96 rounded-[var(--radius)]" />
+          <Skeleton className="h-96 rounded-[var(--radius-lg)]" />
+          <Skeleton className="h-96 rounded-[var(--radius-lg)]" />
         </div>
       </div>
     );
@@ -486,16 +501,9 @@ export function ShortlistCompare() {
           <Stat
             label={t("statCount")}
             value={profiles.length}
+            hint={userContext ? t("hintScores") : t("hintNoContext")}
+            href={userContext ? undefined : "/onboarding"}
             className="min-w-44"
-            hint={
-              userContext ? (
-                t("hintScores")
-              ) : (
-                <Link href="/onboarding" className="transition hover:text-[var(--accent)]">
-                  {t("hintNoContext")}
-                </Link>
-              )
-            }
           />
           {bestProfile && scores.size > 0 && (
             <Stat
