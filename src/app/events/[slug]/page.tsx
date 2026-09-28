@@ -1,6 +1,6 @@
 /**
  * /events/[slug] – Event-Detail: Kopf, KPI-Reihe, Rollen-Filter, Verteilungen, Teilnehmerliste.
- * Server-Component; Daten ausschließlich über src/lib/data.ts. Texte DE/EN über <T> bzw. Localized*.
+ * Server-Component; Daten ausschließlich über src/lib/data.ts. Texte DE/EN über <T>.
  */
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -10,9 +10,7 @@ import { AttendeeStats } from "@/components/events/AttendeeStats";
 import { EventMeta, eventCandidatesHref } from "@/components/events/EventCard";
 import { EventTypeLabel, FounderRoleLabel, NetworkRoleLabel } from "@/components/events/EventLabels";
 import { ArrowLeftIcon, ArrowRightIcon, FilterIcon } from "@/components/events/icons";
-import { EVENT_LABELS, networkRoleLabel } from "@/components/events/labels";
-import { LocalizedEmptyState, LocalizedStat } from "@/components/events/Localized";
-import { Avatar, Badge, Card, Kicker, LinkButton, SectionTitle } from "@/components/ui";
+import { Avatar, Badge, Card, EmptyState, LinkButton, PageHeader, SectionTitle, Stat } from "@/components/ui";
 import { T } from "@/lib/i18n";
 import { getEvent, getEvents, getProfilesForEvent } from "@/lib/data";
 import type { NetworkRole } from "@/lib/types";
@@ -75,40 +73,43 @@ export default async function EventDetailPage({ params }: { params: Params }) {
         </Link>
       </nav>
 
-      {/* Kopf – gleiche Anatomie wie <PageHeader>, aber mit Icon-Zeile und ReactNode-Kicker */}
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div className="max-w-2xl">
-          <Kicker>
-            <EventTypeLabel type={event.type} />
-          </Kicker>
-          <h1 className="text-display text-[var(--foreground)]">{event.name}</h1>
-          <EventMeta date={event.date} location={event.location} url={event.url} size="base" className="mt-3" />
-          <p className="mt-3 text-sm leading-relaxed text-[var(--muted)] sm:text-base">{event.description}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+      <PageHeader
+        eyebrow={<EventTypeLabel type={event.type} />}
+        title={event.name}
+        subtitle={
+          <>
+            <EventMeta date={event.date} location={event.location} url={event.url} size="base" />
+            <span className="mt-3 block">{event.description}</span>
+          </>
+        }
+        action={
           <LinkButton href={candidatesHref}>
             <FilterIcon />
             <T de="In Kandidaten filtern" en="Filter in candidates" />
           </LinkButton>
-        </div>
-      </header>
+        }
+      />
 
       {/* KPI-Reihe */}
       <div className="mb-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <LocalizedStat
+        <Stat
           value={total}
-          label={EVENT_LABELS.attendees}
-          hint={{ de: `${withLinkedin} mit LinkedIn-Profil`, en: `${withLinkedin} with LinkedIn profile` }}
+          label={<T de="Teilnehmer:innen" en="Attendees" />}
+          hint={
+            <>
+              <span className="tabular-nums">{withLinkedin}</span> <T de="mit LinkedIn-Profil" en="with LinkedIn profile" />
+            </>
+          }
           href={candidatesHref}
         />
         {STAT_ROLES.map((role) => {
           const count = roleCounts.get(role) ?? 0;
           return (
-            <LocalizedStat
+            <Stat
               key={role}
               value={count}
-              label={networkRoleLabel(role, true)}
-              hint={{ de: `${share(count)} % der Teilnehmer:innen`, en: `${share(count)}% of attendees` }}
+              label={<NetworkRoleLabel role={role} plural />}
+              hint={<T de={`${share(count)} % der Teilnehmer:innen`} en={`${share(count)}% of attendees`} />}
               href={roleHref(role)}
             />
           );
@@ -185,12 +186,14 @@ export default async function EventDetailPage({ params }: { params: Params }) {
         </div>
 
         {total === 0 ? (
-          <LocalizedEmptyState
-            title={{ de: "Noch keine Teilnehmer:innen", en: "No attendees yet" }}
-            body={{
-              de: "Für dieses Event wurden noch keine Profile importiert.",
-              en: "No profiles have been imported for this event yet.",
-            }}
+          <EmptyState
+            title={<T de="Noch keine Teilnehmer:innen" en="No attendees yet" />}
+            body={
+              <T
+                de="Für dieses Event wurden noch keine Profile importiert."
+                en="No profiles have been imported for this event yet."
+              />
+            }
             action={
               <LinkButton href="/candidates" variant="secondary">
                 <T de="Alle Kandidaten ansehen" en="View all candidates" />
