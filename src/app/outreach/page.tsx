@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PageHeader } from "@/components/ui";
-import OutreachWorkspace from "@/components/outreach/OutreachWorkspace";
+import OutreachWorkspace, { OutreachWorkspaceSkeleton } from "@/components/outreach/OutreachWorkspace";
 
 export const metadata: Metadata = {
   title: "Outreach – Voya",
@@ -10,9 +10,13 @@ export const metadata: Metadata = {
 
 export default function OutreachPage() {
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8">
-      <PageHeader title="Outreach" subtitle="Personalisierte Nachrichten – passend zum Persönlichkeitstyp" />
-      <Suspense fallback={<p className="text-sm text-[var(--muted)]">Lade priorisierte Kontakte…</p>}>
+    <div className="space-y-6">
+      <PageHeader
+        kicker="Kontakt aufnehmen"
+        title="Outreach"
+        subtitle="Personalisierte Nachrichten für deine priorisierten Kontakte – passend zum Persönlichkeitstyp der Person, per E-Mail oder LinkedIn."
+      />
+      <Suspense fallback={<OutreachWorkspaceSkeleton />}>
         <OutreachWorkspace />
       </Suspense>
     </div>
