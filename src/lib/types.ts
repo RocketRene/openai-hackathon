@@ -269,6 +269,8 @@ export interface ChatRequest {
   messages: ChatMessage[];
   userContext: UserContext | null;
   mode: AgentMode;
+  /** UI-Sprache; der Agent antwortet in dieser Sprache (Default "de"). */
+  locale?: "de" | "en";
   /** Bei prep-simulation: welche Person der Agent spielt. */
   candidateId?: string;
 }
@@ -282,6 +284,8 @@ export interface ChatResponse {
 /** Props des Voice-Agent-Components (src/components/assistant/VoiceAgent.tsx). */
 export interface VoiceAgentProps {
   mode: AgentMode;
+  /** UI-Sprache; der Voice-Agent spricht in dieser Sprache (Default "de"). */
+  locale?: "de" | "en";
   userContext: UserContext | null;
   candidate?: Profile;
   onUiAction: (action: UiAction) => void;

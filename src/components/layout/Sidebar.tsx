@@ -2,40 +2,46 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cx } from "@/components/ui";
+import { useLocale } from "@/lib/i18n";
 
-type NavItem = { href: string; label: string; hint: string; icon: string };
+type NavItem = { href: string; label: string; labelEn: string; hint: string; hintEn: string; icon: string };
 
-const GROUPS: { title: string; items: NavItem[] }[] = [
+const GROUPS: { title: string; titleEn: string; items: NavItem[] }[] = [
   {
     title: "Finden",
+    titleEn: "Find",
     items: [
-      { href: "/", label: "Dashboard", hint: "Überblick & Top-Matches", icon: "◫" },
-      { href: "/assistant", label: "Agent", hint: "Interview, Voice, Kandidaten", icon: "◉" },
-      { href: "/candidates", label: "Kandidaten", hint: "Suchen & filtern", icon: "⌕" },
-      { href: "/events", label: "Events", hint: "Konferenzen & Teilnehmer", icon: "▣" },
-      { href: "/network", label: "Netzwerk", hint: "Das Ökosystem in Zahlen", icon: "◎" },
+      { href: "/", label: "Dashboard", labelEn: "Dashboard", hint: "Überblick & Top-Matches", hintEn: "Overview & top matches", icon: "◫" },
+      { href: "/assistant", label: "Agent", labelEn: "Agent", hint: "Interview, Voice, Kandidaten", hintEn: "Interview, voice, candidates", icon: "◉" },
+      { href: "/candidates", label: "Kandidaten", labelEn: "Candidates", hint: "Suchen & filtern", hintEn: "Search & filter", icon: "⌕" },
+      { href: "/events", label: "Events", labelEn: "Events", hint: "Konferenzen & Teilnehmer", hintEn: "Conferences & attendees", icon: "▣" },
+      { href: "/network", label: "Netzwerk", labelEn: "Network", hint: "Das Ökosystem in Zahlen", hintEn: "The ecosystem in numbers", icon: "◎" },
     ],
   },
   {
     title: "Ansprechen",
+    titleEn: "Reach out",
     items: [
-      { href: "/shortlist", label: "Shortlist", hint: "Gemerkte Kontakte", icon: "☆" },
-      { href: "/outreach", label: "Outreach", hint: "Personalisierte Nachrichten", icon: "✉" },
-      { href: "/team", label: "Team-Radar", hint: "Was fehlt im Team?", icon: "◈" },
-      { href: "/tips", label: "Tipps", hint: "Was fehlt dem Start-up?", icon: "✦" },
+      { href: "/shortlist", label: "Shortlist", labelEn: "Shortlist", hint: "Gemerkte Kontakte", hintEn: "Saved contacts", icon: "☆" },
+      { href: "/outreach", label: "Outreach", labelEn: "Outreach", hint: "Personalisierte Nachrichten", hintEn: "Personalised messages", icon: "✉" },
+      { href: "/team", label: "Team-Radar", labelEn: "Team radar", hint: "Was fehlt im Team?", hintEn: "What is missing in the team?", icon: "◈" },
+      { href: "/tips", label: "Tipps", labelEn: "Tips", hint: "Was fehlt dem Start-up?", hintEn: "What does the start-up need?", icon: "✦" },
     ],
   },
   {
     title: "Du",
+    titleEn: "You",
     items: [
-      { href: "/onboarding", label: "Mein Profil", hint: "Kontext & Selbsteinschätzung", icon: "◐" },
-      { href: "/settings", label: "Einstellungen", hint: "Status & Daten", icon: "⚙" },
+      { href: "/onboarding", label: "Mein Profil", labelEn: "My profile", hint: "Kontext & Selbsteinschätzung", hintEn: "Context & self-assessment", icon: "◐" },
+      { href: "/settings", label: "Einstellungen", labelEn: "Settings", hint: "Status & Daten", hintEn: "Status & data", icon: "⚙" },
     ],
   },
 ];
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const [locale] = useLocale();
+  const en = locale === "en";
   return (
     <nav className="flex h-full flex-col gap-5 p-4">
       <Link href="/" className="flex items-center gap-2.5 px-1 py-1" onClick={onNavigate}>
@@ -44,13 +50,13 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         </span>
         <span>
           <span className="block text-sm font-semibold tracking-tight">Voya</span>
-          <span className="block text-[11px] text-[var(--muted)]">Co-Founder · Investoren · Mentor:innen</span>
+          <span className="block text-[11px] text-[var(--muted)]">{en ? "Co-founders · Investors · Mentors" : "Co-Founder · Investoren · Mentor:innen"}</span>
         </span>
       </Link>
 
       {GROUPS.map((group) => (
         <div key={group.title}>
-          <p className="mb-1.5 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">{group.title}</p>
+          <p className="mb-1.5 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">{en ? group.titleEn : group.title}</p>
           <div className="flex flex-col gap-0.5">
             {group.items.map((item) => {
               const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -77,8 +83,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                     {item.icon}
                   </span>
                   <span className="min-w-0">
-                    <span className="block leading-5">{item.label}</span>
-                    <span className="block truncate text-[11px] font-normal text-[var(--muted)]">{item.hint}</span>
+                    <span className="block leading-5">{en ? item.labelEn : item.label}</span>
+                    <span className="block truncate text-[11px] font-normal text-[var(--muted)]">{en ? item.hintEn : item.hint}</span>
                   </span>
                 </Link>
               );
@@ -88,7 +94,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       ))}
 
       <div className="mt-auto rounded-[var(--radius-sm)] border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2 text-[11px] text-[var(--muted)]">
-        OpenAI Hackathon 2026 · IdeaLab-Daten: 569 Profile
+        {en ? "OpenAI Hackathon 2026 · IdeaLab data: 569 profiles" : "OpenAI Hackathon 2026 · IdeaLab-Daten: 569 Profile"}
       </div>
     </nav>
   );

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { useUserContext } from "@/lib/user-context";
 import { Avatar, Badge, Button, LinkButton } from "@/components/ui";
+import { LanguageToggle, useLocale } from "@/lib/i18n";
 
 const ROLE_LABELS: Record<string, string> = {
   tech: "Tech",
@@ -19,6 +20,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { userContext, ready } = useUserContext();
   const pathname = usePathname();
+  const [locale] = useLocale();
+  const en = locale === "en";
 
   return (
     <div className="flex min-h-screen">
@@ -44,12 +47,19 @@ export function AppShell({ children }: { children: ReactNode }) {
               ☰
             </Button>
             <span className="hidden text-xs text-[var(--muted)] sm:inline">
-              {pathname === "/assistant" ? "Sprich mit dem Agenten – sag z. B. „Guck dir mal den Max an“" : "Finde die richtigen Menschen für dein Start-up"}
+              {pathname === "/assistant"
+                ? en
+                  ? "Talk to Voya – e.g. “Show me Max”"
+                  : "Sprich mit Voya – sag z. B. „Guck dir mal den Max an“"
+                : en
+                  ? "Find the right people for your start-up"
+                  : "Finde die richtigen Menschen für dein Start-up"}
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageToggle />
             <LinkButton href="/assistant" size="sm" variant={pathname === "/assistant" ? "secondary" : "primary"}>
-              ◉ Agent starten
+              ◉ {en ? "Start agent" : "Agent starten"}
             </LinkButton>
             {ready && userContext?.name ? (
               <Link href="/onboarding" className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)] py-1 pl-1 pr-3 text-sm shadow-[var(--shadow-sm)]">
@@ -59,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </Link>
             ) : (
               <LinkButton href="/onboarding" size="sm" variant="secondary">
-                Profil anlegen
+                {en ? "Create profile" : "Profil anlegen"}
               </LinkButton>
             )}
           </div>
