@@ -3,13 +3,50 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { getProfiles } from "@/lib/data";
+import { COMMON, useLocale, useT, type Dict } from "@/lib/i18n";
 import { MATCH_TIER_LABELS, matchTier, rankCandidates, type MatchTier } from "@/lib/matching";
 import { useUserContext } from "@/lib/user-context";
 import type { MatchResult, Profile } from "@/lib/types";
 import { Avatar, Badge, Button, Card, EmptyState, LinkButton, Skeleton } from "@/components/ui";
-import { NETWORK_ROLE_SINGULAR, SECTION_LINK_CLS } from "./shared";
+import { SECTION_LINK_CLS, type Bi } from "./shared";
 
 const TOP_N = 5;
+
+const DICT = {
+  title: { de: "Deine Top-Matches", en: "Your top matches" },
+  allCandidatesLink: { de: "Alle Kandidaten →", en: "All candidates →" },
+  allCandidates: { de: "Alle Kandidaten", en: "All candidates" },
+  loadingContext: { de: "Lade deinen Kontext …", en: "Loading your context …" },
+  loadingMatches: { de: "Lade deine Top-Matches", en: "Loading your top matches" },
+  rankedForGoal: { de: "Priorisiert nach Match-Score für dein Ziel", en: "Ranked by match score for your goal" },
+  topOf: {
+    de: "Top {n} von {total} Profilen – priorisiert nach Match-Score",
+    en: "Top {n} of {total} profiles – ranked by match score",
+  },
+  unknownTitle: { de: "Voya kennt dich noch nicht", en: "Voya doesn't know you yet" },
+  unknownBody: {
+    de: "Sag uns kurz, wer du bist und wen du suchst – dann priorisieren wir Co-Founder, Investor:innen, Mentor:innen und Talente aus IdeaLab 2026 für dich.",
+    en: "Tell us briefly who you are and who you're looking for – we'll then rank co-founders, investors, mentors and talent from IdeaLab 2026 for you.",
+  },
+  startOnboarding: { de: "Onboarding starten", en: "Start onboarding" },
+  agentInterview: { de: "Agent-Interview", en: "Agent interview" },
+  noneTitle: { de: "Noch keine Kandidaten gefunden", en: "No candidates found yet" },
+  noneBody: {
+    de: "Ergänze deinen Kontext oder durchsuche alle Profile nach Rolle, Vertical und Event.",
+    en: "Add to your context or browse all profiles by role, vertical and event.",
+  },
+  match: { de: "{score} % Match", en: "{score} % match" },
+  profile: { de: "Profil", en: "Profile" },
+  prep: { de: "Prep", en: "Prep" },
+} satisfies Dict;
+
+/** Tooltip der Score-Pille: Deutsch aus `MATCH_TIER_LABELS`, Englisch lokal. */
+const TIER_LABELS: Record<MatchTier, Bi> = {
+  top: { de: MATCH_TIER_LABELS.top, en: "Top match" },
+  gut: { de: MATCH_TIER_LABELS.gut, en: "Good match" },
+  möglich: { de: MATCH_TIER_LABELS.möglich, en: "Possible match" },
+  schwach: { de: MATCH_TIER_LABELS.schwach, en: "Weak match" },
+};
 
 interface RankedProfile {
   match: MatchResult;
@@ -24,19 +61,22 @@ const TIER_TONE: Record<MatchTier, "success" | "accent" | "neutral"> = {
 };
 
 function ScorePill({ score }: { score: number }) {
+  const t = useT(DICT);
+  const tTier = useT(TIER_LABELS);
   const tier = matchTier(score);
   return (
-    <span title={MATCH_TIER_LABELS[tier]} className="inline-flex">
+    <span title={tTier(tier)} className="inline-flex">
       <Badge tone={TIER_TONE[tier]} className="tabular-nums">
-        {Math.round(score)} % Match
+        {t("match", { score: Math.round(score) })}
       </Badge>
     </span>
   );
 }
 
 function MatchesSkeleton() {
+  const t = useT(DICT);
   return (
-    <ul className="divide-y divide-[var(--border)]" aria-busy="true" aria-label="Lade deine Top-Matches">
+    <ul className="divide-y divide-[var(--border)]" aria-busy="true" aria-label={t("loadingMatches")}>
       {Array.from({ length: TOP_N }, (_, i) => (
         <li key={i} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
           <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
@@ -56,6 +96,9 @@ function MatchesSkeleton() {
 /** Top-Matches für die eingeloggte Nutzer:in – ohne Kontext ein Einstiegs-Teaser. */
 export default function TopMatches() {
   const { userContext, ready, loadDemo } = useUserContext();
+  const [locale] = useLocale();
+  const t = useT(DICT);
+  const tc = useT(COMMON);
 
   const { ranked, total } = useMemo(() => {
     const profiles = getProfiles();
@@ -72,13 +115,13 @@ export default function TopMatches() {
 
   const action = (
     <Link href="/candidates" className={SECTION_LINK_CLS}>
-      Alle Kandidaten →
+      {t("allCandidatesLink")}
     </Link>
   );
 
   if (!ready) {
     return (
-      <Card className="h-full" title="Deine Top-Matches" description="Lade deinen Kontext …" action={action}>
+      <Card className="h-full" title={t("title")} description={t("loadingContext")} action={action}>
         <MatchesSkeleton />
       </Card>
     );
@@ -86,26 +129,21 @@ export default function TopMatches() {
 
   if (!userContext) {
     return (
-      <Card
-        className="h-full"
-        title="Deine Top-Matches"
-        description="Priorisiert nach Match-Score für dein Ziel"
-        action={action}
-      >
+      <Card className="h-full" title={t("title")} description={t("rankedForGoal")} action={action}>
         <EmptyState
           icon="◉"
-          title="Voya kennt dich noch nicht"
-          body="Sag uns kurz, wer du bist und wen du suchst – dann priorisieren wir Co-Founder, Investor:innen, Mentor:innen und Talente aus IdeaLab 2026 für dich."
+          title={t("unknownTitle")}
+          body={t("unknownBody")}
           action={
             <>
               <LinkButton href="/onboarding" size="sm">
-                Onboarding starten
+                {t("startOnboarding")}
               </LinkButton>
               <LinkButton href="/assistant" size="sm" variant="secondary">
-                Agent-Interview
+                {t("agentInterview")}
               </LinkButton>
               <Button size="sm" variant="ghost" onClick={loadDemo}>
-                Demo-Kontext laden
+                {tc("loadDemo")}
               </Button>
             </>
           }
@@ -117,18 +155,18 @@ export default function TopMatches() {
   return (
     <Card
       className="h-full"
-      title="Deine Top-Matches"
-      description={`Top ${ranked.length || TOP_N} von ${total.toLocaleString("de-DE")} Profilen – priorisiert nach Match-Score`}
+      title={t("title")}
+      description={t("topOf", { n: ranked.length || TOP_N, total: total.toLocaleString(locale === "en" ? "en-US" : "de-DE") })}
       action={action}
     >
       {ranked.length === 0 ? (
         <EmptyState
           icon="⌕"
-          title="Noch keine Kandidaten gefunden"
-          body="Ergänze deinen Kontext oder durchsuche alle Profile nach Rolle, Vertical und Event."
+          title={t("noneTitle")}
+          body={t("noneBody")}
           action={
             <LinkButton href="/candidates" size="sm" variant="secondary">
-              Alle Kandidaten
+              {t("allCandidates")}
             </LinkButton>
           }
         />
@@ -155,7 +193,7 @@ export default function TopMatches() {
                       {profile.name}
                     </Link>
                     <ScorePill score={match.score} />
-                    <Badge>{NETWORK_ROLE_SINGULAR[profile.networkRole]}</Badge>
+                    <Badge>{tc(profile.networkRole)}</Badge>
                   </div>
                   <p className="mt-0.5 truncate text-xs text-[var(--muted)]">{profile.headline}</p>
                   {topReason && (
@@ -168,13 +206,13 @@ export default function TopMatches() {
                 </div>
                 <div className="col-start-2 flex flex-wrap gap-1.5 sm:col-start-4 sm:row-start-1 sm:flex-nowrap">
                   <LinkButton href={profileHref} size="sm" variant="secondary">
-                    Profil
+                    {t("profile")}
                   </LinkButton>
                   <LinkButton href={`/outreach?profile=${encodeURIComponent(profile.id)}`} size="sm" variant="ghost">
-                    Outreach
+                    {tc("outreach")}
                   </LinkButton>
                   <LinkButton href={`/prep/${encodeURIComponent(profile.id)}`} size="sm" variant="ghost">
-                    Prep
+                    {t("prep")}
                   </LinkButton>
                 </div>
               </li>

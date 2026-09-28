@@ -1,61 +1,87 @@
 import Link from "next/link";
 import { SectionTitle } from "@/components/ui";
+import { T } from "@/lib/i18n";
+import type { Bi } from "./shared";
 
 interface QuickLink {
   href: string;
   icon: string;
-  title: string;
-  text: string;
+  title: Bi;
+  text: Bi;
 }
 
 const QUICK_LINKS: QuickLink[] = [
   {
     href: "/assistant",
     icon: "◉",
-    title: "Agent & Voice",
-    text: "Lass dich per Text oder Sprache interviewen und bekomme sofort passende Kandidaten.",
+    title: { de: "Agent & Voice", en: "Agent & Voice" },
+    text: {
+      de: "Lass dich per Text oder Sprache interviewen und bekomme sofort passende Kandidaten.",
+      en: "Get interviewed by text or voice and see matching candidates right away.",
+    },
   },
   {
     href: "/candidates",
     icon: "⌕",
-    title: "Kandidaten",
-    text: "Alle Profile nach Rolle, Vertical, Event, Persönlichkeit und Match-Score durchsuchen.",
+    title: { de: "Kandidaten", en: "Candidates" },
+    text: {
+      de: "Alle Profile nach Rolle, Vertical, Event, Persönlichkeit und Match-Score durchsuchen.",
+      en: "Browse all profiles by role, vertical, event, personality and match score.",
+    },
   },
   {
     href: "/outreach",
     icon: "✉",
-    title: "Outreach",
-    text: "Personalisierte Nachrichten, die zum Persönlichkeitstyp der Person passen.",
+    title: { de: "Outreach", en: "Outreach" },
+    text: {
+      de: "Personalisierte Nachrichten, die zum Persönlichkeitstyp der Person passen.",
+      en: "Personalized messages tailored to the person's personality type.",
+    },
   },
   {
     href: "/team",
     icon: "◈",
-    title: "Team-Radar",
-    text: "Auf einen Blick sehen, welche Stärken deinem Gründerteam noch fehlen.",
+    title: { de: "Team-Radar", en: "Team radar" },
+    text: {
+      de: "Auf einen Blick sehen, welche Stärken deinem Gründerteam noch fehlen.",
+      en: "See at a glance which strengths your founding team still lacks.",
+    },
   },
   {
     href: "/tips",
     icon: "✦",
-    title: "Tipps",
-    text: "Konkrete Empfehlungen für dein Start-up auf Basis deines Kontexts.",
+    title: { de: "Tipps", en: "Tips" },
+    text: {
+      de: "Konkrete Empfehlungen für dein Start-up auf Basis deines Kontexts.",
+      en: "Concrete recommendations for your start-up based on your context.",
+    },
   },
   {
     href: "/events",
     icon: "▣",
-    title: "Events",
-    text: "Konferenzen und Meetups mit Teilnehmerlisten – die Quelle deiner Kontakte.",
+    title: { de: "Events", en: "Events" },
+    text: {
+      de: "Konferenzen und Meetups mit Teilnehmerlisten – die Quelle deiner Kontakte.",
+      en: "Conferences and meetups with attendee lists – the source of your contacts.",
+    },
   },
   {
     href: "/shortlist",
     icon: "☆",
-    title: "Shortlist",
-    text: "Alle gemerkten Kandidaten an einem Ort, bereit für Outreach und Prep.",
+    title: { de: "Shortlist", en: "Shortlist" },
+    text: {
+      de: "Alle gemerkten Kandidaten an einem Ort, bereit für Outreach und Prep.",
+      en: "All saved candidates in one place, ready for outreach and prep.",
+    },
   },
   {
     href: "/network",
     icon: "◎",
-    title: "Netzwerk-Analyse",
-    text: "Wer kennt wen? Verbindungen zwischen Kontakten, Verticals und Events.",
+    title: { de: "Netzwerk-Analyse", en: "Network analysis" },
+    text: {
+      de: "Wer kennt wen? Verbindungen zwischen Kontakten, Verticals und Events.",
+      en: "Who knows whom? Connections between contacts, verticals and events.",
+    },
   },
 ];
 
@@ -63,7 +89,9 @@ const QUICK_LINKS: QuickLink[] = [
 export default function QuickAccess() {
   return (
     <section aria-label="Schnellzugriff">
-      <SectionTitle>Schnellzugriff</SectionTitle>
+      <SectionTitle>
+        <T de="Schnellzugriff" en="Quick access" />
+      </SectionTitle>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {QUICK_LINKS.map((item) => (
           <Link
@@ -79,7 +107,7 @@ export default function QuickAccess() {
             </span>
             <span className="min-w-0">
               <span className="flex items-center gap-1.5 text-sm font-semibold text-[var(--foreground)]">
-                {item.title}
+                <T {...item.title} />
                 <span
                   aria-hidden
                   className="text-[var(--muted)] transition group-hover:translate-x-0.5 group-hover:text-[var(--accent)]"
@@ -87,7 +115,9 @@ export default function QuickAccess() {
                   →
                 </span>
               </span>
-              <span className="mt-0.5 block text-xs leading-relaxed text-[var(--muted)]">{item.text}</span>
+              <span className="mt-0.5 block text-xs leading-relaxed text-[var(--muted)]">
+                <T {...item.text} />
+              </span>
             </span>
           </Link>
         ))}

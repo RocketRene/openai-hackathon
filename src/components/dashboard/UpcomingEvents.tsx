@@ -1,16 +1,17 @@
 import Link from "next/link";
 import { getEvents, getProfilesForEvent } from "@/lib/data";
+import { T } from "@/lib/i18n";
 import type { Event as FounderEvent } from "@/lib/types";
 import { Card, EmptyState } from "@/components/ui";
-import { SECTION_LINK_CLS } from "./shared";
+import { SECTION_LINK_CLS, type Bi } from "./shared";
 
 const MAX_EVENTS = 6;
 
-const EVENT_TYPE_LABELS: Record<FounderEvent["type"], string> = {
-  conference: "Konferenz",
-  meetup: "Meetup",
-  "demo-day": "Demo Day",
-  hackathon: "Hackathon",
+const EVENT_TYPE_LABELS: Record<FounderEvent["type"], Bi> = {
+  conference: { de: "Konferenz", en: "Conference" },
+  meetup: { de: "Meetup", en: "Meetup" },
+  "demo-day": { de: "Demo Day", en: "Demo day" },
+  hackathon: { de: "Hackathon", en: "Hackathon" },
 };
 
 const MONTHS: Record<string, number> = {
@@ -29,11 +30,16 @@ const MONTHS: Record<string, number> = {
   dez: 11,
 };
 
+/** Englische Monatskürzel für die Datums-Kachel (Index = Monat). */
+const MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
 interface ParsedDate {
   /** z. B. "25.–26." oder "15." */
   day: string;
-  /** z. B. "Sep" */
+  /** z. B. "Sep" (Rohtext, Deutsch) */
   month: string;
+  /** 0–11, für die englische Kachel. */
+  monthIdx: number;
   sortKey: number;
 }
 
@@ -50,6 +56,7 @@ function parseEventDate(date: string): ParsedDate | null {
   return {
     day: m[1].replace(/\s+/g, ""),
     month: m[2],
+    monthIdx,
     sortKey: Date.UTC(Number(m[3]), monthIdx, firstDay),
   };
 }
@@ -67,7 +74,7 @@ function DateTile({ date, parsed }: { date: string; parsed: ParsedDate | null })
             {parsed.day}
           </span>
           <span aria-hidden className="mt-1 text-[10px] font-medium uppercase tracking-wide text-[var(--muted)]">
-            {parsed.month}
+            <T de={parsed.month} en={MONTHS_EN[parsed.monthIdx]} />
           </span>
         </>
       ) : (
@@ -93,19 +100,24 @@ export default function UpcomingEvents() {
   return (
     <Card
       className="h-full"
-      title="Nächste Events"
-      description="Konferenzen und Meetups mit Teilnehmerlisten"
+      title={<T de="Nächste Events" en="Upcoming events" />}
+      description={<T de="Konferenzen und Meetups mit Teilnehmerlisten" en="Conferences and meetups with attendee lists" />}
       action={
         <Link href="/events" className={SECTION_LINK_CLS}>
-          Alle Events →
+          <T de="Alle Events →" en="All events →" />
         </Link>
       }
     >
       {events.length === 0 ? (
         <EmptyState
           icon="▣"
-          title="Noch keine Events hinterlegt"
-          body="Sobald Events angelegt sind, erscheinen sie hier mit Teilnehmerlisten."
+          title={<T de="Noch keine Events hinterlegt" en="No events yet" />}
+          body={
+            <T
+              de="Sobald Events angelegt sind, erscheinen sie hier mit Teilnehmerlisten."
+              en="Once events are added, they'll show up here with attendee lists."
+            />
+          }
         />
       ) : (
         <ul className="divide-y divide-[var(--border)]">
@@ -120,14 +132,16 @@ export default function UpcomingEvents() {
                   {event.name}
                 </Link>
                 <p className="mt-0.5 truncate text-xs text-[var(--muted)]">
-                  {event.location} · {EVENT_TYPE_LABELS[event.type]}
+                  {event.location} · <T {...EVENT_TYPE_LABELS[event.type]} />
                 </p>
               </div>
               <div className="shrink-0 text-right">
                 <div className="text-sm font-semibold tabular-nums text-[var(--foreground)]">
                   {attendees.toLocaleString("de-DE")}
                 </div>
-                <div className="text-[11px] text-[var(--muted)]">Teilnehmer:innen</div>
+                <div className="text-[11px] text-[var(--muted)]">
+                  <T de="Teilnehmer:innen" en="attendees" />
+                </div>
               </div>
             </li>
           ))}

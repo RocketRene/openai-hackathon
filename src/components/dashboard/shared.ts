@@ -1,51 +1,47 @@
 /**
- * Gemeinsame Labels und Klassen für die Dashboard-Komponenten.
+ * Gemeinsame Labels und Klassen für die Dashboard-Komponenten – zweisprachig (DE/EN).
  * Bewusst lokal gehalten, damit das Paket keine fremden Komponenten (CandidateCard …) berührt.
+ * Die Label-Maps sind `Dict`-kompatibel: Client → `useT(MAP)(key)`, Server → `<T {...MAP[key]} />`.
  */
+import type { Locale } from "@/lib/i18n";
 import type { FounderRole, NetworkRole, Stage } from "@/lib/types";
 
-export const FOUNDER_ROLE_LABELS: Record<FounderRole, string> = {
-  tech: "Tech-Founder",
-  commercial: "Commercial-Founder",
-  product: "Product-Founder",
-  design: "Design-Founder",
-  operations: "Operations-Founder",
-  "domain-expert": "Domain-Expert:in",
+export type Bi = { de: string; en: string };
+
+export const FOUNDER_ROLE_LABELS: Record<FounderRole, Bi> = {
+  tech: { de: "Tech-Founder", en: "Tech founder" },
+  commercial: { de: "Commercial-Founder", en: "Commercial founder" },
+  product: { de: "Product-Founder", en: "Product founder" },
+  design: { de: "Design-Founder", en: "Design founder" },
+  operations: { de: "Operations-Founder", en: "Operations founder" },
+  "domain-expert": { de: "Domain-Expert:in", en: "Domain expert" },
 };
 
-export const FOUNDER_ROLE_SHORT: Record<FounderRole, string> = {
-  tech: "Tech",
-  commercial: "Commercial",
-  product: "Product",
-  design: "Design",
-  operations: "Operations",
-  "domain-expert": "Domain-Expertise",
+/** Kurzform mitten im Satz – „mit Fokus auf Tech und Design“ / “with a focus on tech and design”. */
+export const FOUNDER_ROLE_SHORT: Record<FounderRole, Bi> = {
+  tech: { de: "Tech", en: "tech" },
+  commercial: { de: "Commercial", en: "commercial" },
+  product: { de: "Product", en: "product" },
+  design: { de: "Design", en: "design" },
+  operations: { de: "Operations", en: "operations" },
+  "domain-expert": { de: "Domain-Expertise", en: "domain expertise" },
 };
 
-/** Plural – für „du suchst Co-Founder und Investor:innen“. */
-export const NETWORK_ROLE_LABELS: Record<NetworkRole, string> = {
-  cofounder: "Co-Founder",
-  investor: "Investor:innen",
-  mentor: "Mentor:innen",
-  talent: "Talente",
-  expert: "Expert:innen",
+/** Plural – für „du suchst Co-Founder und Investor:innen“ / “you're looking for co-founders and investors”. */
+export const NETWORK_ROLE_LABELS: Record<NetworkRole, Bi> = {
+  cofounder: { de: "Co-Founder", en: "co-founders" },
+  investor: { de: "Investor:innen", en: "investors" },
+  mentor: { de: "Mentor:innen", en: "mentors" },
+  talent: { de: "Talente", en: "talent" },
+  expert: { de: "Expert:innen", en: "experts" },
 };
 
-/** Singular – für das Rollen-Badge einer einzelnen Person. */
-export const NETWORK_ROLE_SINGULAR: Record<NetworkRole, string> = {
-  cofounder: "Co-Founder",
-  investor: "Investor:in",
-  mentor: "Mentor:in",
-  talent: "Talent",
-  expert: "Expert:in",
-};
-
-export const STAGE_LABELS: Record<Stage, string> = {
-  idea: "Idee",
-  "pre-seed": "Pre-Seed",
-  seed: "Seed",
-  "series-a": "Series A",
-  growth: "Growth",
+export const STAGE_LABELS: Record<Stage, Bi> = {
+  idea: { de: "Idee", en: "Idea" },
+  "pre-seed": { de: "Pre-Seed", en: "Pre-seed" },
+  seed: { de: "Seed", en: "Seed" },
+  "series-a": { de: "Series A", en: "Series A" },
+  growth: { de: "Growth", en: "Growth" },
 };
 
 const VERTICAL_DISPLAY: Record<string, string> = {
@@ -68,10 +64,11 @@ export function formatVertical(vertical: string): string {
   return VERTICAL_DISPLAY[key] ?? key.replace(/(^|\s)\S/g, (c) => c.toUpperCase());
 }
 
-/** ["A", "B", "C"] → "A, B und C" */
-export function joinDe(items: string[]): string {
+/** ["A", "B", "C"] → "A, B und C" / "A, B and C" */
+export function joinList(items: string[], locale: Locale): string {
   if (items.length <= 1) return items[0] ?? "";
-  return `${items.slice(0, -1).join(", ")} und ${items[items.length - 1]}`;
+  const and = locale === "en" ? "and" : "und";
+  return `${items.slice(0, -1).join(", ")} ${and} ${items[items.length - 1]}`;
 }
 
 /** Dezenter „Alle … →“-Link rechts neben Abschnitts- und Card-Titeln. */
