@@ -28,7 +28,7 @@ export default function HowItWorks() {
         {STEPS.map((step, index) => (
           <li
             key={step.title}
-            className="relative rounded-[var(--radius)] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-sm)]"
+            className="relative rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--surface)] p-5 shadow-[var(--shadow-sm)]"
           >
             <div className="flex items-center gap-3">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-soft)] text-sm font-semibold tabular-nums text-[var(--accent)]">
