@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { getProfiles } from "@/lib/data";
 import { COMMON, useLocale, useT, type Dict } from "@/lib/i18n";
-import { MATCH_TIER_LABELS, matchTier, rankCandidates, type MatchTier } from "@/lib/matching";
+import { matchTier, matchTierLabel, rankCandidates, type MatchTier } from "@/lib/matching";
 import { useUserContext } from "@/lib/user-context";
 import type { MatchResult, Profile } from "@/lib/types";
 import { Avatar, Badge, Button, Card, EmptyState, LinkButton, Skeleton } from "@/components/ui";
-import { SECTION_LINK_CLS, type Bi } from "./shared";
+import { SECTION_LINK_CLS } from "./shared";
 
 const TOP_N = 5;
 
@@ -40,14 +40,6 @@ const DICT = {
   prep: { de: "Prep", en: "Prep" },
 } satisfies Dict;
 
-/** Tooltip der Score-Pille: Deutsch aus `MATCH_TIER_LABELS`, Englisch lokal. */
-const TIER_LABELS: Record<MatchTier, Bi> = {
-  top: { de: MATCH_TIER_LABELS.top, en: "Top match" },
-  gut: { de: MATCH_TIER_LABELS.gut, en: "Good match" },
-  möglich: { de: MATCH_TIER_LABELS.möglich, en: "Possible match" },
-  schwach: { de: MATCH_TIER_LABELS.schwach, en: "Weak match" },
-};
-
 interface RankedProfile {
   match: MatchResult;
   profile: Profile;
@@ -62,10 +54,10 @@ const TIER_TONE: Record<MatchTier, "success" | "accent" | "neutral"> = {
 
 function ScorePill({ score }: { score: number }) {
   const t = useT(DICT);
-  const tTier = useT(TIER_LABELS);
+  const [locale] = useLocale();
   const tier = matchTier(score);
   return (
-    <span title={tTier(tier)} className="inline-flex">
+    <span title={matchTierLabel(tier, locale)} className="inline-flex">
       <Badge tone={TIER_TONE[tier]} className="tabular-nums">
         {t("match", { score: Math.round(score) })}
       </Badge>
@@ -104,14 +96,14 @@ export default function TopMatches() {
     const profiles = getProfiles();
     if (!userContext) return { ranked: [] as RankedProfile[], total: profiles.length };
     const byId = new Map(profiles.map((p) => [p.id, p]));
-    const ranked = rankCandidates(userContext, profiles)
+    const ranked = rankCandidates(userContext, profiles, { locale })
       .slice(0, TOP_N)
       .flatMap((match) => {
         const profile = byId.get(match.profileId);
         return profile ? [{ match, profile }] : [];
       });
     return { ranked, total: profiles.length };
-  }, [userContext]);
+  }, [userContext, locale]);
 
   const action = (
     <Link href="/candidates" className={SECTION_LINK_CLS}>
