@@ -4,7 +4,7 @@ import OnboardingForm from "@/components/onboarding/OnboardingForm";
 
 export const metadata: Metadata = {
   title: "Dein Profil – Voya",
-  description: "Onboarding in drei Schritten: wer du bist, woran du arbeitest, wen du suchst.",
+  description: "Onboarding: Rolle, gesuchte Kontakte, Verticals, Idee, Stärken und Selbsteinschätzung.",
 };
 
 export default function OnboardingPage() {
@@ -13,7 +13,7 @@ export default function OnboardingPage() {
       <PageHeader
         kicker="Onboarding"
         title="Dein Profil"
-        subtitle="Drei kurze Schritte – damit Matching und Agent wissen, wer du bist und wen du suchst."
+        subtitle="Fünf kurze Abschnitte – damit Agent und Matching wissen, wer du bist und wen du suchst. Alles lässt sich später ändern."
       />
       <OnboardingForm />
     </div>
