@@ -3,13 +3,13 @@
  * Onboarding-Formular über den kompletten UserContext.
  * Liest/schreibt ausschließlich über useUserContext (src/lib/user-context.ts),
  * Profile nur über den Daten-Zugang (src/lib/data.ts).
- * Vokabular (Verticals, Rollen) lokal – Quelle: docs/PARALLEL-WORK.md.
+ * Rollen-Vokabular lokal (docs/PARALLEL-WORK.md); Verticals kommen aus dem Daten-Zugang (getVerticals).
  *
  * Aufbau: IdeaLab-Import → fünf Karten (Wer bist du · Wen suchst du · Woran arbeitest du ·
  * Deine Stärken · Selbsteinschätzung) → Sticky-Fußleiste (Speichern / Demo laden / Zurücksetzen).
  */
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
-import { getProfiles } from "@/lib/data";
+import { getProfiles, getVerticals } from "@/lib/data";
 import { DEFAULT_USER_CONTEXT, useUserContext } from "@/lib/user-context";
 import type { FounderRole, NetworkRole, Profile, Stage, UserContext } from "@/lib/types";
 import {
@@ -26,32 +26,12 @@ import {
   Textarea,
   cx,
 } from "@/components/ui";
+import { formatVertical } from "@/components/candidates/CandidateCard";
 import DimsSliders from "./DimsSliders";
 
 /* ------------------------------------------------------------------ */
 /* Vokabular (aus docs/PARALLEL-WORK.md, Kleinschreibung)              */
 /* ------------------------------------------------------------------ */
-
-const VERTICALS = [
-  "ai",
-  "fintech",
-  "healthtech",
-  "climate",
-  "b2b saas",
-  "consumer",
-  "robotics",
-  "defense",
-  "edtech",
-  "mobility",
-  "proptech",
-  "deeptech",
-  "ecommerce",
-  "hr tech",
-  "legaltech",
-  "energy",
-  "biotech",
-  "media",
-];
 
 const FOUNDER_ROLES: { value: FounderRole; label: string }[] = [
   { value: "tech", label: "Tech" },
@@ -64,8 +44,8 @@ const FOUNDER_ROLES: { value: FounderRole; label: string }[] = [
 
 const NETWORK_ROLES: { value: NetworkRole; label: string }[] = [
   { value: "cofounder", label: "Co-Founder" },
-  { value: "investor", label: "Investor" },
-  { value: "mentor", label: "Mentor" },
+  { value: "investor", label: "Investor:in" },
+  { value: "mentor", label: "Mentor:in" },
   { value: "talent", label: "Talent" },
   { value: "expert", label: "Expert:in" },
 ];
@@ -451,6 +431,7 @@ export default function OnboardingForm() {
     <FormBody
       key={initial.updatedAt}
       initial={initial}
+      hasProfile={Boolean(userContext)}
       saved={saved}
       onSave={(ctx) => {
         replace(ctx);
@@ -477,12 +458,14 @@ export { OnboardingForm };
 
 function FormBody({
   initial,
+  hasProfile,
   saved,
   onSave,
   onLoadDemo,
   onClear,
 }: {
   initial: UserContext;
+  hasProfile: boolean;
   saved: boolean;
   onSave: (ctx: UserContext) => void;
   onLoadDemo: () => void;
@@ -536,7 +519,7 @@ function FormBody({
 
   /* --- Verticals --- */
   const verticalChips = useMemo(
-    () => Array.from(new Set([...VERTICALS, ...form.verticals])),
+    () => Array.from(new Set([...getVerticals(), ...form.verticals])),
     [form.verticals],
   );
 
@@ -814,7 +797,7 @@ function FormBody({
                   active={form.verticals.includes(v)}
                   onClick={() => patch({ verticals: toggle(form.verticals, v) })}
                 >
-                  {v}
+                  {formatVertical(v)}
                 </Chip>
               ))}
             </ChipGroup>
@@ -904,9 +887,11 @@ function FormBody({
             )}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={onClear}>
-              Zurücksetzen
-            </Button>
+            {hasProfile && (
+              <Button type="button" variant="ghost" size="sm" onClick={onClear}>
+                Zurücksetzen
+              </Button>
+            )}
             <Button type="button" variant="secondary" size="sm" onClick={onLoadDemo}>
               Demo laden
             </Button>
